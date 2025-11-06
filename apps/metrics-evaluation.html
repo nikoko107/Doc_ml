@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Métriques & Évaluation - ML</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .work-area {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .controls {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .controls h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.3s;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            background: #f0f0f0;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .confusion-matrix {
+            display: grid;
+            grid-template-columns: 80px 1fr 1fr;
+            grid-template-rows: 80px 1fr 1fr;
+            gap: 2px;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
+        .cm-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .cm-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            border-radius: 8px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .cm-cell:hover {
+            transform: scale(1.05);
+        }
+
+        .cm-cell small {
+            font-size: 0.5em;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        .cm-tp { background: #2ecc71; }
+        .cm-tn { background: #3498db; }
+        .cm-fp { background: #e74c3c; }
+        .cm-fn { background: #f39c12; }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .metric-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+
+        .metric-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .metric-description {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .slider-container {
+            margin: 15px 0;
+        }
+
+        .slider-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+        .value-display {
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #2196f3;
+        }
+
+        .warning-box {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #ff9800;
+        }
+
+        .explanation {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .explanation h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .explanation p {
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .formula {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            font-size: 0.95em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-btn">← Retour</a>
+            <h1>📊 Métriques & Évaluation</h1>
+            <p>Évaluez la performance de vos modèles ML</p>
+        </header>
+
+        <div class="main-content">
+            <div class="work-area">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('confusion')">Matrice de Confusion</button>
+                    <button class="tab" onclick="switchTab('roc')">ROC & AUC</button>
+                    <button class="tab" onclick="switchTab('imbalanced')">Classes Déséquilibrées</button>
+                    <button class="tab" onclick="switchTab('outliers')">Sensibilité Outliers</button>
+                </div>
+
+                <div id="tab-confusion" class="tab-content active">
+                    <h3 style="color: #667eea; margin-bottom: 20px;">Matrice de Confusion Interactive</h3>
+
+                    <div class="confusion-matrix">
+                        <div></div>
+                        <div class="cm-label">Prédit Négatif</div>
+                        <div class="cm-label">Prédit Positif</div>
+
+                        <div class="cm-label">Réel Négatif</div>
+                        <div class="cm-cell cm-tn" onclick="editCell('tn')">
+                            <span id="tn-value">50</span>
+                            <small>Vrai Négatif (TN)</small>
+                        </div>
+                        <div class="cm-cell cm-fp" onclick="editCell('fp')">
+                            <span id="fp-value">10</span>
+                            <small>Faux Positif (FP)</small>
+                        </div>
+
+                        <div class="cm-label">Réel Positif</div>
+                        <div class="cm-cell cm-fn" onclick="editCell('fn')">
+                            <span id="fn-value">5</span>
+                            <small>Faux Négatif (FN)</small>
+                        </div>
+                        <div class="cm-cell cm-tp" onclick="editCell('tp')">
+                            <span id="tp-value">35</span>
+                            <small>Vrai Positif (TP)</small>
+                        </div>
+                    </div>
+
+                    <div class="metrics-grid" id="metrics-grid"></div>
+                </div>
+
+                <div id="tab-roc" class="tab-content">
+                    <h3 style="color: #667eea; margin-bottom: 20px;">Courbe ROC & AUC</h3>
+                    <canvas id="rocCanvas" width="600" height="500"></canvas>
+                    <div id="rocMetrics"></div>
+                </div>
+
+                <div id="tab-imbalanced" class="tab-content">
+                    <h3 style="color: #667eea; margin-bottom: 20px;">Métriques pour Classes Déséquilibrées</h3>
+                    <div id="imbalancedContent"></div>
+                </div>
+
+                <div id="tab-outliers" class="tab-content">
+                    <h3 style="color: #667eea; margin-bottom: 20px;">Sensibilité aux Valeurs Extrêmes</h3>
+                    <canvas id="outliersCanvas" width="700" height="400"></canvas>
+                    <div id="outliersMetrics"></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <h3>⚙️ Contrôles</h3>
+
+                <div style="margin-bottom: 20px;">
+                    <button class="btn-secondary" onclick="loadScenario('balanced')">Cas Équilibré</button>
+                    <button class="btn-secondary" onclick="loadScenario('imbalanced')">Déséquilibré (90/10)</button>
+                    <button class="btn-secondary" onclick="loadScenario('perfect')">Modèle Parfait</button>
+                    <button class="btn-secondary" onclick="loadScenario('poor')">Modèle Faible</button>
+                </div>
+
+                <div class="slider-container">
+                    <label>Taux de Faux Positifs (FPR)</label>
+                    <input type="range" id="fprSlider" min="0" max="100" value="10" oninput="updateROC()">
+                    <div class="value-display" id="fprValue">10%</div>
+                </div>
+
+                <div class="slider-container">
+                    <label>Taux de Vrais Positifs (TPR)</label>
+                    <input type="range" id="tprSlider" min="0" max="100" value="90" oninput="updateROC()">
+                    <div class="value-display" id="tprValue">90%</div>
+                </div>
+
+                <button class="btn-primary" onclick="generateROCCurve()">Générer Courbe ROC</button>
+
+                <div class="info-box" style="margin-top: 20px;">
+                    <p style="font-size: 0.9em; line-height: 1.6;">
+                        <strong>💡 Conseil Pro:</strong><br>
+                        - Utilisez F1-Score pour classes déséquilibrées<br>
+                        - ROC/AUC pour comparaison de modèles<br>
+                        - Regardez Précision ET Rappel ensemble
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="explanation">
+            <h3>🎓 Comprendre les Métriques ML</h3>
+
+            <h4 style="color: #667eea; margin-top: 20px;">Matrice de Confusion</h4>
+            <p>
+                La matrice de confusion est l'outil fondamental pour évaluer un classifieur binaire.
+                Elle compare les prédictions du modèle avec les vraies valeurs.
+            </p>
+
+            <div class="formula">
+<strong>Vrais Positifs (TP)</strong>: Correctement prédit comme positif<br>
+<strong>Vrais Négatifs (TN)</strong>: Correctement prédit comme négatif<br>
+<strong>Faux Positifs (FP)</strong>: Erreur Type I - Prédit positif mais réellement négatif<br>
+<strong>Faux Négatifs (FN)</strong>: Erreur Type II - Prédit négatif mais réellement positif
+            </div>
+
+            <h4 style="color: #667eea; margin-top: 20px;">Métriques Dérivées</h4>
+            <div class="formula">
+<strong>Accuracy (Précision globale)</strong>: (TP + TN) / Total<br>
+→ Bon pour classes équilibrées<br>
+<br>
+<strong>Precision (Précision)</strong>: TP / (TP + FP)<br>
+→ "Parmi les prédictions positives, combien sont correctes?"<br>
+→ Important quand FP est coûteux (ex: spam, diagnostic médical)<br>
+<br>
+<strong>Recall/Sensitivity (Rappel/Sensibilité)</strong>: TP / (TP + FN)<br>
+→ "Parmi les vrais positifs, combien sont détectés?"<br>
+→ Important quand FN est coûteux (ex: détection de fraude, maladie grave)<br>
+<br>
+<strong>F1-Score</strong>: 2 × (Precision × Recall) / (Precision + Recall)<br>
+→ Moyenne harmonique de Precision et Recall<br>
+→ Idéal pour classes déséquilibrées<br>
+<br>
+<strong>Specificity (Spécificité)</strong>: TN / (TN + FP)<br>
+→ "Parmi les vrais négatifs, combien sont correctement identifiés?"
+            </div>
+
+            <h4 style="color: #667eea; margin-top: 20px;">ROC & AUC</h4>
+            <p>
+                La courbe <strong>ROC (Receiver Operating Characteristic)</strong> trace TPR (sensibilité) vs FPR
+                pour différents seuils de classification. <strong>AUC (Area Under Curve)</strong> résume la performance.
+            </p>
+            <div class="formula">
+<strong>AUC = 1.0</strong>: Classificateur parfait<br>
+<strong>AUC = 0.9-0.99</strong>: Excellent<br>
+<strong>AUC = 0.8-0.9</strong>: Bon<br>
+<strong>AUC = 0.7-0.8</strong>: Acceptable<br>
+<strong>AUC = 0.5</strong>: Aléatoire (pas mieux qu'un tirage à pile ou face)<br>
+<strong>AUC < 0.5</strong>: Pire qu'aléatoire (inversez les prédictions!)
+            </div>
+
+            <h4 style="color: #667eea; margin-top: 20px;">Classes Déséquilibrées</h4>
+            <p>
+                Dans beaucoup de problèmes réels, les classes sont déséquilibrées (ex: fraude 0.1%, email spam 10%).
+                L'accuracy seule est trompeuse!
+            </p>
+            <p>
+                <strong>Exemple:</strong> Si 1% sont frauduleux, un modèle qui prédit "pas fraude" pour TOUT aura 99% accuracy
+                mais sera inutile!
+            </p>
+            <p>
+                <strong>Solutions:</strong> Utilisez F1-Score, Balanced Accuracy, Cohen's Kappa, ou AUPRC (Precision-Recall curve).
+            </p>
+
+            <h4 style="color: #667eea; margin-top: 20px;">Sensibilité aux Outliers</h4>
+            <p>
+                Les valeurs extrêmes peuvent fortement impacter certaines métriques :
+            </p>
+            <p>
+                • <strong>MSE (Mean Squared Error)</strong>: Très sensible aux outliers (erreurs au carré)<br>
+                • <strong>MAE (Mean Absolute Error)</strong>: Moins sensible<br>
+                • <strong>Huber Loss</strong>: Compromis entre MSE et MAE
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'confusion';
+        let confusionData = { tp: 35, tn: 50, fp: 10, fn: 5 };
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+
+            if (tab === 'roc') {
+                updateROC();
+            } else if (tab === 'imbalanced') {
+                showImbalancedMetrics();
+            } else if (tab === 'outliers') {
+                showOutliersSensitivity();
+            }
+        }
+
+        function editCell(cell) {
+            const newValue = prompt(`Nouvelle valeur pour ${cell.toUpperCase()}:`, confusionData[cell]);
+            if (newValue !== null && !isNaN(newValue) && newValue >= 0) {
+                confusionData[cell] = parseInt(newValue);
+                updateConfusionMatrix();
+            }
+        }
+
+        function updateConfusionMatrix() {
+            document.getElementById('tp-value').textContent = confusionData.tp;
+            document.getElementById('tn-value').textContent = confusionData.tn;
+            document.getElementById('fp-value').textContent = confusionData.fp;
+            document.getElementById('fn-value').textContent = confusionData.fn;
+
+            calculateMetrics();
+        }
+
+        function calculateMetrics() {
+            const { tp, tn, fp, fn } = confusionData;
+            const total = tp + tn + fp + fn;
+
+            const accuracy = (tp + tn) / total;
+            const precision = tp / (tp + fp) || 0;
+            const recall = tp / (tp + fn) || 0;
+            const f1 = 2 * (precision * recall) / (precision + recall) || 0;
+            const specificity = tn / (tn + fp) || 0;
+
+            const metricsHTML = `
+                <div class="metric-card">
+                    <h4>Accuracy</h4>
+                    <div class="metric-value">${(accuracy * 100).toFixed(1)}%</div>
+                    <div class="metric-description">Précision globale</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Precision</h4>
+                    <div class="metric-value">${(precision * 100).toFixed(1)}%</div>
+                    <div class="metric-description">Fiabilité des positifs</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Recall / Sensitivity</h4>
+                    <div class="metric-value">${(recall * 100).toFixed(1)}%</div>
+                    <div class="metric-description">Détection des positifs</div>
+                </div>
+                <div class="metric-card">
+                    <h4>F1-Score</h4>
+                    <div class="metric-value">${(f1 * 100).toFixed(1)}%</div>
+                    <div class="metric-description">Équilibre P/R</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Specificity</h4>
+                    <div class="metric-value">${(specificity * 100).toFixed(1)}%</div>
+                    <div class="metric-description">Détection des négatifs</div>
+                </div>
+            `;
+
+            document.getElementById('metrics-grid').innerHTML = metricsHTML;
+        }
+
+        function loadScenario(scenario) {
+            switch(scenario) {
+                case 'balanced':
+                    confusionData = { tp: 45, tn: 45, fp: 5, fn: 5 };
+                    break;
+                case 'imbalanced':
+                    confusionData = { tp: 8, tn: 85, fp: 5, fn: 2 };
+                    break;
+                case 'perfect':
+                    confusionData = { tp: 50, tn: 50, fp: 0, fn: 0 };
+                    break;
+                case 'poor':
+                    confusionData = { tp: 25, tn: 25, fp: 25, fn: 25 };
+                    break;
+            }
+            updateConfusionMatrix();
+        }
+
+        function updateROC() {
+            const fpr = document.getElementById('fprSlider').value;
+            const tpr = document.getElementById('tprSlider').value;
+
+            document.getElementById('fprValue').textContent = fpr + '%';
+            document.getElementById('tprValue').textContent = tpr + '%';
+
+            drawROCPoint(fpr / 100, tpr / 100);
+        }
+
+        function drawROCPoint(fpr, tpr) {
+            const canvas = document.getElementById('rocCanvas');
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#f9f9f9';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, 50);
+            ctx.lineTo(50, 450);
+            ctx.lineTo(550, 450);
+            ctx.stroke();
+
+            // Labels
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Taux de Faux Positifs (FPR)', 300, 490);
+
+            ctx.save();
+            ctx.translate(15, 250);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Taux de Vrais Positifs (TPR)', 0, 0);
+            ctx.restore();
+
+            // Draw diagonal (random classifier)
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(50, 450);
+            ctx.lineTo(550, 50);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw grid
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const x = 50 + i * 50;
+                const y = 450 - i * 40;
+
+                ctx.beginPath();
+                ctx.moveTo(x, 50);
+                ctx.lineTo(x, 450);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(50, y);
+                ctx.lineTo(550, y);
+                ctx.stroke();
+
+                // Axis labels
+                ctx.fillStyle = '#666';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText((i / 10).toFixed(1), x, 470);
+                ctx.textAlign = 'right';
+                ctx.fillText((i / 10).toFixed(1), 45, y + 5);
+            }
+
+            // Draw current point
+            const px = 50 + fpr * 500;
+            const py = 450 - tpr * 400;
+
+            ctx.fillStyle = '#667eea';
+            ctx.beginPath();
+            ctx.arc(px, py, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // AUC estimation (simplified)
+            const auc = (1 - fpr / 2 + tpr / 2);
+
+            const metricsHTML = `
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h4>AUC Estimée</h4>
+                        <div class="metric-value">${auc.toFixed(3)}</div>
+                        <div class="metric-description">Area Under Curve</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Performance</h4>
+                        <div class="metric-value">${auc > 0.9 ? 'Excellent' : auc > 0.8 ? 'Bon' : auc > 0.7 ? 'Moyen' : 'Faible'}</div>
+                    </div>
+                </div>
+                <div class="info-box">
+                    <strong>Interprétation:</strong><br>
+                    FPR = ${(fpr * 100).toFixed(0)}% : Parmi les négatifs, ${(fpr * 100).toFixed(0)}% sont mal classés<br>
+                    TPR = ${(tpr * 100).toFixed(0)}% : Parmi les positifs, ${(tpr * 100).toFixed(0)}% sont bien détectés
+                </div>
+            `;
+
+            document.getElementById('rocMetrics').innerHTML = metricsHTML;
+        }
+
+        function generateROCCurve() {
+            const canvas = document.getElementById('rocCanvas');
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#f9f9f9';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw axes (same as before)
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, 50);
+            ctx.lineTo(50, 450);
+            ctx.lineTo(550, 450);
+            ctx.stroke();
+
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Taux de Faux Positifs (FPR)', 300, 490);
+
+            ctx.save();
+            ctx.translate(15, 250);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Taux de Vrais Positifs (TPR)', 0, 0);
+            ctx.restore();
+
+            // Grid and diagonal
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const x = 50 + i * 50;
+                const y = 450 - i * 40;
+
+                ctx.beginPath();
+                ctx.moveTo(x, 50);
+                ctx.lineTo(x, 450);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(50, y);
+                ctx.lineTo(550, y);
+                ctx.stroke();
+
+                ctx.fillStyle = '#666';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText((i / 10).toFixed(1), x, 470);
+                ctx.textAlign = 'right';
+                ctx.fillText((i / 10).toFixed(1), 45, y + 5);
+            }
+
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(50, 450);
+            ctx.lineTo(550, 50);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Generate ROC curve (simulate a good classifier)
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+
+            const points = [];
+            for (let i = 0; i <= 100; i++) {
+                const fpr = i / 100;
+                // Simulated good classifier curve
+                const tpr = Math.min(1, Math.pow(fpr, 0.3));
+                points.push({fpr, tpr});
+
+                const px = 50 + fpr * 500;
+                const py = 450 - tpr * 400;
+
+                if (i === 0) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+
+            // Calculate AUC using trapezoidal rule
+            let auc = 0;
+            for (let i = 1; i < points.length; i++) {
+                const width = points[i].fpr - points[i-1].fpr;
+                const height = (points[i].tpr + points[i-1].tpr) / 2;
+                auc += width * height;
+            }
+
+            const metricsHTML = `
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h4>AUC</h4>
+                        <div class="metric-value">${auc.toFixed(3)}</div>
+                        <div class="metric-description">Area Under Curve</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Qualité</h4>
+                        <div class="metric-value">${auc > 0.9 ? 'Excellent' : auc > 0.8 ? 'Bon' : auc > 0.7 ? 'Acceptable' : 'Faible'}</div>
+                    </div>
+                </div>
+                <div class="info-box">
+                    <strong>Courbe ROC générée</strong><br>
+                    Cette courbe montre les performances à différents seuils de décision.<br>
+                    Plus la courbe est proche du coin supérieur gauche, meilleur est le modèle.
+                </div>
+            `;
+
+            document.getElementById('rocMetrics').innerHTML = metricsHTML;
+        }
+
+        function showImbalancedMetrics() {
+            // Example: fraud detection (0.5% fraud rate)
+            const total = 10000;
+            const frauds = 50; // 0.5%
+            const legit = 9950;
+
+            // Model detects 40 frauds correctly, misses 10
+            // But also flags 100 legit as fraud
+            const tp = 40;
+            const fn = 10;
+            const fp = 100;
+            const tn = 9850;
+
+            const accuracy = (tp + tn) / total;
+            const precision = tp / (tp + fp);
+            const recall = tp / (tp + fn);
+            const f1 = 2 * (precision * recall) / (precision + recall);
+            const balancedAccuracy = ((tp / (tp + fn)) + (tn / (tn + fp))) / 2;
+
+            const html = `
+                <div class="warning-box">
+                    <strong>⚠️ Scénario: Détection de Fraude (0.5% de fraudes)</strong><br>
+                    Sur 10,000 transactions: 50 fraudes, 9,950 légitimes
+                </div>
+
+                <div class="confusion-matrix" style="font-size: 0.85em;">
+                    <div></div>
+                    <div class="cm-label">Prédit Légitime</div>
+                    <div class="cm-label">Prédit Fraude</div>
+
+                    <div class="cm-label">Légitime</div>
+                    <div class="cm-cell cm-tn">
+                        <span>${tn}</span>
+                        <small>TN</small>
+                    </div>
+                    <div class="cm-cell cm-fp">
+                        <span>${fp}</span>
+                        <small>FP</small>
+                    </div>
+
+                    <div class="cm-label">Fraude</div>
+                    <div class="cm-cell cm-fn">
+                        <span>${fn}</span>
+                        <small>FN</small>
+                    </div>
+                    <div class="cm-cell cm-tp">
+                        <span>${tp}</span>
+                        <small>TP</small>
+                    </div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h4>Accuracy</h4>
+                        <div class="metric-value">${(accuracy * 100).toFixed(1)}%</div>
+                        <div class="metric-description" style="color: #e74c3c;">⚠️ Trompeur!</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Precision</h4>
+                        <div class="metric-value">${(precision * 100).toFixed(1)}%</div>
+                        <div class="metric-description">Fiabilité détection</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Recall</h4>
+                        <div class="metric-value">${(recall * 100).toFixed(1)}%</div>
+                        <div class="metric-description">Couverture fraudes</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>F1-Score</h4>
+                        <div class="metric-value">${(f1 * 100).toFixed(1)}%</div>
+                        <div class="metric-description" style="color: #2ecc71;">✓ Recommandé</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Balanced Accuracy</h4>
+                        <div class="metric-value">${(balancedAccuracy * 100).toFixed(1)}%</div>
+                        <div class="metric-description" style="color: #2ecc71;">✓ Recommandé</div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 Analyse:</strong><br>
+                    • Accuracy ${(accuracy * 100).toFixed(1)}% semble bon MAIS c'est trompeur!<br>
+                    • Un modèle qui prédit "légitime" pour TOUT aurait ${(legit/total*100).toFixed(1)}% accuracy<br>
+                    • <strong>F1-Score (${(f1 * 100).toFixed(1)}%)</strong> montre la vraie performance<br>
+                    • <strong>Recall ${(recall * 100).toFixed(1)}%</strong>: On détecte 80% des fraudes<br>
+                    • <strong>Precision ${(precision * 100).toFixed(1)}%</strong>: Mais beaucoup de fausses alertes
+                </div>
+
+                <div class="warning-box">
+                    <strong>Recommandations pour classes déséquilibrées:</strong><br>
+                    1. Utilisez F1-Score, non Accuracy<br>
+                    2. Regardez Precision-Recall trade-off<br>
+                    3. Utilisez Balanced Accuracy<br>
+                    4. Considérez le coût métier de FP vs FN<br>
+                    5. Techniques: SMOTE, sous-échantillonnage, pondération
+                </div>
+            `;
+
+            document.getElementById('imbalancedContent').innerHTML = html;
+        }
+
+        function showOutliersSensitivity() {
+            const canvas = document.getElementById('outliersCanvas');
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#f9f9f9';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Generate dataset with and without outliers
+            const data = [1, 2, 2, 3, 3, 3, 4, 4, 5];
+            const dataWithOutlier = [...data, 50]; // One extreme outlier
+
+            // Calculate metrics
+            const meanNormal = data.reduce((a, b) => a + b) / data.length;
+            const meanOutlier = dataWithOutlier.reduce((a, b) => a + b) / dataWithOutlier.length;
+
+            const medianNormal = data[Math.floor(data.length / 2)];
+            const sortedWithOutlier = [...dataWithOutlier].sort((a, b) => a - b);
+            const medianOutlier = sortedWithOutlier[Math.floor(sortedWithOutlier.length / 2)];
+
+            // MSE simulation
+            const predictions = data.map(v => meanNormal);
+            const mseNormal = data.reduce((sum, val, i) => sum + Math.pow(val - predictions[i], 2), 0) / data.length;
+
+            const predictionsOutlier = dataWithOutlier.map(v => meanOutlier);
+            const mseOutlier = dataWithOutlier.reduce((sum, val, i) => sum + Math.pow(val - predictionsOutlier[i], 2), 0) / dataWithOutlier.length;
+
+            // MAE simulation
+            const maeNormal = data.reduce((sum, val, i) => sum + Math.abs(val - predictions[i]), 0) / data.length;
+            const maeOutlier = dataWithOutlier.reduce((sum, val, i) => sum + Math.abs(val - predictionsOutlier[i]), 0) / dataWithOutlier.length;
+
+            // Visualize
+            const maxVal = 55;
+            const scale = 600 / maxVal;
+
+            // Draw axis
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, 350);
+            ctx.lineTo(650, 350);
+            ctx.stroke();
+
+            // Draw normal data
+            ctx.fillStyle = '#4ecdc4';
+            data.forEach((val, i) => {
+                const x = 100 + i * 40;
+                const y = 350;
+                ctx.beginPath();
+                ctx.arc(x, y, 8, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Draw outlier
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.arc(100 + 9 * 40, 350, 12, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw means
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(50, 350 - meanNormal * 20);
+            ctx.lineTo(400, 350 - meanNormal * 20);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#ff6b6b';
+            ctx.beginPath();
+            ctx.moveTo(50, 350 - meanOutlier * 20);
+            ctx.lineTo(650, 350 - meanOutlier * 20);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Labels
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Données normales', 150, 30);
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillText('+ Outlier (50)', 450, 30);
+
+            const metricsHTML = `
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h4>Moyenne (sans outlier)</h4>
+                        <div class="metric-value">${meanNormal.toFixed(2)}</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Moyenne (avec outlier)</h4>
+                        <div class="metric-value" style="color: #e74c3c;">${meanOutlier.toFixed(2)}</div>
+                        <div class="metric-description">+${((meanOutlier - meanNormal) / meanNormal * 100).toFixed(0)}%!</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Médiane (robuste)</h4>
+                        <div class="metric-value" style="color: #2ecc71;">${medianNormal} → ${medianOutlier}</div>
+                        <div class="metric-description">Stable</div>
+                    </div>
+                </div>
+
+                <div class="metrics-grid" style="margin-top: 15px;">
+                    <div class="metric-card">
+                        <h4>MSE (sensible)</h4>
+                        <div class="metric-value">${mseNormal.toFixed(2)} → ${mseOutlier.toFixed(2)}</div>
+                        <div class="metric-description" style="color: #e74c3c;">Explose!</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>MAE (robuste)</h4>
+                        <div class="metric-value">${maeNormal.toFixed(2)} → ${maeOutlier.toFixed(2)}</div>
+                        <div class="metric-description" style="color: #ff9800;">Impact modéré</div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 Enseignements:</strong><br>
+                    • <strong>Moyenne</strong>: Très sensible aux outliers (${meanNormal.toFixed(1)} → ${meanOutlier.toFixed(1)})<br>
+                    • <strong>Médiane</strong>: Robuste aux outliers (${medianNormal} → ${medianOutlier})<br>
+                    • <strong>MSE</strong>: Amplifie l'impact (erreurs au carré)<br>
+                    • <strong>MAE</strong>: Moins sensible (valeurs absolues)
+                </div>
+
+                <div class="warning-box">
+                    <strong>En pratique:</strong><br>
+                    1. Identifiez les outliers (IQR, Z-score)<br>
+                    2. Analysez leur origine (erreur vs vraie valeur extrême)<br>
+                    3. Options: retrait, transformation, métriques robustes<br>
+                    4. Utilisez MAE ou Huber Loss si outliers attendus<br>
+                    5. Visualisez toujours vos données!
+                </div>
+            `;
+
+            document.getElementById('outliersMetrics').innerHTML = metricsHTML;
+        }
+
+        // Initialize
+        updateConfusionMatrix();
+        updateROC();
+    </script>
+</body>
+</html>
