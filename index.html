@@ -109,6 +109,26 @@
             color: white;
         }
 
+        .badge-advanced {
+            background: #9b59b6;
+            color: white;
+        }
+
+        .badge-evaluation {
+            background: #3498db;
+            color: white;
+        }
+
+        .badge-ensemble {
+            background: #e67e22;
+            color: white;
+        }
+
+        .badge-rl {
+            background: #1abc9c;
+            color: white;
+        }
+
         .btn {
             display: inline-block;
             padding: 12px 30px;
@@ -220,6 +240,53 @@
                     <h3>TF-IDF</h3>
                     <p>Identifiez les mots importants dans vos documents. Utilisé par les moteurs de recherche et systèmes de recommandation.</p>
                     <a href="apps/tfidf.html" class="btn">Essayer</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category">
+            <h2 class="category-title">🎯 Évaluation & Algorithmes Avancés</h2>
+            <div class="apps-grid">
+                <div class="app-card" onclick="window.location.href='apps/metrics-evaluation.html'">
+                    <span class="badge badge-evaluation">Évaluation</span>
+                    <h3>Métriques & Évaluation</h3>
+                    <p>Matrice de confusion, ROC/AUC, sensibilité aux outliers, classes déséquilibrées. Comprenez comment évaluer vos modèles en entreprise.</p>
+                    <a href="apps/metrics-evaluation.html" class="btn">Essayer</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/data-preprocessing.html'">
+                    <span class="badge badge-evaluation">Prétraitement</span>
+                    <h3>Prétraitement de Données</h3>
+                    <p>Normalisation (Min-Max, Z-Score, Robust), détection d'outliers, gestion des valeurs manquantes. 80% du travail en Data Science.</p>
+                    <a href="apps/data-preprocessing.html" class="btn">Essayer</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/random-forest.html'">
+                    <span class="badge badge-ensemble">Ensemble</span>
+                    <h3>Random Forest</h3>
+                    <p>Forêt d'arbres de décision avec bootstrap sampling. Visualisez l'importance des features et la puissance de l'ensemble learning.</p>
+                    <a href="apps/random-forest.html" class="btn">Essayer</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/svm.html'">
+                    <span class="badge badge-advanced">Avancé</span>
+                    <h3>SVM - Support Vector Machines</h3>
+                    <p>Marges maximales et kernel trick (Linéaire, RBF, Polynomial). Classification puissante pour données non-linéairement séparables.</p>
+                    <a href="apps/svm.html" class="btn">Essayer</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/genetic-algorithm.html'">
+                    <span class="badge badge-advanced">Évolutionnaire</span>
+                    <h3>Algorithme Génétique</h3>
+                    <p>Optimisation inspirée de l'évolution biologique. Sélection, croisement, mutation. Pas besoin de gradient !</p>
+                    <a href="apps/genetic-algorithm.html" class="btn">Essayer</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/q-learning.html'">
+                    <span class="badge badge-rl">Reinforcement Learning</span>
+                    <h3>Q-Learning</h3>
+                    <p>Apprentissage par renforcement. Regardez un agent apprendre à naviguer dans une grille vers son objectif en évitant les obstacles.</p>
+                    <a href="apps/q-learning.html" class="btn">Essayer</a>
                 </div>
             </div>
         </div>
