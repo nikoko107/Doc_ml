@@ -177,7 +177,7 @@
 
                 <div style="margin-top: 20px;">
                     <label><strong>Vitesse d'apprentissage:</strong></label>
-                    <input type="range" id="learningRate" min="0.0001" max="0.01" step="0.0001" value="0.001" style="width: 100%;">
+                    <input type="range" id="learningRate" min="0.001" max="0.5" step="0.001" value="0.01" style="width: 100%;">
                     <p style="text-align: center;" id="lrValue">0.001</p>
                 </div>
             </div>
@@ -210,13 +210,17 @@
         const ctx = canvas.getContext('2d');
         const points = [];
         let m = 0; // slope
-        let b = 300; // intercept
-        let learningRate = 0.001;
+        let b = 0.5; // intercept (normalized)
+        let learningRate = 0.01;
 
         document.getElementById('learningRate').addEventListener('input', (e) => {
             learningRate = parseFloat(e.target.value);
             document.getElementById('lrValue').textContent = learningRate.toFixed(4);
         });
+
+        // Update learning rate display
+        document.getElementById('lrValue').textContent = learningRate.toFixed(4);
+        document.getElementById('learningRate').value = learningRate;
 
         canvas.addEventListener('click', (e) => {
             const rect = canvas.getBoundingClientRect();
@@ -242,7 +246,7 @@
         function clearPoints() {
             points.length = 0;
             m = 0;
-            b = 300;
+            b = 0.5;
             draw();
             updateInfo();
         }
@@ -250,35 +254,53 @@
         function train() {
             if (points.length < 2) return;
 
+            // Normalize coordinates to [0, 1]
+            const normalizedPoints = points.map(p => ({
+                x: p.x / canvas.width,
+                y: p.y / canvas.height
+            }));
+
             // Gradient descent for 1000 iterations
             for (let iter = 0; iter < 1000; iter++) {
                 let dm = 0;
                 let db = 0;
 
-                for (let point of points) {
+                for (let point of normalizedPoints) {
                     const prediction = m * point.x + b;
                     const error = prediction - point.y;
                     dm += error * point.x;
                     db += error;
                 }
 
-                dm = dm * 2 / points.length;
-                db = db * 2 / points.length;
+                dm = dm * 2 / normalizedPoints.length;
+                db = db * 2 / normalizedPoints.length;
 
                 m -= learningRate * dm;
                 b -= learningRate * db;
+
+                // Check for NaN
+                if (isNaN(m) || isNaN(b)) {
+                    console.error('NaN detected! Resetting...');
+                    m = 0;
+                    b = 0.5;
+                    break;
+                }
             }
         }
 
         function calculateMSE() {
             if (points.length === 0) return 0;
             let sum = 0;
-            for (let point of points) {
+            const normalizedPoints = points.map(p => ({
+                x: p.x / canvas.width,
+                y: p.y / canvas.height
+            }));
+            for (let point of normalizedPoints) {
                 const prediction = m * point.x + b;
                 const error = prediction - point.y;
                 sum += error * error;
             }
-            return sum / points.length;
+            return sum / normalizedPoints.length;
         }
 
         function draw() {
@@ -307,8 +329,12 @@
                 ctx.strokeStyle = '#667eea';
                 ctx.lineWidth = 3;
                 ctx.beginPath();
-                const y1 = m * 0 + b;
-                const y2 = m * canvas.width + b;
+                // Use normalized coordinates: x from 0 to 1
+                const y1_norm = m * 0 + b;  // at x=0
+                const y2_norm = m * 1 + b;  // at x=1
+                // Convert back to pixel coordinates
+                const y1 = y1_norm * canvas.height;
+                const y2 = y2_norm * canvas.height;
                 ctx.moveTo(0, y1);
                 ctx.lineTo(canvas.width, y2);
                 ctx.stroke();
@@ -323,7 +349,14 @@
 
                 // Draw error line
                 if (points.length >= 2) {
-                    const prediction = m * point.x + b;
+                    // Normalize point coordinates
+                    const x_norm = point.x / canvas.width;
+                    const y_norm = point.y / canvas.height;
+                    // Calculate prediction in normalized space
+                    const prediction_norm = m * x_norm + b;
+                    // Convert back to pixels
+                    const prediction = prediction_norm * canvas.height;
+
                     ctx.strokeStyle = 'rgba(255, 107, 107, 0.3)';
                     ctx.lineWidth = 1;
                     ctx.beginPath();
