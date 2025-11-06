@@ -366,23 +366,27 @@
 
         function forward(input) {
             const activations = [input];
+            const zValues = []; // Store pre-activation values
 
             for (let i = 0; i < weights.length; i++) {
                 const layer = [];
+                const zLayer = [];
                 for (let j = 0; j < weights[i].length; j++) {
                     let sum = biases[i][j];
                     for (let k = 0; k < weights[i][j].length; k++) {
                         sum += weights[i][j][k] * activations[i][k];
                     }
+                    zLayer.push(sum);
 
                     // Use ReLU for hidden layers, sigmoid for output
                     const activation = i < weights.length - 1 ? relu(sum) : sigmoid(sum);
                     layer.push(activation);
                 }
+                zValues.push(zLayer);
                 activations.push(layer);
             }
 
-            return activations;
+            return {activations, zValues};
         }
 
         function train(numEpochs) {
@@ -401,13 +405,13 @@
                     const target = point.class;
 
                     // Forward pass
-                    const activations = forward(input);
+                    const {activations, zValues} = forward(input);
                     const output = activations[activations.length - 1][0];
 
                     // Backward pass
                     const deltas = [];
 
-                    // Output layer delta
+                    // Output layer delta (sigmoid derivative is already included in the error)
                     const outputDelta = [(output - target)];
                     deltas.unshift(outputDelta);
 
@@ -419,12 +423,8 @@
                             for (let k = 0; k < weights[i + 1].length; k++) {
                                 error += weights[i + 1][k][j] * deltas[0][k];
                             }
-                            // ReLU derivative for hidden layers
-                            const sum = biases[i][j];
-                            for (let k = 0; k < weights[i][j].length; k++) {
-                                sum += weights[i][j][k] * activations[i + 1][k];
-                            }
-                            layerDelta.push(error * reluDerivative(sum));
+                            // ReLU derivative using stored z values
+                            layerDelta.push(error * reluDerivative(zValues[i][j]));
                         }
                         deltas.unshift(layerDelta);
                     }
@@ -452,7 +452,7 @@
 
             let loss = 0;
             for (let point of points) {
-                const activations = forward([point.x, point.y]);
+                const {activations} = forward([point.x, point.y]);
                 const output = activations[activations.length - 1][0];
                 const target = point.class;
 
@@ -468,7 +468,7 @@
 
             let correct = 0;
             for (let point of points) {
-                const activations = forward([point.x, point.y]);
+                const {activations} = forward([point.x, point.y]);
                 const output = activations[activations.length - 1][0];
                 const prediction = output >= 0.5 ? 1 : 0;
 
@@ -561,7 +561,7 @@
                     for (let j = 0; j < dataCanvas.height; j += resolution) {
                         const x = i / dataCanvas.width;
                         const y = j / dataCanvas.height;
-                        const activations = forward([x, y]);
+                        const {activations} = forward([x, y]);
                         const output = activations[activations.length - 1][0];
 
                         ctx.fillStyle = output >= 0.5 ? 'rgba(78, 205, 196, 0.2)' : 'rgba(255, 107, 107, 0.2)';
@@ -581,7 +581,7 @@
                 ctx.fill();
 
                 if (weights.length > 0) {
-                    const activations = forward([point.x, point.y]);
+                    const {activations} = forward([point.x, point.y]);
                     const output = activations[activations.length - 1][0];
                     const prediction = output >= 0.5 ? 1 : 0;
 
