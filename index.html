@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apprentissage Machine - Applications Interactives</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .category {
+            margin-bottom: 40px;
+        }
+
+        .category-title {
+            color: white;
+            font-size: 2em;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .app-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .app-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .app-card h3 {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .app-card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .app-card .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .badge-historical {
+            background: #ffd93d;
+            color: #333;
+        }
+
+        .badge-modern {
+            background: #6bcf7f;
+            color: white;
+        }
+
+        .badge-fundamental {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: opacity 0.3s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧠 Apprentissage Machine</h1>
+            <p class="subtitle">Applications interactives pour comprendre le ML historique et moderne</p>
+        </header>
+
+        <div class="category">
+            <h2 class="category-title">📚 ML Historique - Les Fondations</h2>
+            <div class="apps-grid">
+                <div class="app-card" onclick="window.location.href='apps/linear-regression.html'">
+                    <span class="badge badge-historical">Historique</span>
+                    <h3>Régression Linéaire</h3>
+                    <p>Découvrez l'un des premiers algorithmes de ML. Dessinez des points et observez comment l'algorithme trouve la meilleure ligne pour les prédire.</p>
+                    <a href="apps/linear-regression.html" class="btn">Essayer</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/perceptron.html'">
+                    <span class="badge badge-historical">Historique</span>
+                    <h3>Perceptron</h3>
+                    <p>Le premier réseau de neurones (1958). Apprenez comment un neurone artificiel peut classifier des données en deux catégories.</p>
+                    <a href="apps/perceptron.html" class="btn">Essayer</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/kmeans.html'">
+                    <span class="badge badge-historical">Historique</span>
+                    <h3>K-Means Clustering</h3>
+                    <p>Algorithme de clustering non supervisé. Observez comment l'algorithme groupe automatiquement vos données.</p>
+                    <a href="apps/kmeans.html" class="btn">Essayer</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category">
+            <h2 class="category-title">🔥 ML Moderne - Concepts Avancés</h2>
+            <div class="apps-grid">
+                <div class="app-card" onclick="window.location.href='apps/neural-network.html'">
+                    <span class="badge badge-modern">Moderne</span>
+                    <h3>Réseau de Neurones</h3>
+                    <p>Visualisez un réseau de neurones multicouche en action. Ajustez les paramètres et observez l'apprentissage en temps réel.</p>
+                    <a href="apps/neural-network.html" class="btn">Essayer</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/gradient-descent.html'">
+                    <span class="badge badge-fundamental">Fondamental</span>
+                    <h3>Descente de Gradient</h3>
+                    <p>Comprenez le coeur de l'apprentissage profond. Visualisez comment un algorithme trouve le minimum d'une fonction.</p>
+                    <a href="apps/gradient-descent.html" class="btn">Essayer</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/backpropagation.html'">
+                    <span class="badge badge-modern">Moderne</span>
+                    <h3>Backpropagation</h3>
+                    <p>Découvrez comment les réseaux de neurones apprennent. Visualisez la propagation des erreurs à travers le réseau.</p>
+                    <a href="apps/backpropagation.html" class="btn">Essayer</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/cnn.html'">
+                    <span class="badge badge-modern">Moderne</span>
+                    <h3>CNN - Réseaux Convolutifs</h3>
+                    <p>Découvrez comment les CNN révolutionnent la vision par ordinateur. Dessinez et observez les filtres de convolution détecter les caractéristiques.</p>
+                    <a href="apps/cnn.html" class="btn">Essayer</a>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Applications éducatives de Machine Learning - Utilisables localement sans serveur</p>
+            <p>Ouvrez simplement les fichiers HTML dans votre navigateur</p>
+        </footer>
+    </div>
+</body>
+</html>

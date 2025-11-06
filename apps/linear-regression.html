@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Régression Linéaire Interactive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .canvas-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        canvas {
+            border: 2px solid #ddd;
+            cursor: crosshair;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .controls h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-box p {
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .info-box strong {
+            color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.3s;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .explanation {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .explanation h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .explanation p {
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .formula {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            margin: 15px 0;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-btn">← Retour</a>
+            <h1>📈 Régression Linéaire</h1>
+            <p>Cliquez sur le canvas pour ajouter des points</p>
+        </header>
+
+        <div class="main-content">
+            <div class="canvas-container">
+                <canvas id="canvas" width="800" height="600"></canvas>
+            </div>
+
+            <div class="controls">
+                <h3>📊 Informations</h3>
+                <div class="info-box">
+                    <p><strong>Nombre de points:</strong> <span id="pointCount">0</span></p>
+                    <p><strong>Équation:</strong></p>
+                    <p id="equation">y = mx + b</p>
+                    <p><strong>Pente (m):</strong> <span id="slope">-</span></p>
+                    <p><strong>Ordonnée (b):</strong> <span id="intercept">-</span></p>
+                    <p><strong>Erreur (MSE):</strong> <span id="error">-</span></p>
+                </div>
+
+                <button class="btn-primary" onclick="addRandomPoints()">Ajouter 10 points aléatoires</button>
+                <button class="btn-secondary" onclick="clearPoints()">Effacer tous les points</button>
+
+                <div style="margin-top: 20px;">
+                    <label><strong>Vitesse d'apprentissage:</strong></label>
+                    <input type="range" id="learningRate" min="0.0001" max="0.01" step="0.0001" value="0.001" style="width: 100%;">
+                    <p style="text-align: center;" id="lrValue">0.001</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="explanation">
+            <h3>🎓 Comment ça marche ?</h3>
+            <p>
+                La <strong>régression linéaire</strong> est l'un des algorithmes les plus anciens et fondamentaux du machine learning (Francis Galton, 1886).
+                Elle cherche à trouver la meilleure ligne droite qui passe à travers vos points de données.
+            </p>
+            <div class="formula">
+                y = mx + b
+            </div>
+            <p>
+                Où <strong>m</strong> est la pente de la ligne et <strong>b</strong> est l'ordonnée à l'origine.
+            </p>
+            <p>
+                L'algorithme utilise la <strong>descente de gradient</strong> pour minimiser l'erreur quadratique moyenne (MSE) entre
+                les prédictions et les vraies valeurs. À chaque itération, il ajuste m et b pour réduire l'erreur.
+            </p>
+            <div class="formula">
+                MSE = (1/n) Σ (y_réel - y_prédit)²
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const points = [];
+        let m = 0; // slope
+        let b = 300; // intercept
+        let learningRate = 0.001;
+
+        document.getElementById('learningRate').addEventListener('input', (e) => {
+            learningRate = parseFloat(e.target.value);
+            document.getElementById('lrValue').textContent = learningRate.toFixed(4);
+        });
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            points.push({x, y});
+            train();
+            draw();
+            updateInfo();
+        });
+
+        function addRandomPoints() {
+            for (let i = 0; i < 10; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                points.push({x, y});
+            }
+            train();
+            draw();
+            updateInfo();
+        }
+
+        function clearPoints() {
+            points.length = 0;
+            m = 0;
+            b = 300;
+            draw();
+            updateInfo();
+        }
+
+        function train() {
+            if (points.length < 2) return;
+
+            // Gradient descent for 1000 iterations
+            for (let iter = 0; iter < 1000; iter++) {
+                let dm = 0;
+                let db = 0;
+
+                for (let point of points) {
+                    const prediction = m * point.x + b;
+                    const error = prediction - point.y;
+                    dm += error * point.x;
+                    db += error;
+                }
+
+                dm = dm * 2 / points.length;
+                db = db * 2 / points.length;
+
+                m -= learningRate * dm;
+                b -= learningRate * db;
+            }
+        }
+
+        function calculateMSE() {
+            if (points.length === 0) return 0;
+            let sum = 0;
+            for (let point of points) {
+                const prediction = m * point.x + b;
+                const error = prediction - point.y;
+                sum += error * error;
+            }
+            return sum / points.length;
+        }
+
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = '#f9f9f9';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < canvas.height; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+
+            // Draw regression line
+            if (points.length >= 2) {
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                const y1 = m * 0 + b;
+                const y2 = m * canvas.width + b;
+                ctx.moveTo(0, y1);
+                ctx.lineTo(canvas.width, y2);
+                ctx.stroke();
+            }
+
+            // Draw points
+            for (let point of points) {
+                ctx.fillStyle = '#ff6b6b';
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw error line
+                if (points.length >= 2) {
+                    const prediction = m * point.x + b;
+                    ctx.strokeStyle = 'rgba(255, 107, 107, 0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(point.x, point.y);
+                    ctx.lineTo(point.x, prediction);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function updateInfo() {
+            document.getElementById('pointCount').textContent = points.length;
+            if (points.length >= 2) {
+                document.getElementById('slope').textContent = m.toFixed(4);
+                document.getElementById('intercept').textContent = b.toFixed(4);
+                document.getElementById('equation').textContent = `y = ${m.toFixed(4)}x + ${b.toFixed(4)}`;
+                document.getElementById('error').textContent = calculateMSE().toFixed(2);
+            } else {
+                document.getElementById('slope').textContent = '-';
+                document.getElementById('intercept').textContent = '-';
+                document.getElementById('equation').textContent = 'y = mx + b';
+                document.getElementById('error').textContent = '-';
+            }
+        }
+
+        // Initial draw
+        draw();
+    </script>
+</body>
+</html>
