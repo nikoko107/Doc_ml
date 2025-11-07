@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Learning - Entraînement de Réseau de Neurones</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block; background: rgba(255,255,255,0.2); color: white;
+            padding: 10px 20px; font-weight: 600; text-decoration: none; border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .back-link:hover { background: rgba(255,255,255,0.3); }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .animation-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            height: 700px;
+            overflow: hidden;
+        }
+
+        .layer {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .layer-label {
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .neuron {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8em;
+            transition: all 0.3s;
+        }
+
+        .neuron.active {
+            transform: scale(1.2);
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .input-layer { top: 120px; left: 100px; }
+        .hidden-layer-1 { top: 120px; left: 320px; }
+        .hidden-layer-2 { top: 120px; left: 540px; }
+        .output-layer { top: 220px; left: 760px; }
+
+        .input-layer .neuron { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); }
+        .hidden-layer-1 .neuron { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+        .hidden-layer-2 .neuron { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); }
+        .output-layer .neuron { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }
+
+        .weight-line {
+            position: absolute;
+            height: 2px;
+            background: rgba(149, 165, 166, 0.3);
+            transform-origin: left center;
+            pointer-events: none;
+        }
+
+        .weight-line.active {
+            background: rgba(241, 196, 15, 0.8);
+            height: 3px;
+        }
+
+        .data-packet {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            animation-timing-function: ease-in-out;
+            opacity: 0;
+        }
+
+        .gradient-packet {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .forward-packet {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .loss-box {
+            position: absolute;
+            top: 400px;
+            left: 760px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            min-width: 150px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .loss-box.show {
+            opacity: 1;
+        }
+
+        .loss-box h4 {
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .loss-value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .optimizer-box {
+            position: absolute;
+            bottom: 180px;
+            left: 50px;
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .optimizer-box.show {
+            opacity: 1;
+        }
+
+        .optimizer-box h4 {
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px 30px;
+            min-width: 700px;
+            text-align: center;
+        }
+
+        .info-panel h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .info-panel p {
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        .epoch-counter {
+            position: absolute;
+            top: 40px;
+            right: 50px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .epoch-counter h4 {
+            color: #667eea;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .epoch-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 3px 10px rgba(0,0,0,0.2); }
+            50% { box-shadow: 0 4px 20px rgba(102, 126, 234, 0.6); }
+        }
+
+        .pulse { animation: pulse 1s ease-in-out; }
+        .glow { animation: glow 1.5s ease-in-out infinite; }
+
+        .formula-box {
+            position: absolute;
+            background: #fff9e6;
+            border: 2px solid #f39c12;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            color: #e67e22;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .formula-box.show {
+            opacity: 1;
+        }
+
+        .formula-forward {
+            top: 220px;
+            left: 350px;
+        }
+
+        .formula-loss {
+            top: 350px;
+            left: 600px;
+        }
+
+        .formula-backward {
+            top: 500px;
+            left: 350px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">← Retour au menu</a>
+
+        <h1>🧠 Deep Learning - Réseau de Neurones</h1>
+        <p class="subtitle">Animation de l'entraînement avec forward pass, backpropagation et optimisation</p>
+
+        <div class="animation-container">
+            <!-- Epoch Counter -->
+            <div class="epoch-counter">
+                <h4>Epoch</h4>
+                <div class="epoch-value" id="epochValue">1</div>
+            </div>
+
+            <!-- Neural Network Layers -->
+            <div class="layer input-layer" id="inputLayer">
+                <div class="layer-label">Input Layer</div>
+                <div class="neuron" data-layer="input" data-idx="0">x₁</div>
+                <div class="neuron" data-layer="input" data-idx="1">x₂</div>
+                <div class="neuron" data-layer="input" data-idx="2">x₃</div>
+            </div>
+
+            <div class="layer hidden-layer-1" id="hiddenLayer1">
+                <div class="layer-label">Hidden Layer 1</div>
+                <div class="neuron" data-layer="h1" data-idx="0">h₁</div>
+                <div class="neuron" data-layer="h1" data-idx="1">h₂</div>
+                <div class="neuron" data-layer="h1" data-idx="2">h₃</div>
+                <div class="neuron" data-layer="h1" data-idx="3">h₄</div>
+            </div>
+
+            <div class="layer hidden-layer-2" id="hiddenLayer2">
+                <div class="layer-label">Hidden Layer 2</div>
+                <div class="neuron" data-layer="h2" data-idx="0">h₅</div>
+                <div class="neuron" data-layer="h2" data-idx="1">h₆</div>
+                <div class="neuron" data-layer="h2" data-idx="2">h₇</div>
+            </div>
+
+            <div class="layer output-layer" id="outputLayer">
+                <div class="layer-label">Output Layer</div>
+                <div class="neuron" data-layer="output" data-idx="0">ŷ</div>
+            </div>
+
+            <!-- Loss Box -->
+            <div class="loss-box" id="lossBox">
+                <h4>Loss (MSE)</h4>
+                <div class="loss-value" id="lossValue">0.342</div>
+            </div>
+
+            <!-- Optimizer Box -->
+            <div class="optimizer-box" id="optimizerBox">
+                <h4>🔧 Optimizer: Adam</h4>
+                <div style="font-size: 0.75em;">W ← W - α·∇W</div>
+            </div>
+
+            <!-- Formulas -->
+            <div class="formula-box formula-forward" id="formulaForward">
+                z = W·x + b → a = σ(z)
+            </div>
+
+            <div class="formula-box formula-loss" id="formulaLoss">
+                L = ½(y - ŷ)²
+            </div>
+
+            <div class="formula-box formula-backward" id="formulaBackward">
+                ∂L/∂W = ∂L/∂a · ∂a/∂z · ∂z/∂W
+            </div>
+
+            <!-- Info Panel -->
+            <div class="info-panel">
+                <h4 id="step-title">Étape 1: Forward Propagation</h4>
+                <p id="step-description">Les données traversent le réseau couche par couche, chaque neurone calcule z = W·x + b puis applique σ(z)</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <h2 style="color: #667eea; margin-bottom: 20px;">📖 Comprendre l'Entraînement des Réseaux de Neurones</h2>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #2ecc71; margin-bottom: 10px;">🎯 Objectif</h3>
+                    <p>Apprendre automatiquement les poids et biais optimaux pour minimiser l'erreur entre prédictions (ŷ) et valeurs réelles (y) sur un ensemble de données.</p>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #3498db; margin-bottom: 10px;">⚡ Architecture</h3>
+                    <p>• Input Layer: Reçoit les features<br>• Hidden Layers: Extraient représentations<br>• Output Layer: Produit prédictions<br>• Fully connected: Chaque neurone connecté à tous les suivants</p>
+                </div>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 10px;">🔄 Cycle d'Entraînement (Epoch)</h3>
+                <ol style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Forward Propagation:</strong> Calcul des activations couche par couche
+                        <div style="background: white; padding: 10px; margin: 8px 0; border-radius: 5px; font-family: monospace; font-size: 0.9em;">
+                            z<sup>(l)</sup> = W<sup>(l)</sup> · a<sup>(l-1)</sup> + b<sup>(l)</sup><br>
+                            a<sup>(l)</sup> = σ(z<sup>(l)</sup>) &nbsp; &nbsp; <span style="color: #666;">// Fonction d'activation (ReLU, sigmoid, tanh)</span>
+                        </div>
+                    </li>
+                    <li><strong>Loss Calculation:</strong> Mesure de l'erreur entre prédiction et cible
+                        <div style="background: white; padding: 10px; margin: 8px 0; border-radius: 5px; font-family: monospace; font-size: 0.9em;">
+                            MSE: L = ½(y - ŷ)²<br>
+                            Cross-Entropy: L = -y·log(ŷ) - (1-y)·log(1-ŷ)
+                        </div>
+                    </li>
+                    <li><strong>Backward Propagation:</strong> Calcul des gradients via la chaîne de dérivation
+                        <div style="background: white; padding: 10px; margin: 8px 0; border-radius: 5px; font-family: monospace; font-size: 0.9em;">
+                            ∂L/∂W<sup>(l)</sup> = ∂L/∂a<sup>(l)</sup> · ∂a<sup>(l)</sup>/∂z<sup>(l)</sup> · ∂z<sup>(l)</sup>/∂W<sup>(l)</sup><br>
+                            δ<sup>(l)</sup> = (W<sup>(l+1)</sup>)<sup>T</sup> · δ<sup>(l+1)</sup> ⊙ σ'(z<sup>(l)</sup>)
+                        </div>
+                    </li>
+                    <li><strong>Weight Update:</strong> Optimisation des paramètres avec l'optimiseur
+                        <div style="background: white; padding: 10px; margin: 8px 0; border-radius: 5px; font-family: monospace; font-size: 0.9em;">
+                            W<sup>(l)</sup> ← W<sup>(l)</sup> - α · ∂L/∂W<sup>(l)</sup><br>
+                            b<sup>(l)</sup> ← b<sup>(l)</sup> - α · ∂L/∂b<sup>(l)</sup>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+                <h3 style="color: #1976d2; margin-bottom: 10px;">🔬 Fonctions d'Activation</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 15px;">
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #3498db; margin-bottom: 8px;">ReLU</h4>
+                        <div style="font-family: monospace; font-size: 0.85em; margin: 5px 0;">σ(z) = max(0, z)</div>
+                        <p style="font-size: 0.85em; color: #666; margin-top: 5px;">Plus populaire, résout vanishing gradient</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #9b59b6; margin-bottom: 8px;">Sigmoid</h4>
+                        <div style="font-family: monospace; font-size: 0.85em; margin: 5px 0;">σ(z) = 1/(1+e<sup>-z</sup>)</div>
+                        <p style="font-size: 0.85em; color: #666; margin-top: 5px;">Sortie [0,1], classification binaire</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #e74c3c; margin-bottom: 8px;">Tanh</h4>
+                        <div style="font-family: monospace; font-size: 0.85em; margin: 5px 0;">σ(z) = tanh(z)</div>
+                        <p style="font-size: 0.85em; color: #666; margin-top: 5px;">Sortie [-1,1], centré en zéro</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; border-left: 4px solid #ff9800;">
+                <h3 style="color: #e65100; margin-bottom: 10px;">⚙️ Optimiseurs Modernes</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #f39c12; margin-bottom: 8px;">SGD avec Momentum</h4>
+                        <div style="font-family: monospace; font-size: 0.8em; margin: 5px 0; line-height: 1.5;">
+                            v = β·v + (1-β)·∇W<br>
+                            W ← W - α·v
+                        </div>
+                        <p style="font-size: 0.85em; color: #666; margin-top: 5px;">Accélère convergence, réduit oscillations</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #e67e22; margin-bottom: 8px;">Adam (Adaptive Moment)</h4>
+                        <div style="font-family: monospace; font-size: 0.8em; margin: 5px 0; line-height: 1.5;">
+                            m = β₁·m + (1-β₁)·∇W<br>
+                            v = β₂·v + (1-β₂)·∇W²<br>
+                            W ← W - α·m/√(v+ε)
+                        </div>
+                        <p style="font-size: 0.85em; color: #666; margin-top: 5px;">Le plus populaire, learning rate adaptatif</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e91e63;">
+                <h3 style="color: #c2185b; margin-bottom: 10px;">💡 Hyperparamètres Clés</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Learning Rate (α):</strong> Taille des pas lors de l'optimisation (typiquement 0.001 - 0.1)</li>
+                    <li><strong>Batch Size:</strong> Nombre d'exemples par mise à jour (32, 64, 128, 256)</li>
+                    <li><strong>Epochs:</strong> Nombre de passages complets sur le dataset</li>
+                    <li><strong>Hidden Units:</strong> Nombre de neurones par couche cachée</li>
+                    <li><strong>Regularization (L1/L2, Dropout):</strong> Prévention du surapprentissage</li>
+                </ul>
+            </div>
+
+            <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #9c27b0;">
+                <h3 style="color: #7b1fa2; margin-bottom: 10px;">🚀 Améliorations Modernes</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Batch Normalization:</strong> Normalise activations entre couches pour stabiliser l'entraînement</li>
+                    <li><strong>Dropout:</strong> Désactive aléatoirement des neurones pour éviter le surapprentissage</li>
+                    <li><strong>Skip Connections (ResNet):</strong> Connexions directes qui sautent des couches</li>
+                    <li><strong>Learning Rate Scheduling:</strong> Réduction progressive du learning rate</li>
+                    <li><strong>Early Stopping:</strong> Arrêt si validation loss ne s'améliore plus</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentEpoch = 1;
+        const totalDuration = 16000; // 16 secondes par cycle complet
+
+        const steps = [
+            {
+                title: "Étape 1: Forward Propagation",
+                description: "Les données traversent le réseau couche par couche, chaque neurone calcule z = W·x + b puis applique σ(z)",
+                time: 0
+            },
+            {
+                title: "Étape 2: Calcul de la Loss",
+                description: "Mesure de l'erreur entre la prédiction ŷ et la valeur cible y avec la fonction de perte (MSE, Cross-Entropy)",
+                time: 4000
+            },
+            {
+                title: "Étape 3: Backward Propagation (Backprop)",
+                description: "Les gradients ∂L/∂W remontent à travers le réseau via la règle de la chaîne, de la sortie vers l'entrée",
+                time: 8000
+            },
+            {
+                title: "Étape 4: Mise à jour des poids",
+                description: "L'optimiseur (Adam, SGD) ajuste les poids W ← W - α·∇W pour minimiser la loss",
+                time: 12000
+            }
+        ];
+
+        function updateStep(stepIndex) {
+            document.getElementById('step-title').textContent = steps[stepIndex].title;
+            document.getElementById('step-description').textContent = steps[stepIndex].description;
+        }
+
+        function activateNeurons(layer) {
+            const neurons = document.querySelectorAll(`[data-layer="${layer}"]`);
+            neurons.forEach(neuron => neuron.classList.add('active'));
+            setTimeout(() => {
+                neurons.forEach(neuron => neuron.classList.remove('active'));
+            }, 600);
+        }
+
+        function createDataPacket(type, startX, startY, endX, endY, delay) {
+            setTimeout(() => {
+                const packet = document.createElement('div');
+                packet.className = `data-packet ${type}`;
+                packet.textContent = type === 'forward-packet' ? '→' : '←';
+                packet.style.left = startX + 'px';
+                packet.style.top = startY + 'px';
+                packet.style.opacity = '1';
+                document.querySelector('.animation-container').appendChild(packet);
+
+                // Animate to end position
+                setTimeout(() => {
+                    packet.style.transition = 'all 0.8s ease-in-out';
+                    packet.style.left = endX + 'px';
+                    packet.style.top = endY + 'px';
+                }, 50);
+
+                // Remove packet
+                setTimeout(() => {
+                    packet.style.opacity = '0';
+                    setTimeout(() => packet.remove(), 300);
+                }, 850);
+            }, delay);
+        }
+
+        function runAnimation() {
+            // Reset displays
+            document.getElementById('lossBox').classList.remove('show');
+            document.getElementById('optimizerBox').classList.remove('show');
+            document.querySelectorAll('.formula-box').forEach(el => el.classList.remove('show'));
+
+            // PHASE 1: Forward Propagation (0-4s)
+            setTimeout(() => {
+                updateStep(0);
+                document.getElementById('formulaForward').classList.add('show');
+
+                // Input layer
+                activateNeurons('input');
+                createDataPacket('forward-packet', 125, 195, 295, 195, 200);
+
+                // Hidden layer 1
+                setTimeout(() => {
+                    activateNeurons('h1');
+                    createDataPacket('forward-packet', 370, 195, 515, 195, 200);
+                }, 1000);
+
+                // Hidden layer 2
+                setTimeout(() => {
+                    activateNeurons('h2');
+                    createDataPacket('forward-packet', 590, 195, 735, 245, 200);
+                }, 2000);
+
+                // Output layer
+                setTimeout(() => {
+                    activateNeurons('output');
+                }, 3000);
+
+                setTimeout(() => {
+                    document.getElementById('formulaForward').classList.remove('show');
+                }, 3800);
+            }, 0);
+
+            // PHASE 2: Loss Calculation (4-8s)
+            setTimeout(() => {
+                updateStep(1);
+                document.getElementById('lossBox').classList.add('show');
+                document.getElementById('formulaLoss').classList.add('show');
+
+                // Animate loss value
+                const lossBox = document.getElementById('lossBox');
+                lossBox.classList.add('pulse');
+                const currentLoss = (0.5 - currentEpoch * 0.02).toFixed(3);
+                document.getElementById('lossValue').textContent = Math.max(0.001, currentLoss);
+
+                setTimeout(() => {
+                    lossBox.classList.remove('pulse');
+                    document.getElementById('formulaLoss').classList.remove('show');
+                }, 3000);
+            }, 4000);
+
+            // PHASE 3: Backward Propagation (8-12s)
+            setTimeout(() => {
+                updateStep(2);
+                document.getElementById('formulaBackward').classList.add('show');
+
+                // Gradients flow backward
+                // From output to hidden 2
+                createDataPacket('gradient-packet', 760, 245, 590, 220, 200);
+                setTimeout(() => activateNeurons('h2'), 400);
+
+                // From hidden 2 to hidden 1
+                setTimeout(() => {
+                    createDataPacket('gradient-packet', 540, 220, 370, 220, 200);
+                    setTimeout(() => activateNeurons('h1'), 400);
+                }, 1000);
+
+                // From hidden 1 to input
+                setTimeout(() => {
+                    createDataPacket('gradient-packet', 320, 220, 175, 220, 200);
+                    setTimeout(() => activateNeurons('input'), 400);
+                }, 2000);
+
+                setTimeout(() => {
+                    document.getElementById('formulaBackward').classList.remove('show');
+                }, 3500);
+            }, 8000);
+
+            // PHASE 4: Weight Update (12-16s)
+            setTimeout(() => {
+                updateStep(3);
+                document.getElementById('optimizerBox').classList.add('show');
+
+                // Highlight all neurons briefly to show weight updates
+                const allNeurons = document.querySelectorAll('.neuron');
+                allNeurons.forEach(neuron => neuron.classList.add('glow'));
+
+                setTimeout(() => {
+                    allNeurons.forEach(neuron => neuron.classList.remove('glow'));
+                    document.getElementById('optimizerBox').classList.remove('show');
+                    document.getElementById('lossBox').classList.remove('show');
+                }, 3000);
+
+                // Update epoch counter
+                setTimeout(() => {
+                    currentEpoch++;
+                    if (currentEpoch > 20) currentEpoch = 1; // Reset after 20 epochs
+                    document.getElementById('epochValue').textContent = currentEpoch;
+                }, 2000);
+            }, 12000);
+
+            // Restart cycle
+            setTimeout(() => {
+                runAnimation();
+            }, totalDuration);
+        }
+
+        // Start animation
+        runAnimation();
+    </script>
+</body>
+</html>
