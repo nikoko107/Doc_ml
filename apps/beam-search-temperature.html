@@ -16,7 +16,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
@@ -48,7 +48,7 @@
             padding: 40px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             position: relative;
-            min-height: 750px;
+            min-height: 850px;
         }
 
         .mode-selector {
@@ -75,25 +75,37 @@
             border-color: #667eea;
         }
 
+        .step-indicator {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
         .canvas-container {
             position: relative;
-            height: 450px;
+            height: 550px;
             border: 2px solid #ddd;
             border-radius: 10px;
-            background: #f9f9f9;
+            background: linear-gradient(to bottom, #fafafa 0%, #f0f0f0 100%);
             overflow: hidden;
+            margin-bottom: 20px;
         }
 
         .tree-node {
             position: absolute;
             background: white;
-            padding: 10px 15px;
+            padding: 8px 15px;
             border-radius: 8px;
             box-shadow: 0 3px 10px rgba(0,0,0,0.2);
             font-weight: bold;
-            transition: all 0.5s;
+            transition: all 0.4s;
             opacity: 0;
-            border: 2px solid #ddd;
+            border: 3px solid #ddd;
+            font-size: 0.9em;
+            text-align: center;
+            min-width: 80px;
         }
 
         .tree-node.show {
@@ -104,7 +116,8 @@
             border-color: #2ecc71;
             background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
             color: white;
-            transform: scale(1.1);
+            transform: scale(1.15);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.5);
         }
 
         .tree-node.beam {
@@ -114,35 +127,77 @@
         }
 
         .tree-node.pruned {
-            opacity: 0.3;
+            opacity: 0.25;
+            background: #bdc3c7;
             text-decoration: line-through;
+            border-color: #95a5a6;
+        }
+
+        .tree-node.sampled {
+            border-color: #9b59b6;
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
         }
 
         .prob-label {
-            font-size: 0.7em;
+            font-size: 0.75em;
             color: #666;
             margin-top: 3px;
+            display: block;
+        }
+
+        .tree-node.selected .prob-label,
+        .tree-node.beam .prob-label,
+        .tree-node.sampled .prob-label {
+            color: rgba(255,255,255,0.9);
+        }
+
+        svg.tree-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
         }
 
         .tree-line {
-            position: absolute;
-            background: #95a5a6;
+            stroke: #95a5a6;
+            stroke-width: 2;
+            fill: none;
             opacity: 0;
-            transition: opacity 0.5s;
+            transition: all 0.4s;
         }
 
         .tree-line.show {
-            opacity: 1;
+            opacity: 0.6;
         }
 
         .tree-line.selected {
-            background: #2ecc71;
-            height: 3px;
+            stroke: #2ecc71;
+            stroke-width: 4;
+            opacity: 1;
+        }
+
+        .tree-line.beam {
+            stroke: #3498db;
+            stroke-width: 3;
+            opacity: 1;
+        }
+
+        .tree-line.sampled {
+            stroke: #9b59b6;
+            stroke-width: 3;
+            opacity: 1;
         }
 
         .temperature-slider {
-            margin: 30px 0;
+            margin: 20px 0;
             text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
         }
 
         .temperature-slider input {
@@ -157,49 +212,13 @@
             margin: 10px 0;
         }
 
-        .prob-bars {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 30px 0;
-            height: 150px;
-            align-items: flex-end;
-        }
-
-        .prob-bar {
-            width: 60px;
-            background: linear-gradient(to top, #3498db, #667eea);
-            border-radius: 5px 5px 0 0;
-            transition: height 0.5s;
-            position: relative;
-        }
-
-        .prob-bar-label {
-            position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.85em;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-
-        .prob-value {
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.75em;
-            color: #666;
-        }
-
         .generated-text {
             background: #f8f9fa;
             border: 2px solid #667eea;
             border-radius: 10px;
             padding: 20px;
             margin: 20px 0;
-            min-height: 80px;
+            min-height: 70px;
         }
 
         .generated-text h4 {
@@ -208,17 +227,17 @@
         }
 
         .text-output {
-            font-size: 1.1em;
+            font-size: 1.3em;
             color: #333;
             line-height: 1.6;
         }
 
         .token {
             display: inline-block;
-            padding: 2px 8px;
-            margin: 2px;
+            padding: 4px 12px;
+            margin: 3px;
             background: #e3f2fd;
-            border-radius: 4px;
+            border-radius: 5px;
             animation: fadeIn 0.5s;
         }
 
@@ -228,27 +247,24 @@
         }
 
         .info-panel {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
             background: rgba(102, 126, 234, 0.1);
             border: 2px solid #667eea;
             border-radius: 10px;
-            padding: 15px 30px;
-            min-width: 800px;
+            padding: 20px 30px;
             text-align: center;
+            margin-top: 20px;
         }
 
         .info-panel h4 {
             color: #667eea;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
             font-size: 1.1em;
         }
 
         .info-panel p {
             color: #555;
-            font-size: 0.9em;
+            font-size: 0.95em;
+            line-height: 1.5;
         }
 
         .formula-box {
@@ -262,10 +278,59 @@
 
         .formula {
             font-family: 'Courier New', monospace;
-            font-size: 1em;
+            font-size: 1.05em;
             color: #e67e22;
             font-weight: bold;
             margin: 8px 0;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .legend-box {
+            width: 25px;
+            height: 25px;
+            border-radius: 5px;
+            border: 2px solid;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .control-btn {
+            padding: 10px 30px;
+            margin: 0 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.2s;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -274,21 +339,24 @@
         <a href="../index.html" class="back-link">← Retour au menu</a>
 
         <h1>🔍 Beam Search & Temperature</h1>
-        <p class="subtitle">Stratégies de décodage pour la génération de texte (GPT, LLaMA, Claude)</p>
+        <p class="subtitle">Stratégies de décodage pour la génération de texte - Génération de 5 mots</p>
 
         <div class="animation-container">
             <!-- Mode Selector -->
             <div class="mode-selector">
-                <div class="mode-btn active" data-mode="greedy">Greedy Decoding</div>
-                <div class="mode-btn" data-mode="beam">Beam Search (k=3)</div>
-                <div class="mode-btn" data-mode="temperature">Temperature Sampling</div>
+                <div class="mode-btn active" data-mode="greedy">🎯 Greedy Decoding</div>
+                <div class="mode-btn" data-mode="beam">📊 Beam Search (k=3)</div>
+                <div class="mode-btn" data-mode="temperature">🎲 Temperature Sampling</div>
             </div>
+
+            <!-- Step Indicator -->
+            <div class="step-indicator" id="stepIndicator">Étape 1/5 : Choix du premier mot après "Le"</div>
 
             <!-- Generated Text Display -->
             <div class="generated-text">
-                <h4>Texte Généré:</h4>
+                <h4>Séquence Générée:</h4>
                 <div class="text-output" id="textOutput">
-                    <span class="token">Le</span>
+                    <span class="token" style="background: #d1c4e9;">Le</span>
                 </div>
             </div>
 
@@ -297,41 +365,50 @@
                 <label><strong>Température T:</strong></label>
                 <input type="range" id="tempInput" min="0.1" max="2" step="0.1" value="1">
                 <div class="temperature-display" id="tempDisplay">T = 1.0</div>
-                <p style="font-size: 0.85em; color: #666;">T→0: déterministe | T=1: équilibré | T→2: créatif/aléatoire</p>
+                <p style="font-size: 0.85em; color: #666;">T→0: déterministe (greedy) | T=1: équilibré | T>1: créatif/aléatoire</p>
             </div>
 
-            <!-- Probability Bars -->
-            <div class="prob-bars" id="probBars">
-                <div class="prob-bar" style="height: 100px;">
-                    <div class="prob-value">70%</div>
-                    <div class="prob-bar-label">chat</div>
+            <!-- Legend -->
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-box" style="background: linear-gradient(135deg, #2ecc71, #27ae60); border-color: #2ecc71;"></div>
+                    <span>Sélectionné (Greedy)</span>
                 </div>
-                <div class="prob-bar" style="height: 60px;">
-                    <div class="prob-value">20%</div>
-                    <div class="prob-bar-label">chien</div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: linear-gradient(135deg, #3498db, #2980b9); border-color: #3498db;"></div>
+                    <span>Beam (k=3)</span>
                 </div>
-                <div class="prob-bar" style="height: 30px;">
-                    <div class="prob-value">7%</div>
-                    <div class="prob-bar-label">soleil</div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: linear-gradient(135deg, #9b59b6, #8e44ad); border-color: #9b59b6;"></div>
+                    <span>Échantillonné</span>
                 </div>
-                <div class="prob-bar" style="height: 15px;">
-                    <div class="prob-value">3%</div>
-                    <div class="prob-bar-label">oiseau</div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #bdc3c7; border-color: #95a5a6;"></div>
+                    <span>Élagué/Rejeté</span>
                 </div>
+            </div>
+
+            <!-- Tree Visualization Canvas -->
+            <div class="canvas-container" id="canvasContainer">
+                <svg class="tree-svg" id="treeSvg"></svg>
             </div>
 
             <!-- Formula Box -->
             <div class="formula-box">
-                <div class="formula" id="formulaText">p(token) = softmax(logits / T)</div>
+                <div class="formula" id="formulaText">token = argmax P(w | context)</div>
             </div>
 
-            <!-- Tree Visualization Canvas -->
-            <div class="canvas-container" id="canvasContainer"></div>
+            <!-- Controls -->
+            <div class="controls">
+                <button class="control-btn" id="prevBtn" onclick="previousStep()">⏮️ Précédent</button>
+                <button class="control-btn" id="nextBtn" onclick="nextStep()">Suivant ⏭️</button>
+                <button class="control-btn" onclick="resetAnimation()">🔄 Recommencer</button>
+            </div>
 
             <!-- Info Panel -->
             <div class="info-panel">
                 <h4 id="step-title">Greedy Decoding: Choix du token le plus probable</h4>
-                <p id="step-description">À chaque étape, on sélectionne le token avec la probabilité maximale. Simple mais déterministe.</p>
+                <p id="step-description">À chaque étape, on sélectionne uniquement le token avec la probabilité maximale. Simple, rapide et déterministe, mais peut manquer de meilleures séquences globales.</p>
             </div>
         </div>
 
@@ -360,8 +437,8 @@
                     </div>
                     <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
                         <strong>Avantages:</strong> Rapide, déterministe<br>
-                        <strong>Inconvénients:</strong> Répétitif, peut manquer de meilleures séquences globales<br>
-                        <strong>Utilisation:</strong> Traduction automatique simple
+                        <strong>Inconvénients:</strong> Répétitif, myope (ne voit qu'une étape à la fois)<br>
+                        <strong>Utilisation:</strong> Traduction simple, code generation
                     </p>
                 </div>
 
@@ -373,10 +450,10 @@
                     </div>
                     <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
                         <strong>Beam width k:</strong> typiquement 3-10<br>
-                        <strong>Avantages:</strong> Meilleure qualité globale, explore plusieurs chemins<br>
+                        <strong>Avantages:</strong> Meilleure qualité globale, explore plusieurs chemins en parallèle<br>
                         <strong>Inconvénients:</strong> k× plus lent, peut être générique/fade<br>
                         <strong>Length normalization:</strong> Diviser par longueur pour éviter biais vers séquences courtes<br>
-                        <strong>Utilisation:</strong> Traduction (Google Translate), résumé
+                        <strong>Utilisation:</strong> Traduction (Google Translate), résumé automatique
                     </p>
                 </div>
 
@@ -388,9 +465,9 @@
                     <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
                         <strong>T → 0:</strong> Greedy (déterministe, choisit le plus probable)<br>
                         <strong>T = 1:</strong> Distribution originale du modèle<br>
-                        <strong>T > 1:</strong> Plus aléatoire, explore davantage<br>
+                        <strong>T > 1:</strong> Plus aléatoire, explore davantage, plus créatif<br>
                         <strong>T → ∞:</strong> Uniforme (perd toute information)<br>
-                        <strong>Utilisation:</strong> Écriture créative (ChatGPT, Claude)
+                        <strong>Utilisation:</strong> Écriture créative (ChatGPT, Claude), brainstorming
                     </p>
                 </div>
             </div>
@@ -405,7 +482,7 @@
                         Redistribuer la probabilité entre eux
                     </div>
                     <p style="font-size: 0.85em; color: #666; margin-top: 8px;">
-                        <strong>k typique:</strong> 40-50. Élimine les tokens très improbables qui peuvent causer du non-sens.
+                        <strong>k typique:</strong> 40-50. Élimine les tokens très improbables qui causent du non-sens.
                     </p>
                 </div>
 
@@ -413,7 +490,7 @@
                     <h4 style="color: #e67e22; margin-bottom: 10px;">Top-p (Nucleus) Sampling</h4>
                     <div style="font-family: monospace; font-size: 0.9em; background: #f5f5f5; padding: 8px; border-radius: 4px; margin: 8px 0;">
                         Garder les tokens jusqu'à cumuler p% de probabilité<br>
-                        Nombre dynamique selon contexte
+                        Nombre dynamique selon le contexte
                     </div>
                     <p style="font-size: 0.85em; color: #666; margin-top: 8px;">
                         <strong>p typique:</strong> 0.9-0.95. Adaptatif: garde peu de tokens quand le modèle est sûr, plus quand il hésite.
@@ -473,45 +550,82 @@
                     </tbody>
                 </table>
             </div>
-
-            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e91e63;">
-                <h3 style="color: #c2185b; margin-bottom: 10px;">💡 Paramètres en Pratique</h3>
-                <ul style="margin-left: 20px; line-height: 1.8;">
-                    <li><strong>Code generation (Codex, Copilot):</strong> T=0, top-p=0 (déterministe, précis)</li>
-                    <li><strong>Traduction:</strong> Beam search k=4-5, length normalization</li>
-                    <li><strong>Chat factuel (Claude):</strong> T=0.7, top-p=0.95 (équilibré)</li>
-                    <li><strong>Écriture créative:</strong> T=0.9-1.2, top-p=0.9 (plus de diversité)</li>
-                    <li><strong>Brainstorming:</strong> T=1.5, top-k=50 (très exploratoire)</li>
-                </ul>
-
-                <div style="background: white; padding: 12px; border-radius: 6px; margin-top: 15px;">
-                    <p style="font-size: 0.9em; color: #666;">
-                        <strong>Répétition penalty:</strong> Réduire la probabilité des tokens déjà générés pour éviter les boucles.<br>
-                        <strong>Frequency/presence penalty (OpenAI):</strong> Pénaliser les tokens fréquents dans la génération.
-                    </p>
-                </div>
-            </div>
         </div>
     </div>
 
     <script>
         let currentMode = 'greedy';
+        let currentStep = 0;
         let temperature = 1.0;
+
+        // Sequence data: context → candidates with probabilities
+        const sequenceData = [
+            {
+                context: "Le",
+                candidates: [
+                    {word: "chat", prob: 0.45},
+                    {word: "chien", prob: 0.25},
+                    {word: "soleil", prob: 0.15},
+                    {word: "garçon", prob: 0.10},
+                    {word: "livre", prob: 0.05}
+                ]
+            },
+            {
+                context: "Le chat",
+                candidates: [
+                    {word: "noir", prob: 0.40},
+                    {word: "dort", prob: 0.30},
+                    {word: "mange", prob: 0.15},
+                    {word: "saute", prob: 0.10},
+                    {word: "miaule", prob: 0.05}
+                ]
+            },
+            {
+                context: "Le chat noir",
+                candidates: [
+                    {word: "dort", prob: 0.50},
+                    {word: "marche", prob: 0.20},
+                    {word: "court", prob: 0.15},
+                    {word: "regarde", prob: 0.10},
+                    {word: "joue", prob: 0.05}
+                ]
+            },
+            {
+                context: "Le chat noir dort",
+                candidates: [
+                    {word: "paisiblement", prob: 0.35},
+                    {word: "tranquillement", prob: 0.30},
+                    {word: "profondément", prob: 0.20},
+                    {word: "calmement", prob: 0.10},
+                    {word: "confortablement", prob: 0.05}
+                ]
+            },
+            {
+                context: "Le chat noir dort tranquillement",
+                candidates: [
+                    {word: ".", prob: 0.60},
+                    {word: "sur", prob: 0.20},
+                    {word: "dans", prob: 0.10},
+                    {word: "sous", prob: 0.07},
+                    {word: "près", prob: 0.03}
+                ]
+            }
+        ];
 
         const modes = {
             greedy: {
                 title: "Greedy Decoding: Choix du token le plus probable",
-                description: "À chaque étape, on sélectionne le token avec la probabilité maximale. Simple mais déterministe.",
+                description: "À chaque étape, on sélectionne uniquement le token avec la probabilité maximale. Simple, rapide et déterministe, mais peut manquer de meilleures séquences globales.",
                 formula: "token = argmax P(w | context)"
             },
             beam: {
-                title: "Beam Search: Maintien des k meilleures séquences",
-                description: "On garde k séquences candidates (beam width=3 ici) et on explore en parallèle. Score = log prob cumulé.",
+                title: "Beam Search: Maintien des k=3 meilleures séquences",
+                description: "On garde 3 séquences candidates (beam width) et on explore en parallèle. À chaque étape, on évalue k×5=15 options et on garde les 3 meilleures selon le score cumulé.",
                 formula: "Score(seq) = Σ log P(token_i) / length"
             },
             temperature: {
-                title: "Temperature Sampling: Contrôle de la randomness",
-                description: "Temperature T ajuste la distribution: T→0 déterministe, T=1 équilibré, T>1 créatif/aléatoire.",
+                title: "Temperature Sampling: Échantillonnage stochastique",
+                description: "On applique température T aux logits pour contrôler la randomness. T→0 déterministe (greedy), T=1 équilibré, T>1 créatif. Puis on échantillonne selon la distribution.",
                 formula: "p_i = exp(logits_i / T) / Σ exp(logits_j / T)"
             }
         };
@@ -527,6 +641,7 @@
                 tempSlider.style.display = currentMode === 'temperature' ? 'block' : 'none';
 
                 updateInfo();
+                renderStep();
             });
         });
 
@@ -534,7 +649,9 @@
         document.getElementById('tempInput').addEventListener('input', (e) => {
             temperature = parseFloat(e.target.value);
             document.getElementById('tempDisplay').textContent = `T = ${temperature.toFixed(1)}`;
-            updateProbBars();
+            if (currentMode === 'temperature') {
+                renderStep();
+            }
         });
 
         function updateInfo() {
@@ -544,37 +661,140 @@
             document.getElementById('formulaText').textContent = info.formula;
         }
 
-        function updateProbBars() {
-            // Simulate temperature effect on probability distribution
-            const baseProbs = [0.70, 0.20, 0.07, 0.03];
-            const logits = baseProbs.map(p => Math.log(p));
+        function nextStep() {
+            if (currentStep < sequenceData.length - 1) {
+                currentStep++;
+                renderStep();
+            }
+        }
 
+        function previousStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderStep();
+            }
+        }
+
+        function resetAnimation() {
+            currentStep = 0;
+            renderStep();
+        }
+
+        function applyTemperature(probs, temp) {
+            // Convert probs to logits
+            const logits = probs.map(p => Math.log(p));
             // Apply temperature
-            const tempLogits = logits.map(l => l / temperature);
+            const tempLogits = logits.map(l => l / temp);
             const maxLogit = Math.max(...tempLogits);
             const expLogits = tempLogits.map(l => Math.exp(l - maxLogit));
             const sumExp = expLogits.reduce((a, b) => a + b, 0);
-            const newProbs = expLogits.map(e => e / sumExp);
+            return expLogits.map(e => e / sumExp);
+        }
 
-            const bars = document.querySelectorAll('.prob-bar');
-            bars.forEach((bar, idx) => {
-                const height = newProbs[idx] * 150;
-                bar.style.height = height + 'px';
-                const valueSpan = bar.querySelector('.prob-value');
-                valueSpan.textContent = Math.round(newProbs[idx] * 100) + '%';
+        function renderStep() {
+            const step = sequenceData[currentStep];
+            const container = document.getElementById('canvasContainer');
+            const svg = document.getElementById('treeSvg');
+
+            // Clear previous content
+            container.querySelectorAll('.tree-node').forEach(n => n.remove());
+            svg.innerHTML = '';
+
+            // Update step indicator
+            document.getElementById('stepIndicator').textContent =
+                `Étape ${currentStep + 1}/5 : Choix du mot après "${step.context}"`;
+
+            // Update generated text
+            const textOutput = document.getElementById('textOutput');
+            const words = step.context.split(' ');
+            textOutput.innerHTML = words.map((w, i) =>
+                `<span class="token" style="background: ${i === 0 ? '#d1c4e9' : '#e3f2fd'};">${w}</span>`
+            ).join('');
+
+            // Update prev/next buttons
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === sequenceData.length - 1;
+
+            // Apply temperature if in temperature mode
+            let displayProbs = step.candidates.map(c => c.prob);
+            if (currentMode === 'temperature') {
+                displayProbs = applyTemperature(displayProbs, temperature);
+            }
+
+            // Calculate positions
+            const containerWidth = container.offsetWidth;
+            const containerHeight = container.offsetHeight;
+            const numCandidates = step.candidates.length;
+            const spacing = Math.min(150, (containerWidth - 100) / numCandidates);
+            const startX = (containerWidth - (numCandidates - 1) * spacing) / 2;
+            const yPos = containerHeight / 2;
+
+            // Render candidates
+            step.candidates.forEach((candidate, idx) => {
+                const x = startX + idx * spacing;
+                const y = yPos;
+
+                const node = document.createElement('div');
+                node.className = 'tree-node';
+                node.style.left = x + 'px';
+                node.style.top = y + 'px';
+                node.innerHTML = `
+                    <div>${candidate.word}</div>
+                    <span class="prob-label">${Math.round(displayProbs[idx] * 100)}%</span>
+                `;
+
+                // Apply styling based on mode
+                if (currentMode === 'greedy') {
+                    if (idx === 0) {
+                        node.classList.add('selected');
+                    }
+                } else if (currentMode === 'beam') {
+                    if (idx < 3) {
+                        node.classList.add('beam');
+                    } else {
+                        node.classList.add('pruned');
+                    }
+                } else if (currentMode === 'temperature') {
+                    // Randomly select one based on probabilities
+                    const randomChoice = Math.random() < 0.7 ? 0 : Math.floor(Math.random() * Math.min(3, numCandidates));
+                    if (idx === randomChoice) {
+                        node.classList.add('sampled');
+                    } else if (idx < 3) {
+                        node.style.opacity = '0.5';
+                    } else {
+                        node.classList.add('pruned');
+                    }
+                }
+
+                container.appendChild(node);
+                setTimeout(() => node.classList.add('show'), idx * 100);
+
+                // Draw line from previous step
+                if (currentStep > 0) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const prevY = 100;
+                    const prevX = containerWidth / 2;
+
+                    line.setAttribute('d', `M ${prevX} ${prevY} Q ${(prevX + x) / 2} ${(prevY + y) / 2} ${x + 40} ${y}`);
+                    line.setAttribute('class', 'tree-line');
+
+                    if (currentMode === 'greedy' && idx === 0) {
+                        line.classList.add('selected');
+                    } else if (currentMode === 'beam' && idx < 3) {
+                        line.classList.add('beam');
+                    } else if (currentMode === 'temperature' && idx === Math.floor(Math.random() * 3)) {
+                        line.classList.add('sampled');
+                    }
+
+                    svg.appendChild(line);
+                    setTimeout(() => line.classList.add('show'), idx * 100);
+                }
             });
         }
 
-        // Animation simulation
-        function runAnimation() {
-            // This is a simplified animation
-            // In a real implementation, you would animate the tree structure
-            setTimeout(() => {
-                updateInfo();
-            }, 0);
-        }
-
-        runAnimation();
+        // Initialize
+        updateInfo();
+        renderStep();
     </script>
 </body>
 </html>
