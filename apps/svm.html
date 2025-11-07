@@ -99,6 +99,7 @@
                         • Kernel trick pour non-linéaire<br>
                         • Robuste aux outliers
                     </p>
+                    <p id="svInfo" style="margin-top: 10px; font-size: 0.9em; font-weight: bold; color: #667eea;"></p>
                 </div>
             </div>
         </div>
@@ -179,6 +180,7 @@ Seuls ces points déterminent l'hyperplan
 
         document.getElementById('cParam').addEventListener('input', (e) => {
             document.getElementById('cValue').textContent = 'C = ' + parseFloat(e.target.value).toFixed(1);
+            if (supportVectors.length > 0) trainSVM();
         });
 
         document.getElementById('gammaParam').addEventListener('input', (e) => {
@@ -240,6 +242,8 @@ Seuls ces points déterminent l'hyperplan
         function clearPoints() {
             points = [];
             supportVectors = [];
+            alphas = [];
+            document.getElementById('svInfo').textContent = '';
             draw();
         }
 
@@ -249,8 +253,12 @@ Seuls ces points déterminent l'hyperplan
             const kernel = document.getElementById('kernelSelect').value;
             const C = parseFloat(document.getElementById('cParam').value);
 
-            // Find potential support vectors near decision boundary
-            // First, find approximate decision boundary
+            // C controls the margin width
+            // Small C → wide margin → more support vectors → softer boundary
+            // Large C → narrow margin → fewer support vectors → stricter boundary
+            const distanceThreshold = 0.5 / C; // Inversely proportional to C
+            const alphaWeight = Math.min(C, 5.0); // Alpha increases with C (capped at 5)
+
             const class0Points = points.filter(p => p.label === 0);
             const class1Points = points.filter(p => p.label === 1);
 
@@ -260,17 +268,16 @@ Seuls ces points déterminent l'hyperplan
             supportVectors = [];
             alphas = [];
 
-            // For each class, find points closest to opposite class
+            // Store distances for all points
+            const pointsWithDist = [];
+
             class0Points.forEach(p0 => {
                 let minDist = Infinity;
                 class1Points.forEach(p1 => {
                     const dist = Math.sqrt(Math.pow(p0.x - p1.x, 2) + Math.pow(p0.y - p1.y, 2));
                     if (dist < minDist) minDist = dist;
                 });
-                if (minDist < 0.3) { // Threshold for being near boundary
-                    supportVectors.push(p0);
-                    alphas.push(1.0);
-                }
+                pointsWithDist.push({ point: p0, dist: minDist });
             });
 
             class1Points.forEach(p1 => {
@@ -279,17 +286,34 @@ Seuls ces points déterminent l'hyperplan
                     const dist = Math.sqrt(Math.pow(p1.x - p0.x, 2) + Math.pow(p1.y - p0.y, 2));
                     if (dist < minDist) minDist = dist;
                 });
-                if (minDist < 0.3) {
-                    supportVectors.push(p1);
-                    alphas.push(1.0);
+                pointsWithDist.push({ point: p1, dist: minDist });
+            });
+
+            // Sort by distance (closest first)
+            pointsWithDist.sort((a, b) => a.dist - b.dist);
+
+            // Select support vectors based on C parameter
+            const maxSupportVectors = Math.max(4, Math.floor(points.length * (1 / C)));
+
+            pointsWithDist.forEach(({ point, dist }, idx) => {
+                // Add points near boundary or within max count
+                if (dist < distanceThreshold || idx < maxSupportVectors) {
+                    supportVectors.push(point);
+                    // Points closer to boundary get higher alpha weights
+                    const alpha = alphaWeight * (1.0 - Math.min(dist, distanceThreshold) / distanceThreshold);
+                    alphas.push(Math.max(0.1, alpha));
                 }
             });
 
             // Ensure we have at least some support vectors
             if (supportVectors.length === 0) {
-                supportVectors = [...class0Points.slice(0, 3), ...class1Points.slice(0, 3)];
-                alphas = new Array(supportVectors.length).fill(1.0);
+                supportVectors = [...class0Points.slice(0, 2), ...class1Points.slice(0, 2)];
+                alphas = new Array(supportVectors.length).fill(alphaWeight);
             }
+
+            // Update info display
+            const svInfo = document.getElementById('svInfo');
+            svInfo.textContent = `Support Vectors: ${supportVectors.length} / ${points.length}`;
 
             draw();
         }
