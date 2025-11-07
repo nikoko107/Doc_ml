@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beam Search & Temperature - Décodage LLM</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block; background: rgba(255,255,255,0.2); color: white;
+            padding: 10px 20px; font-weight: 600; text-decoration: none; border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .back-link:hover { background: rgba(255,255,255,0.3); }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .animation-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            min-height: 750px;
+        }
+
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .mode-btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.95em;
+            cursor: pointer;
+            border: 2px solid #ddd;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .canvas-container {
+            position: relative;
+            height: 450px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: #f9f9f9;
+            overflow: hidden;
+        }
+
+        .tree-node {
+            position: absolute;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            font-weight: bold;
+            transition: all 0.5s;
+            opacity: 0;
+            border: 2px solid #ddd;
+        }
+
+        .tree-node.show {
+            opacity: 1;
+        }
+
+        .tree-node.selected {
+            border-color: #2ecc71;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .tree-node.beam {
+            border-color: #3498db;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .tree-node.pruned {
+            opacity: 0.3;
+            text-decoration: line-through;
+        }
+
+        .prob-label {
+            font-size: 0.7em;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .tree-line {
+            position: absolute;
+            background: #95a5a6;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .tree-line.show {
+            opacity: 1;
+        }
+
+        .tree-line.selected {
+            background: #2ecc71;
+            height: 3px;
+        }
+
+        .temperature-slider {
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .temperature-slider input {
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .temperature-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .prob-bars {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            height: 150px;
+            align-items: flex-end;
+        }
+
+        .prob-bar {
+            width: 60px;
+            background: linear-gradient(to top, #3498db, #667eea);
+            border-radius: 5px 5px 0 0;
+            transition: height 0.5s;
+            position: relative;
+        }
+
+        .prob-bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85em;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .prob-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75em;
+            color: #666;
+        }
+
+        .generated-text {
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 80px;
+        }
+
+        .generated-text h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .text-output {
+            font-size: 1.1em;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .token {
+            display: inline-block;
+            padding: 2px 8px;
+            margin: 2px;
+            background: #e3f2fd;
+            border-radius: 4px;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px 30px;
+            min-width: 800px;
+            text-align: center;
+        }
+
+        .info-panel h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .info-panel p {
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        .formula-box {
+            background: #fff9e6;
+            border: 2px solid #f39c12;
+            border-radius: 10px;
+            padding: 15px 25px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            color: #e67e22;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">← Retour au menu</a>
+
+        <h1>🔍 Beam Search & Temperature</h1>
+        <p class="subtitle">Stratégies de décodage pour la génération de texte (GPT, LLaMA, Claude)</p>
+
+        <div class="animation-container">
+            <!-- Mode Selector -->
+            <div class="mode-selector">
+                <div class="mode-btn active" data-mode="greedy">Greedy Decoding</div>
+                <div class="mode-btn" data-mode="beam">Beam Search (k=3)</div>
+                <div class="mode-btn" data-mode="temperature">Temperature Sampling</div>
+            </div>
+
+            <!-- Generated Text Display -->
+            <div class="generated-text">
+                <h4>Texte Généré:</h4>
+                <div class="text-output" id="textOutput">
+                    <span class="token">Le</span>
+                </div>
+            </div>
+
+            <!-- Temperature Slider (only visible in temperature mode) -->
+            <div class="temperature-slider" id="temperatureSlider" style="display: none;">
+                <label><strong>Température T:</strong></label>
+                <input type="range" id="tempInput" min="0.1" max="2" step="0.1" value="1">
+                <div class="temperature-display" id="tempDisplay">T = 1.0</div>
+                <p style="font-size: 0.85em; color: #666;">T→0: déterministe | T=1: équilibré | T→2: créatif/aléatoire</p>
+            </div>
+
+            <!-- Probability Bars -->
+            <div class="prob-bars" id="probBars">
+                <div class="prob-bar" style="height: 100px;">
+                    <div class="prob-value">70%</div>
+                    <div class="prob-bar-label">chat</div>
+                </div>
+                <div class="prob-bar" style="height: 60px;">
+                    <div class="prob-value">20%</div>
+                    <div class="prob-bar-label">chien</div>
+                </div>
+                <div class="prob-bar" style="height: 30px;">
+                    <div class="prob-value">7%</div>
+                    <div class="prob-bar-label">soleil</div>
+                </div>
+                <div class="prob-bar" style="height: 15px;">
+                    <div class="prob-value">3%</div>
+                    <div class="prob-bar-label">oiseau</div>
+                </div>
+            </div>
+
+            <!-- Formula Box -->
+            <div class="formula-box">
+                <div class="formula" id="formulaText">p(token) = softmax(logits / T)</div>
+            </div>
+
+            <!-- Tree Visualization Canvas -->
+            <div class="canvas-container" id="canvasContainer"></div>
+
+            <!-- Info Panel -->
+            <div class="info-panel">
+                <h4 id="step-title">Greedy Decoding: Choix du token le plus probable</h4>
+                <p id="step-description">À chaque étape, on sélectionne le token avec la probabilité maximale. Simple mais déterministe.</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <h2 style="color: #667eea; margin-bottom: 20px;">📖 Comprendre les Stratégies de Décodage</h2>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #2ecc71; margin-bottom: 10px;">🎯 Objectif</h3>
+                    <p>Générer du texte token par token en explorant l'espace des séquences possibles. Trade-off entre qualité, diversité et vitesse.</p>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #3498db; margin-bottom: 10px;">⚡ Enjeu</h3>
+                    <p>Espace de recherche énorme (50k tokens → 50k<sup>n</sup> séquences possibles). Impossible d'explorer tout. Il faut des heuristiques intelligentes.</p>
+                </div>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 10px;">🔬 Méthodes de Décodage</h3>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #2ecc71; margin-bottom: 10px;">1️⃣ Greedy Decoding</h4>
+                    <div style="font-family: monospace; font-size: 0.95em; background: #f5f5f5; padding: 10px; border-radius: 5px; margin: 8px 0;">
+                        token<sub>t</sub> = argmax<sub>w</sub> P(w | context)
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        <strong>Avantages:</strong> Rapide, déterministe<br>
+                        <strong>Inconvénients:</strong> Répétitif, peut manquer de meilleures séquences globales<br>
+                        <strong>Utilisation:</strong> Traduction automatique simple
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #3498db; margin-bottom: 10px;">2️⃣ Beam Search</h4>
+                    <div style="font-family: monospace; font-size: 0.95em; background: #f5f5f5; padding: 10px; border-radius: 5px; margin: 8px 0;">
+                        Garder k meilleures séquences à chaque étape<br>
+                        Score(seq) = Σ log P(token<sub>i</sub> | context) / length
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        <strong>Beam width k:</strong> typiquement 3-10<br>
+                        <strong>Avantages:</strong> Meilleure qualité globale, explore plusieurs chemins<br>
+                        <strong>Inconvénients:</strong> k× plus lent, peut être générique/fade<br>
+                        <strong>Length normalization:</strong> Diviser par longueur pour éviter biais vers séquences courtes<br>
+                        <strong>Utilisation:</strong> Traduction (Google Translate), résumé
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #9b59b6; margin-bottom: 10px;">3️⃣ Temperature Sampling</h4>
+                    <div style="font-family: monospace; font-size: 0.95em; background: #f5f5f5; padding: 10px; border-radius: 5px; margin: 8px 0;">
+                        p<sub>i</sub> = exp(logits<sub>i</sub> / T) / Σ exp(logits<sub>j</sub> / T)
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        <strong>T → 0:</strong> Greedy (déterministe, choisit le plus probable)<br>
+                        <strong>T = 1:</strong> Distribution originale du modèle<br>
+                        <strong>T > 1:</strong> Plus aléatoire, explore davantage<br>
+                        <strong>T → ∞:</strong> Uniforme (perd toute information)<br>
+                        <strong>Utilisation:</strong> Écriture créative (ChatGPT, Claude)
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+                <h3 style="color: #1976d2; margin-bottom: 10px;">🎲 Sampling Avancé</h3>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h4 style="color: #f39c12; margin-bottom: 10px;">Top-k Sampling</h4>
+                    <div style="font-family: monospace; font-size: 0.9em; background: #f5f5f5; padding: 8px; border-radius: 4px; margin: 8px 0;">
+                        Garder seulement les k tokens les plus probables<br>
+                        Redistribuer la probabilité entre eux
+                    </div>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 8px;">
+                        <strong>k typique:</strong> 40-50. Élimine les tokens très improbables qui peuvent causer du non-sens.
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h4 style="color: #e67e22; margin-bottom: 10px;">Top-p (Nucleus) Sampling</h4>
+                    <div style="font-family: monospace; font-size: 0.9em; background: #f5f5f5; padding: 8px; border-radius: 4px; margin: 8px 0;">
+                        Garder les tokens jusqu'à cumuler p% de probabilité<br>
+                        Nombre dynamique selon contexte
+                    </div>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 8px;">
+                        <strong>p typique:</strong> 0.9-0.95. Adaptatif: garde peu de tokens quand le modèle est sûr, plus quand il hésite.
+                    </p>
+                </div>
+
+                <div style="background: #fff9e6; padding: 12px; border-radius: 6px; margin-top: 15px;">
+                    <p style="font-size: 0.9em; color: #e65100; line-height: 1.6;">
+                        <strong>💡 Combinaison populaire (ChatGPT):</strong> Top-p (p=0.95) + Temperature (T=0.7-0.8).
+                        Garde l'essentiel de la masse de probabilité tout en ajoutant un peu de randomness.
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; border-left: 4px solid #ff9800; margin-bottom: 20px;">
+                <h3 style="color: #e65100; margin-bottom: 10px;">⚖️ Comparaison Pratique</h3>
+
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <thead>
+                        <tr style="background: #f5f5f5;">
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Méthode</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Qualité</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Diversité</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Vitesse</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Usage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Greedy</strong></td>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee;">★★★☆☆</td>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee;">★☆☆☆☆</td>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee;">★★★★★</td>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee;">Traduction simple</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Beam Search</strong></td>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee;">★★★★★</td>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee;">★★☆☆☆</td>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee;">★★☆☆☆</td>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee;">Traduction, résumé</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>Temperature</strong></td>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee;">★★★★☆</td>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee;">★★★★★</td>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee;">★★★★☆</td>
+                            <td style="padding: 10px; border-bottom: 1px solid #eee;">Créativité, chat</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px;"><strong>Top-p + Temp</strong></td>
+                            <td style="padding: 10px;">★★★★★</td>
+                            <td style="padding: 10px;">★★★★☆</td>
+                            <td style="padding: 10px;">★★★★☆</td>
+                            <td style="padding: 10px;">ChatGPT, Claude</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e91e63;">
+                <h3 style="color: #c2185b; margin-bottom: 10px;">💡 Paramètres en Pratique</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Code generation (Codex, Copilot):</strong> T=0, top-p=0 (déterministe, précis)</li>
+                    <li><strong>Traduction:</strong> Beam search k=4-5, length normalization</li>
+                    <li><strong>Chat factuel (Claude):</strong> T=0.7, top-p=0.95 (équilibré)</li>
+                    <li><strong>Écriture créative:</strong> T=0.9-1.2, top-p=0.9 (plus de diversité)</li>
+                    <li><strong>Brainstorming:</strong> T=1.5, top-k=50 (très exploratoire)</li>
+                </ul>
+
+                <div style="background: white; padding: 12px; border-radius: 6px; margin-top: 15px;">
+                    <p style="font-size: 0.9em; color: #666;">
+                        <strong>Répétition penalty:</strong> Réduire la probabilité des tokens déjà générés pour éviter les boucles.<br>
+                        <strong>Frequency/presence penalty (OpenAI):</strong> Pénaliser les tokens fréquents dans la génération.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'greedy';
+        let temperature = 1.0;
+
+        const modes = {
+            greedy: {
+                title: "Greedy Decoding: Choix du token le plus probable",
+                description: "À chaque étape, on sélectionne le token avec la probabilité maximale. Simple mais déterministe.",
+                formula: "token = argmax P(w | context)"
+            },
+            beam: {
+                title: "Beam Search: Maintien des k meilleures séquences",
+                description: "On garde k séquences candidates (beam width=3 ici) et on explore en parallèle. Score = log prob cumulé.",
+                formula: "Score(seq) = Σ log P(token_i) / length"
+            },
+            temperature: {
+                title: "Temperature Sampling: Contrôle de la randomness",
+                description: "Temperature T ajuste la distribution: T→0 déterministe, T=1 équilibré, T>1 créatif/aléatoire.",
+                formula: "p_i = exp(logits_i / T) / Σ exp(logits_j / T)"
+            }
+        };
+
+        // Mode switching
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.getAttribute('data-mode');
+
+                const tempSlider = document.getElementById('temperatureSlider');
+                tempSlider.style.display = currentMode === 'temperature' ? 'block' : 'none';
+
+                updateInfo();
+            });
+        });
+
+        // Temperature slider
+        document.getElementById('tempInput').addEventListener('input', (e) => {
+            temperature = parseFloat(e.target.value);
+            document.getElementById('tempDisplay').textContent = `T = ${temperature.toFixed(1)}`;
+            updateProbBars();
+        });
+
+        function updateInfo() {
+            const info = modes[currentMode];
+            document.getElementById('step-title').textContent = info.title;
+            document.getElementById('step-description').textContent = info.description;
+            document.getElementById('formulaText').textContent = info.formula;
+        }
+
+        function updateProbBars() {
+            // Simulate temperature effect on probability distribution
+            const baseProbs = [0.70, 0.20, 0.07, 0.03];
+            const logits = baseProbs.map(p => Math.log(p));
+
+            // Apply temperature
+            const tempLogits = logits.map(l => l / temperature);
+            const maxLogit = Math.max(...tempLogits);
+            const expLogits = tempLogits.map(l => Math.exp(l - maxLogit));
+            const sumExp = expLogits.reduce((a, b) => a + b, 0);
+            const newProbs = expLogits.map(e => e / sumExp);
+
+            const bars = document.querySelectorAll('.prob-bar');
+            bars.forEach((bar, idx) => {
+                const height = newProbs[idx] * 150;
+                bar.style.height = height + 'px';
+                const valueSpan = bar.querySelector('.prob-value');
+                valueSpan.textContent = Math.round(newProbs[idx] * 100) + '%';
+            });
+        }
+
+        // Animation simulation
+        function runAnimation() {
+            // This is a simplified animation
+            // In a real implementation, you would animate the tree structure
+            setTimeout(() => {
+                updateInfo();
+            }, 0);
+        }
+
+        runAnimation();
+    </script>
+</body>
+</html>

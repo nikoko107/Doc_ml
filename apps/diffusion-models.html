@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diffusion Models - Génération Progressive</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block; background: rgba(255,255,255,0.2); color: white;
+            padding: 10px 20px; font-weight: 600; text-decoration: none; border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .back-link:hover { background: rgba(255,255,255,0.3); }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .animation-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            min-height: 750px;
+        }
+
+        .dual-view {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 30px 0;
+        }
+
+        .canvas-wrapper {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .canvas-wrapper h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .timestep-display {
+            position: absolute;
+            top: 30px;
+            right: 50px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .timestep-display h4 {
+            color: #667eea;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .timestep-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .formula-box {
+            background: #fff9e6;
+            border: 2px solid #f39c12;
+            border-radius: 10px;
+            padding: 15px 25px;
+            margin: 20px auto;
+            text-align: center;
+            max-width: 700px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .formula-box.show {
+            opacity: 1;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            color: #e67e22;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        .direction-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 10;
+        }
+
+        .direction-indicator.show {
+            opacity: 1;
+        }
+
+        .noise-visualization {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .noise-bar {
+            width: 40px;
+            height: 150px;
+            background: linear-gradient(to top, #3498db, #e74c3c);
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .noise-level {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: rgba(231, 76, 60, 0.8);
+            transition: height 0.5s;
+        }
+
+        .noise-label {
+            text-align: center;
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px 30px;
+            min-width: 800px;
+            text-align: center;
+        }
+
+        .info-panel h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .info-panel p {
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 1.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">← Retour au menu</a>
+
+        <h1>🎨 Diffusion Models</h1>
+        <p class="subtitle">Génération d'images par débruitage progressif (Stable Diffusion, DALL-E)</p>
+
+        <div class="animation-container">
+            <!-- Timestep Display -->
+            <div class="timestep-display">
+                <h4>Timestep</h4>
+                <div class="timestep-value" id="timestepValue">T=1000</div>
+            </div>
+
+            <!-- Direction Indicator -->
+            <div class="direction-indicator" id="directionIndicator">→</div>
+
+            <!-- Dual View: Image and Noise -->
+            <div class="dual-view">
+                <div class="canvas-wrapper">
+                    <h3>Image Actuelle x<sub>t</sub></h3>
+                    <canvas id="imageCanvas" width="300" height="300"></canvas>
+                    <div class="noise-visualization">
+                        <div>
+                            <div class="noise-bar">
+                                <div class="noise-level" id="noiseLevel"></div>
+                            </div>
+                            <div class="noise-label">Niveau de bruit</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="canvas-wrapper">
+                    <h3>Masque de Bruit ε<sub>t</sub></h3>
+                    <canvas id="noiseCanvas" width="300" height="300"></canvas>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
+                        Bruit gaussien ajouté/prédit à chaque étape
+                    </p>
+                </div>
+            </div>
+
+            <!-- Formula Box -->
+            <div class="formula-box" id="formulaBox">
+                <div class="formula" id="formulaText">x<sub>t</sub> = √(ᾱ<sub>t</sub>) · x<sub>0</sub> + √(1 - ᾱ<sub>t</sub>) · ε</div>
+            </div>
+
+            <!-- Info Panel -->
+            <div class="info-panel">
+                <h4 id="step-title">Étape 1: Image claire (t=0)</h4>
+                <p id="step-description">On part d'une image claire sans bruit. C'est notre distribution cible.</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <h2 style="color: #667eea; margin-bottom: 20px;">📖 Comprendre les Modèles de Diffusion</h2>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #2ecc71; margin-bottom: 10px;">🎯 Innovation</h3>
+                    <p>Modèles génératifs (Stable Diffusion, DALL-E 2, Midjourney) qui apprennent à retirer progressivement du bruit pour créer des images de haute qualité.</p>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #3498db; margin-bottom: 10px;">⚡ Avantages</h3>
+                    <p>• Qualité supérieure aux GANs<br>• Entraînement stable<br>• Pas de mode collapse<br>• Contrôle précis (guidance)</p>
+                </div>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 10px;">🔬 Processus en 2 Phases</h3>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #e74c3c; margin-bottom: 10px;">Phase 1: Forward Diffusion (Ajout de bruit)</h4>
+                    <div style="font-family: monospace; font-size: 0.95em; background: #f5f5f5; padding: 10px; border-radius: 5px; margin: 8px 0;">
+                        q(x<sub>t</sub> | x<sub>t-1</sub>) = 𝒩(x<sub>t</sub>; √(1-β<sub>t</sub>) x<sub>t-1</sub>, β<sub>t</sub>I)
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px; line-height: 1.6;">
+                        À chaque timestep t, on ajoute un petit bruit gaussien ε ~ 𝒩(0,I) à l'image.<br>
+                        Après T étapes (~1000), l'image devient du pur bruit.<br>
+                        <strong>Formule directe:</strong> x<sub>t</sub> = √ᾱ<sub>t</sub> · x<sub>0</sub> + √(1-ᾱ<sub>t</sub>) · ε
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #2ecc71; margin-bottom: 10px;">Phase 2: Reverse Diffusion (Débruitage)</h4>
+                    <div style="font-family: monospace; font-size: 0.95em; background: #f5f5f5; padding: 10px; border-radius: 5px; margin: 8px 0;">
+                        p<sub>θ</sub>(x<sub>t-1</sub> | x<sub>t</sub>) = 𝒩(x<sub>t-1</sub>; μ<sub>θ</sub>(x<sub>t</sub>, t), Σ<sub>θ</sub>(x<sub>t</sub>, t))
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px; line-height: 1.6;">
+                        Un réseau de neurones (U-Net) apprend à prédire le bruit ε<sub>θ</sub>(x<sub>t</sub>, t).<br>
+                        On retire progressivement le bruit prédit pour reconstruire l'image:<br>
+                        <strong>x<sub>t-1</sub> = (x<sub>t</sub> - (1-α<sub>t</sub>)/√(1-ᾱ<sub>t</sub>) · ε<sub>θ</sub>) / √α<sub>t</sub> + σ<sub>t</sub>z</strong>
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+                <h3 style="color: #1976d2; margin-bottom: 10px;">🧮 Loss Function (ELBO)</h3>
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <div style="font-family: monospace; font-size: 1em; text-align: center; margin: 10px 0;">
+                        𝓛 = 𝔼<sub>t,x₀,ε</sub>[||ε - ε<sub>θ</sub>(x<sub>t</sub>, t)||²]
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px; line-height: 1.6;">
+                        On entraîne le réseau à prédire le bruit ε qui a été ajouté.<br>
+                        • <strong>t</strong> ~ Uniform(1, T) : timestep aléatoire<br>
+                        • <strong>x₀</strong> : image originale du dataset<br>
+                        • <strong>ε</strong> ~ 𝒩(0,I) : bruit gaussien<br>
+                        • <strong>ε<sub>θ</sub></strong> : bruit prédit par le réseau
+                    </p>
+                </div>
+
+                <div style="background: #fff9e6; padding: 12px; border-radius: 6px; margin-top: 15px;">
+                    <p style="font-size: 0.9em; color: #e65100; line-height: 1.6;">
+                        <strong>💡 Intuition:</strong> Comme apprendre à "deviner" quel bruit a été ajouté à une image bruitée.
+                        Si on peut prédire le bruit, on peut le soustraire pour récupérer l'image !
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; border-left: 4px solid #ff9800; margin-bottom: 20px;">
+                <h3 style="color: #e65100; margin-bottom: 10px;">🏗️ Architecture: U-Net avec Time Conditioning</h3>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h4 style="color: #f39c12; margin-bottom: 10px;">Réseau de Débruitage</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8; font-size: 0.9em;">
+                        <li><strong>Encoder:</strong> Convolutions + downsampling (↓ résolution, ↑ channels)</li>
+                        <li><strong>Bottleneck:</strong> Transformers ou self-attention</li>
+                        <li><strong>Decoder:</strong> Upsampling + skip connections depuis encoder</li>
+                        <li><strong>Time embedding:</strong> Sinusoidal positional encoding pour t</li>
+                        <li><strong>Text conditioning (optionnel):</strong> CLIP embeddings pour le prompt</li>
+                    </ul>
+                </div>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h4 style="color: #e67e22; margin-bottom: 10px;">Classifier-Free Guidance</h4>
+                    <div style="font-family: monospace; font-size: 0.9em; background: #f5f5f5; padding: 8px; border-radius: 4px;">
+                        ε̃ = ε<sub>θ</sub>(x<sub>t</sub>) + w · (ε<sub>θ</sub>(x<sub>t</sub>, c) - ε<sub>θ</sub>(x<sub>t</sub>))
+                    </div>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 8px;">
+                        <strong>w</strong> = guidance scale (typiquement 7-9). Plus w est élevé, plus l'image suit le prompt.
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; border-left: 4px solid #9c27b0;">
+                <h3 style="color: #7b1fa2; margin-bottom: 10px;">🚀 Modèles Célèbres</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>DALL-E 2 (OpenAI, 2022):</strong> Text-to-image avec CLIP guidance</li>
+                    <li><strong>Stable Diffusion (Stability AI, 2022):</strong> Open-source, latent diffusion dans espace compressé</li>
+                    <li><strong>Midjourney:</strong> Qualité artistique exceptionnelle, fermé</li>
+                    <li><strong>Imagen (Google, 2022):</strong> Text-to-image avec T5 text encoder</li>
+                    <li><strong>SDXL (2023):</strong> Stable Diffusion XL, meilleure qualité, résolution 1024×1024</li>
+                </ul>
+
+                <div style="background: white; padding: 12px; border-radius: 6px; margin-top: 15px;">
+                    <p style="font-size: 0.9em; color: #666;">
+                        <strong>Latent Diffusion:</strong> Pour accélérer, on compresse l'image avec un VAE (ex: 512×512 → 64×64 latent),
+                        on fait la diffusion dans l'espace latent (8× plus rapide), puis on décode.
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e91e63;">
+                <h3 style="color: #c2185b; margin-bottom: 10px;">💡 Applications</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Text-to-Image:</strong> Génération d'images depuis prompts textuels</li>
+                    <li><strong>Image-to-Image:</strong> Style transfer, super-resolution, colorization</li>
+                    <li><strong>Inpainting:</strong> Remplissage de zones masquées</li>
+                    <li><strong>Outpainting:</strong> Extension d'images au-delà de leurs bords</li>
+                    <li><strong>Video Generation:</strong> Extension temporelle (Runway Gen-2)</li>
+                    <li><strong>3D Generation:</strong> DreamFusion, text-to-3D</li>
+                </ul>
+            </div>
+
+            <div style="background: #e0f7fa; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #00bcd4;">
+                <h3 style="color: #006064; margin-bottom: 10px;">⚙️ Paramètres Importants</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Timesteps T:</strong> Nombre d'étapes de diffusion (50-1000). Plus = mieux mais plus lent.</li>
+                    <li><strong>Guidance scale:</strong> Force du prompt (1-20). 7-9 optimal.</li>
+                    <li><strong>Negative prompt:</strong> Ce qu'on ne veut PAS voir</li>
+                    <li><strong>Scheduler:</strong> DDPM, DDIM, DPM-Solver (vitesse/qualité)</li>
+                    <li><strong>Seed:</strong> Reproductibilité</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const imageCanvas = document.getElementById('imageCanvas');
+        const noiseCanvas = document.getElementById('noiseCanvas');
+        const imgCtx = imageCanvas.getContext('2d');
+        const noiseCtx = noiseCanvas.getContext('2d');
+
+        const pixelSize = 15;
+        const gridSize = 20;
+
+        // Simple pattern (smiley face)
+        const originalImage = Array(gridSize).fill().map(() => Array(gridSize).fill(0));
+        // Draw a simple smiley
+        for (let y = 0; y < gridSize; y++) {
+            for (let x = 0; x < gridSize; x++) {
+                const dx = x - gridSize/2;
+                const dy = y - gridSize/2;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+
+                // Circle face
+                if (Math.abs(dist - 7) < 1) originalImage[y][x] = 1;
+
+                // Eyes
+                if ((Math.abs(x - 7) < 1 && Math.abs(y - 7) < 1) ||
+                    (Math.abs(x - 13) < 1 && Math.abs(y - 7) < 1)) {
+                    originalImage[y][x] = 1;
+                }
+
+                // Smile
+                if (y > 12 && Math.abs(x - 10) < 4 && Math.abs(dist - 4) < 1) {
+                    originalImage[y][x] = 1;
+                }
+            }
+        }
+
+        let currentImage = [];
+        let currentNoise = [];
+        let phase = 'forward'; // 'forward' or 'reverse'
+        let t = 0;
+        const maxT = 20;
+        const totalDuration = 24000; // 24 seconds
+
+        const steps = [
+            {
+                title: "Étape 1: Image claire (t=0)",
+                description: "On part d'une image claire sans bruit. C'est notre distribution cible.",
+                time: 0
+            },
+            {
+                title: "Étape 2: Forward Diffusion - Ajout progressif de bruit",
+                description: "À chaque timestep, on ajoute du bruit gaussien ε ~ 𝒩(0,I). Formule: x_t = √ᾱ_t · x_0 + √(1-ᾱ_t) · ε",
+                time: 2000
+            },
+            {
+                title: "Étape 3: Pur bruit (t=T)",
+                description: "Après T étapes, l'image est devenue du pur bruit gaussien. C'est le point de départ de la génération.",
+                time: 10000
+            },
+            {
+                title: "Étape 4: Reverse Diffusion - Débruitage par le réseau",
+                description: "Le U-Net prédit le bruit ε_θ(x_t, t) et on le soustrait progressivement pour reconstruire l'image claire",
+                time: 14000
+            }
+        ];
+
+        function updateStep(stepIndex) {
+            if (stepIndex < steps.length) {
+                document.getElementById('step-title').textContent = steps[stepIndex].title;
+                document.getElementById('step-description').textContent = steps[stepIndex].description;
+            }
+        }
+
+        function generateNoise() {
+            const noise = [];
+            for (let y = 0; y < gridSize; y++) {
+                noise[y] = [];
+                for (let x = 0; x < gridSize; x++) {
+                    noise[y][x] = (Math.random() - 0.5) * 2;
+                }
+            }
+            return noise;
+        }
+
+        function mixImageWithNoise(image, noise, noiseLevel) {
+            const mixed = [];
+            for (let y = 0; y < gridSize; y++) {
+                mixed[y] = [];
+                for (let x = 0; x < gridSize; x++) {
+                    const signalStrength = Math.sqrt(1 - noiseLevel);
+                    const noiseStrength = Math.sqrt(noiseLevel);
+                    mixed[y][x] = signalStrength * image[y][x] + noiseStrength * noise[y][x];
+                }
+            }
+            return mixed;
+        }
+
+        function drawPixelGrid(ctx, data, isNoise = false) {
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    const value = data[y][x];
+                    let color;
+
+                    if (isNoise) {
+                        // Noise visualization: red=positive, blue=negative
+                        const intensity = Math.abs(value) * 0.5;
+                        if (value > 0) {
+                            color = `rgba(231, 76, 60, ${Math.min(intensity, 1)})`;
+                        } else {
+                            color = `rgba(52, 152, 219, ${Math.min(intensity, 1)})`;
+                        }
+                    } else {
+                        // Image visualization: grayscale
+                        const normalized = Math.max(0, Math.min(1, (value + 1) / 2));
+                        const intensity = Math.floor(normalized * 255);
+                        color = `rgb(${intensity}, ${intensity}, ${intensity})`;
+                    }
+
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize - 1, pixelSize - 1);
+                }
+            }
+        }
+
+        function runAnimation() {
+            t = 0;
+            phase = 'forward';
+            currentNoise = generateNoise();
+
+            document.getElementById('formulaBox').classList.remove('show');
+            document.getElementById('directionIndicator').classList.remove('show');
+
+            // Phase 1: Show original image (0-2s)
+            setTimeout(() => {
+                updateStep(0);
+                currentImage = originalImage.map(row => [...row]);
+                drawPixelGrid(imgCtx, currentImage);
+                drawPixelGrid(noiseCtx, Array(gridSize).fill().map(() => Array(gridSize).fill(0)), true);
+                document.getElementById('noiseLevel').style.height = '0%';
+                document.getElementById('timestepValue').textContent = 't=0';
+            }, 0);
+
+            // Phase 2: Forward diffusion (2-10s)
+            setTimeout(() => {
+                updateStep(1);
+                document.getElementById('formulaBox').classList.add('show');
+                document.getElementById('directionIndicator').textContent = '→';
+                document.getElementById('directionIndicator').classList.add('show');
+
+                const forwardInterval = setInterval(() => {
+                    t++;
+                    const noiseLevel = t / maxT;
+                    currentImage = mixImageWithNoise(originalImage, currentNoise, noiseLevel);
+
+                    drawPixelGrid(imgCtx, currentImage);
+                    drawPixelGrid(noiseCtx, currentNoise, true);
+
+                    document.getElementById('noiseLevel').style.height = (noiseLevel * 100) + '%';
+                    document.getElementById('timestepValue').textContent = `t=${t}`;
+
+                    if (t >= maxT) {
+                        clearInterval(forwardInterval);
+                    }
+                }, 400);
+            }, 2000);
+
+            // Phase 3: Pure noise (10-14s)
+            setTimeout(() => {
+                updateStep(2);
+                document.getElementById('directionIndicator').classList.remove('show');
+            }, 10000);
+
+            // Phase 4: Reverse diffusion (14-24s)
+            setTimeout(() => {
+                updateStep(3);
+                phase = 'reverse';
+                document.getElementById('directionIndicator').textContent = '←';
+                document.getElementById('directionIndicator').classList.add('show');
+                document.getElementById('formulaText').textContent = 'x_{t-1} = (x_t - ε_θ(x_t, t)) / √α_t + σ_t·z';
+
+                const reverseInterval = setInterval(() => {
+                    t--;
+                    const noiseLevel = t / maxT;
+                    currentImage = mixImageWithNoise(originalImage, currentNoise, noiseLevel);
+
+                    drawPixelGrid(imgCtx, currentImage);
+                    drawPixelGrid(noiseCtx, currentNoise.map(row => row.map(v => v * noiseLevel)), true);
+
+                    document.getElementById('noiseLevel').style.height = (noiseLevel * 100) + '%';
+                    document.getElementById('timestepValue').textContent = `t=${t}`;
+
+                    if (t <= 0) {
+                        clearInterval(reverseInterval);
+                        document.getElementById('directionIndicator').classList.remove('show');
+                    }
+                }, 400);
+            }, 14000);
+
+            // Restart
+            setTimeout(() => {
+                runAnimation();
+            }, totalDuration);
+        }
+
+        // Start animation
+        runAnimation();
+    </script>
+</body>
+</html>

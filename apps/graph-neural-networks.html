@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Neural Networks - Message Passing</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block; background: rgba(255,255,255,0.2); color: white;
+            padding: 10px 20px; font-weight: 600; text-decoration: none; border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .back-link:hover { background: rgba(255,255,255,0.3); }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .animation-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            min-height: 700px;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            width: 700px;
+            height: 500px;
+            margin: 0 auto;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+
+        canvas {
+            display: block;
+            border-radius: 10px;
+        }
+
+        .node {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.5s;
+            font-size: 1.1em;
+        }
+
+        .node.active {
+            transform: scale(1.3);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .node.receiving {
+            animation: pulse 1.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .message {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: all 0.8s ease-in-out;
+        }
+
+        .message.show {
+            opacity: 1;
+        }
+
+        .layer-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .layer-indicator h4 {
+            color: #667eea;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .layer-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .formula-box {
+            background: #fff9e6;
+            border: 2px solid #f39c12;
+            border-radius: 10px;
+            padding: 15px 25px;
+            margin: 20px auto;
+            text-align: center;
+            max-width: 700px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .formula-box.show {
+            opacity: 1;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            color: #e67e22;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px 30px;
+            min-width: 800px;
+            text-align: center;
+        }
+
+        .info-panel h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .info-panel p {
+            color: #555;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">← Retour au menu</a>
+
+        <h1>🕸️ Graph Neural Networks</h1>
+        <p class="subtitle">Apprentissage sur structures en graphes via message passing</p>
+
+        <div class="animation-container">
+            <!-- Layer Indicator -->
+            <div class="layer-indicator">
+                <h4>Layer</h4>
+                <div class="layer-value" id="layerValue">0</div>
+            </div>
+
+            <!-- Graph Canvas -->
+            <div class="canvas-wrapper">
+                <canvas id="graphCanvas" width="700" height="500"></canvas>
+            </div>
+
+            <!-- Formula Box -->
+            <div class="formula-box" id="formulaBox">
+                <div class="formula" id="formulaText">h<sub>v</sub><sup>(k+1)</sup> = σ(W<sup>(k)</sup> · AGGREGATE({h<sub>u</sub><sup>(k)</sup>, ∀u ∈ N(v)}))</div>
+            </div>
+
+            <!-- Info Panel -->
+            <div class="info-panel">
+                <h4 id="step-title">Initialisation: Features initiales des noeuds</h4>
+                <p id="step-description">Chaque noeud a un vecteur de features initial (ex: attributs utilisateur dans un réseau social)</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <h2 style="color: #667eea; margin-bottom: 20px;">📖 Comprendre les Graph Neural Networks</h2>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #2ecc71; margin-bottom: 10px;">🎯 Innovation</h3>
+                    <p>Étendre les réseaux de neurones aux données non-euclidiennes (graphes). Capture la structure relationnelle entre entités.</p>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #3498db; margin-bottom: 10px;">⚡ Applications</h3>
+                    <p>Réseaux sociaux, molécules, knowledge graphs, systèmes de recommandation, code source, circuits électroniques</p>
+                </div>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 10px;">🔬 Message Passing Framework</h3>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #3498db; margin-bottom: 10px;">1️⃣ Message Génération</h4>
+                    <div style="font-family: monospace; font-size: 0.95em; background: #f5f5f5; padding: 10px; border-radius: 5px; margin: 8px 0;">
+                        m<sub>u→v</sub><sup>(k)</sup> = MSG<sup>(k)</sup>(h<sub>u</sub><sup>(k)</sup>, h<sub>v</sub><sup>(k)</sup>, e<sub>uv</sub>)
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        Chaque noeud u génère un message pour ses voisins v.
+                        Peut inclure les features de l'arête e<sub>uv</sub>.
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #e74c3c; margin-bottom: 10px;">2️⃣ Message Agrégation</h4>
+                    <div style="font-family: monospace; font-size: 0.95em; background: #f5f5f5; padding: 10px; border-radius: 5px; margin: 8px 0;">
+                        m<sub>v</sub><sup>(k)</sup> = AGG<sup>(k)</sup>({m<sub>u→v</sub><sup>(k)</sup>, ∀u ∈ N(v)})
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        <strong>AGG</strong> peut être: SUM, MEAN, MAX, LSTM, Attention<br>
+                        Fonction permutation-invariante (ordre des voisins n'importe pas)
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #2ecc71; margin-bottom: 10px;">3️⃣ Node Update</h4>
+                    <div style="font-family: monospace; font-size: 0.95em; background: #f5f5f5; padding: 10px; border-radius: 5px; margin: 8px 0;">
+                        h<sub>v</sub><sup>(k+1)</sup> = UPDATE<sup>(k)</sup>(h<sub>v</sub><sup>(k)</sup>, m<sub>v</sub><sup>(k)</sup>)
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        Combiner l'ancien état h<sub>v</sub><sup>(k)</sup> avec messages agrégés.<br>
+                        Souvent: h<sub>v</sub><sup>(k+1)</sup> = σ(W · [h<sub>v</sub><sup>(k)</sup> || m<sub>v</sub><sup>(k)</sup>])
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+                <h3 style="color: #1976d2; margin-bottom: 10px;">🏗️ Architectures Populaires</h3>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h4 style="color: #f39c12; margin-bottom: 10px;">GCN (Graph Convolutional Network)</h4>
+                    <div style="font-family: monospace; font-size: 0.9em; background: #f5f5f5; padding: 8px; border-radius: 4px; margin: 8px 0;">
+                        h<sub>v</sub><sup>(k+1)</sup> = σ(W<sup>(k)</sup> · Σ<sub>u∈N(v)∪{v}</sub> h<sub>u</sub><sup>(k)</sup> / √(d<sub>u</sub>·d<sub>v</sub>))
+                    </div>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 8px;">
+                        AGG = normalized sum. d<sub>v</sub> = degré du noeud. Simple et efficace.
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h4 style="color: #e67e22; margin-bottom: 10px;">GraphSAGE</h4>
+                    <div style="font-family: monospace; font-size: 0.9em; background: #f5f5f5; padding: 8px; border-radius: 4px; margin: 8px 0;">
+                        h<sub>v</sub><sup>(k+1)</sup> = σ(W<sup>(k)</sup> · [h<sub>v</sub><sup>(k)</sup> || AGG({h<sub>u</sub><sup>(k)</sup>, u∈N(v)})])
+                    </div>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 8px;">
+                        AGG = MEAN, LSTM, or MAX pooling. Scalable à grands graphes via sampling.
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h4 style="color: #9b59b6; margin-bottom: 10px;">GAT (Graph Attention Networks)</h4>
+                    <div style="font-family: monospace; font-size: 0.9em; background: #f5f5f5; padding: 8px; border-radius: 4px; margin: 8px 0;">
+                        α<sub>uv</sub> = softmax(LeakyReLU(a<sup>T</sup>[Wh<sub>u</sub>||Wh<sub>v</sub>]))<br>
+                        h<sub>v</sub><sup>(k+1)</sup> = σ(Σ<sub>u∈N(v)</sub> α<sub>uv</sub> W h<sub>u</sub><sup>(k)</sup>)
+                    </div>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 8px;">
+                        Attention pondérée sur voisins. Multi-head comme Transformers.
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; border-left: 4px solid #ff9800; margin-bottom: 20px;">
+                <h3 style="color: #e65100; margin-bottom: 10px;">📊 Tâches et Applications</h3>
+
+                <div style="background: white; padding: 12px; border-radius: 6px; margin: 10px 0;">
+                    <h4 style="color: #2ecc71; margin-bottom: 8px;">Node Classification</h4>
+                    <p style="font-size: 0.9em; color: #666;">
+                        Prédire catégorie/propriété d'un noeud.<br>
+                        <strong>Ex:</strong> Détection de fraude, catégorisation utilisateurs, prédiction de protéines
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 12px; border-radius: 6px; margin: 10px 0;">
+                    <h4 style="color: #3498db; margin-bottom: 8px;">Link Prediction</h4>
+                    <p style="font-size: 0.9em; color: #666;">
+                        Prédire arêtes manquantes/futures.<br>
+                        <strong>Ex:</strong> Recommandation d'amis, drug-target interaction, knowledge graph completion
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 12px; border-radius: 6px; margin: 10px 0;">
+                    <h4 style="color: #e74c3c; margin-bottom: 8px;">Graph Classification</h4>
+                    <p style="font-size: 0.9em; color: #666;">
+                        Classifier graphes entiers.<br>
+                        <strong>Ex:</strong> Propriétés moléculaires, classification de code source, analyse de réseaux
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; border-left: 4px solid #9c27b0;">
+                <h3 style="color: #7b1fa2; margin-bottom: 10px;">🚀 Cas d'Usage Réels</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Pinterest:</strong> PinSage (GraphSAGE) pour recommandation de pins, 3B noeuds</li>
+                    <li><strong>Google Maps:</strong> ETA prediction avec GNN sur road network</li>
+                    <li><strong>DeepMind:</strong> AlphaFold 2 utilise GNN pour prédire structures protéines</li>
+                    <li><strong>Drug Discovery:</strong> Prédiction propriétés moléculaires (Chemprop, GNN)</li>
+                    <li><strong>Facebook:</strong> Detection de fake news via propagation dans graphe social</li>
+                    <li><strong>Alibaba:</strong> Fraud detection dans réseau de transactions</li>
+                </ul>
+            </div>
+
+            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e91e63;">
+                <h3 style="color: #c2185b; margin-bottom: 10px;">⚙️ Défis & Solutions</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Over-smoothing:</strong> Après k couches, tous les noeuds convergent. Solution: skip connections, attention</li>
+                    <li><strong>Scalabilité:</strong> Graphes géants (millions noeuds). Solution: mini-batch, sampling (GraphSAGE)</li>
+                    <li><strong>Hétérogénéité:</strong> Types de noeuds/arêtes différents. Solution: Heterogeneous GNN (HAN, HGT)</li>
+                    <li><strong>Dynamic graphs:</strong> Structure évolue. Solution: Temporal GNN (TGAT, EvolveGCN)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Graph structure (simple social network)
+        const nodes = [
+            { id: 'A', x: 350, y: 100, color: '#e74c3c', label: 'Alice' },
+            { id: 'B', x: 200, y: 250, color: '#3498db', label: 'Bob' },
+            { id: 'C', x: 500, y: 250, color: '#2ecc71', label: 'Carol' },
+            { id: 'D', x: 150, y: 400, color: '#f39c12', label: 'Dave' },
+            { id: 'E', x: 350, y: 400, color: '#9b59b6', label: 'Eve' },
+            { id: 'F', x: 550, y: 400, color: '#1abc9c', label: 'Frank' }
+        ];
+
+        const edges = [
+            { from: 'A', to: 'B' },
+            { from: 'A', to: 'C' },
+            { from: 'B', to: 'D' },
+            { from: 'B', to: 'E' },
+            { from: 'C', to: 'E' },
+            { from: 'C', to: 'F' },
+            { from: 'D', to: 'E' },
+            { from: 'E', to: 'F' }
+        ];
+
+        let currentLayer = 0;
+        let activeNode = null;
+        const totalDuration = 20000; // 20 seconds
+
+        const steps = [
+            {
+                title: "Initialisation: Features initiales des noeuds",
+                description: "Chaque noeud a un vecteur de features initial (ex: attributs utilisateur dans un réseau social)",
+                time: 0
+            },
+            {
+                title: "Layer 1: Message Passing depuis voisins directs",
+                description: "Chaque noeud reçoit des messages de ses voisins directs (1-hop). AGG({h_u, u∈N(v)})",
+                time: 5000
+            },
+            {
+                title: "Layer 2: Information de 2-hop voisins",
+                description: "Les messages se propagent plus loin. Information des voisins de voisins (2-hop)",
+                time: 10000
+            },
+            {
+                title: "Layer 3: Réceptive field complet",
+                description: "Après k layers, chaque noeud a agrégé l'information de tous les noeuds à distance ≤ k",
+                time: 15000
+            }
+        ];
+
+        function updateStep(stepIndex) {
+            if (stepIndex < steps.length) {
+                document.getElementById('step-title').textContent = steps[stepIndex].title;
+                document.getElementById('step-description').textContent = steps[stepIndex].description;
+            }
+        }
+
+        function drawGraph() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw edges
+            ctx.strokeStyle = '#bdc3c7';
+            ctx.lineWidth = 3;
+            edges.forEach(edge => {
+                const from = nodes.find(n => n.id === edge.from);
+                const to = nodes.find(n => n.id === edge.to);
+                ctx.beginPath();
+                ctx.moveTo(from.x, from.y);
+                ctx.lineTo(to.x, to.y);
+                ctx.stroke();
+            });
+
+            // Draw nodes
+            nodes.forEach(node => {
+                ctx.fillStyle = node.color;
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, 30, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Label
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(node.id, node.x, node.y);
+            });
+        }
+
+        function highlightNode(nodeId) {
+            const node = nodes.find(n => n.id === nodeId);
+            ctx.fillStyle = node.color;
+            ctx.globalAlpha = 0.5;
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, 45, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+
+        function animateMessagePassing(fromId, toId) {
+            const from = nodes.find(n => n.id === fromId);
+            const to = nodes.find(n => n.id === toId);
+
+            // Draw arrow
+            ctx.strokeStyle = '#f39c12';
+            ctx.fillStyle = '#f39c12';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(from.x, from.y);
+            ctx.lineTo(to.x, to.y);
+            ctx.stroke();
+
+            // Arrow head
+            const angle = Math.atan2(to.y - from.y, to.x - from.x);
+            ctx.beginPath();
+            ctx.moveTo(to.x, to.y);
+            ctx.lineTo(to.x - 15 * Math.cos(angle - Math.PI / 6), to.y - 15 * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(to.x - 15 * Math.cos(angle + Math.PI / 6), to.y - 15 * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function runAnimation() {
+            currentLayer = 0;
+            document.getElementById('formulaBox').classList.add('show');
+
+            // Layer 0: Initialization
+            setTimeout(() => {
+                updateStep(0);
+                document.getElementById('layerValue').textContent = '0';
+                drawGraph();
+            }, 0);
+
+            // Layer 1: First message passing
+            setTimeout(() => {
+                updateStep(1);
+                document.getElementById('layerValue').textContent = '1';
+                drawGraph();
+
+                // Animate messages to node E
+                let delay = 0;
+                ['A', 'B', 'C', 'D', 'F'].forEach((fromId, idx) => {
+                    const hasEdge = edges.some(e =>
+                        (e.from === fromId && e.to === 'E') ||
+                        (e.to === fromId && e.from === 'E')
+                    );
+                    if (hasEdge) {
+                        setTimeout(() => {
+                            animateMessagePassing(fromId, 'E');
+                        }, delay);
+                        delay += 800;
+                    }
+                });
+
+                setTimeout(() => {
+                    highlightNode('E');
+                }, delay);
+            }, 5000);
+
+            // Layer 2
+            setTimeout(() => {
+                updateStep(2);
+                document.getElementById('layerValue').textContent = '2';
+                drawGraph();
+            }, 10000);
+
+            // Layer 3
+            setTimeout(() => {
+                updateStep(3);
+                document.getElementById('layerValue').textContent = '3';
+                drawGraph();
+            }, 15000);
+
+            // Restart
+            setTimeout(() => {
+                runAnimation();
+            }, totalDuration);
+        }
+
+        // Start animation
+        runAnimation();
+    </script>
+</body>
+</html>
