@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transformers - Mécanisme d'Attention</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block; background: rgba(255,255,255,0.2); color: white;
+            padding: 10px 20px; font-weight: 600; text-decoration: none; border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .back-link:hover { background: rgba(255,255,255,0.3); }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .animation-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            min-height: 700px;
+            overflow: hidden;
+        }
+
+        .sentence-display {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0 50px 0;
+            flex-wrap: wrap;
+        }
+
+        .word-token {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .word-token.active {
+            transform: scale(1.15);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .word-token.target {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        }
+
+        .word-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7em;
+            color: #999;
+            white-space: nowrap;
+        }
+
+        .attention-matrix {
+            margin: 40px auto;
+            max-width: 600px;
+        }
+
+        .matrix-row {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        .matrix-cell {
+            width: 80px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .matrix-label {
+            width: 80px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.85em;
+        }
+
+        .matrix-cell.highlight {
+            border: 3px solid #f39c12;
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
+        }
+
+        .qkv-display {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .qkv-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+        }
+
+        .qkv-box.active {
+            border-color: #667eea;
+            background: #e8eaf6;
+        }
+
+        .qkv-box h4 {
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .qkv-query { border-color: #3498db; }
+        .qkv-query.active { background: #e3f2fd; border-color: #3498db; }
+        .qkv-query h4 { color: #3498db; }
+
+        .qkv-key { border-color: #e74c3c; }
+        .qkv-key.active { background: #ffebee; border-color: #e74c3c; }
+        .qkv-key h4 { color: #e74c3c; }
+
+        .qkv-value { border-color: #2ecc71; }
+        .qkv-value.active { background: #e8f8f0; border-color: #2ecc71; }
+        .qkv-value h4 { color: #2ecc71; }
+
+        .formula-box {
+            background: #fff9e6;
+            border: 2px solid #f39c12;
+            border-radius: 10px;
+            padding: 15px 25px;
+            margin: 20px auto;
+            text-align: center;
+            max-width: 600px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .formula-box.show {
+            opacity: 1;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            color: #e67e22;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .grammar-explanation {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(46, 204, 113, 0.95);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.5s;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .grammar-explanation.show {
+            opacity: 1;
+        }
+
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px 30px;
+            min-width: 800px;
+            text-align: center;
+        }
+
+        .info-panel h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .info-panel p {
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        .attention-arrow {
+            position: absolute;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .attention-arrow.show {
+            opacity: 1;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .pulse {
+            animation: pulse 1.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">← Retour au menu</a>
+
+        <h1>🤖 Transformers - Mécanisme d'Attention</h1>
+        <p class="subtitle">Visualisation de l'attention multi-tête avec analyse grammaticale</p>
+
+        <div class="animation-container">
+            <!-- Sentence Display -->
+            <div class="sentence-display" id="sentenceDisplay">
+                <div class="word-token" data-idx="0">Le<div class="word-label">déterminant</div></div>
+                <div class="word-token" data-idx="1">chat<div class="word-label">nom</div></div>
+                <div class="word-token" data-idx="2">noir<div class="word-label">adjectif</div></div>
+                <div class="word-token" data-idx="3">mange<div class="word-label">verbe</div></div>
+                <div class="word-token" data-idx="4">la<div class="word-label">déterminant</div></div>
+                <div class="word-token" data-idx="5">souris<div class="word-label">nom</div></div>
+            </div>
+
+            <!-- QKV Display -->
+            <div class="qkv-display">
+                <div class="qkv-box qkv-query" id="queryBox">
+                    <h4>🔍 Query (Q)</h4>
+                    <p style="font-size: 0.85em; color: #666;">Que cherche ce mot ?<br>"À quoi dois-je faire attention ?"</p>
+                </div>
+                <div class="qkv-box qkv-key" id="keyBox">
+                    <h4>🔑 Key (K)</h4>
+                    <p style="font-size: 0.85em; color: #666;">Quelle information propose ce mot ?<br>"Voici ce que je suis"</p>
+                </div>
+                <div class="qkv-box qkv-value" id="valueBox">
+                    <h4>💎 Value (V)</h4>
+                    <p style="font-size: 0.85em; color: #666;">Contenu sémantique du mot<br>"Voici mon information"</p>
+                </div>
+            </div>
+
+            <!-- Formula Box -->
+            <div class="formula-box" id="formulaBox">
+                <div class="formula" id="formulaText">Attention(Q, K, V) = softmax(Q·K<sup>T</sup> / √d<sub>k</sub>) · V</div>
+            </div>
+
+            <!-- Attention Matrix -->
+            <div class="attention-matrix" id="attentionMatrix"></div>
+
+            <!-- Grammar Explanation -->
+            <div class="grammar-explanation" id="grammarExplanation">
+                L'adjectif "noir" fait attention au nom "chat" (accord grammatical)
+            </div>
+
+            <!-- Info Panel -->
+            <div class="info-panel">
+                <h4 id="step-title">Étape 1: Tokenisation et embeddings</h4>
+                <p id="step-description">Chaque mot de la phrase est transformé en vecteur (embedding) qui capture son sens</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <h2 style="color: #667eea; margin-bottom: 20px;">📖 Comprendre les Transformers</h2>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #2ecc71; margin-bottom: 10px;">🎯 Innovation</h3>
+                    <p>Architecture "Attention Is All You Need" (2017). Remplace les RNN/LSTM par le mécanisme d'attention pour traiter les séquences en parallèle.</p>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #3498db; margin-bottom: 10px;">⚡ Avantages</h3>
+                    <p>• Parallélisation massive<br>• Capture dépendances longue distance<br>• Pas de vanishing gradient<br>• Interprétabilité via poids d'attention</p>
+                </div>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 10px;">🔬 Mécanisme d'Attention Self-Attention</h3>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #3498db; margin-bottom: 10px;">1️⃣ Projections Q, K, V</h4>
+                    <div style="font-family: monospace; font-size: 0.95em; background: #f5f5f5; padding: 10px; border-radius: 5px; margin: 8px 0;">
+                        Q = X · W<sub>Q</sub> &nbsp; // Query: "Que cherché-je ?"<br>
+                        K = X · W<sub>K</sub> &nbsp; // Key: "Que suis-je ?"<br>
+                        V = X · W<sub>V</sub> &nbsp; // Value: "Mon contenu sémantique"
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        Chaque mot est projeté en 3 vecteurs via des matrices de poids apprises W<sub>Q</sub>, W<sub>K</sub>, W<sub>V</sub>
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #e74c3c; margin-bottom: 10px;">2️⃣ Calcul des Scores d'Attention</h4>
+                    <div style="font-family: monospace; font-size: 0.95em; background: #f5f5f5; padding: 10px; border-radius: 5px; margin: 8px 0;">
+                        scores = Q · K<sup>T</sup> / √d<sub>k</sub>
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        Produit scalaire entre Query et toutes les Keys. Division par √d<sub>k</sub> pour stabiliser les gradients.
+                        Score élevé = forte relation entre les mots.
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #9b59b6; margin-bottom: 10px;">3️⃣ Softmax et Normalisation</h4>
+                    <div style="font-family: monospace; font-size: 0.95em; background: #f5f5f5; padding: 10px; border-radius: 5px; margin: 8px 0;">
+                        attention_weights = softmax(scores)
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        Softmax transforme les scores en probabilités (somme = 1). Les poids élevés indiquent les mots importants pour le contexte.
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #2ecc71; margin-bottom: 10px;">4️⃣ Agrégation Pondérée</h4>
+                    <div style="font-family: monospace; font-size: 0.95em; background: #f5f5f5; padding: 10px; border-radius: 5px; margin: 8px 0;">
+                        output = attention_weights · V
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        Somme pondérée des Values selon les poids d'attention. Chaque mot reçoit l'information contextuelle des autres mots.
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+                <h3 style="color: #1976d2; margin-bottom: 10px;">👁️ Multi-Head Attention</h3>
+                <p style="margin-bottom: 15px;">Au lieu d'une seule attention, on utilise plusieurs "têtes" en parallèle pour capturer différentes relations :</p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 15px;">
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #3498db; margin-bottom: 8px;">Tête 1: Syntaxe</h4>
+                        <p style="font-size: 0.85em; color: #666;">Adjectif → Nom<br>Verbe → Sujet<br>Relations grammaticales</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #9b59b6; margin-bottom: 8px;">Tête 2: Sémantique</h4>
+                        <p style="font-size: 0.85em; color: #666;">Coréférence<br>Anaphores<br>Relations thématiques</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #e74c3c; margin-bottom: 8px;">Tête 3: Position</h4>
+                        <p style="font-size: 0.85em; color: #666;">Ordre des mots<br>Distance<br>Structure phrastique</p>
+                    </div>
+                </div>
+
+                <div style="background: #fff9e6; padding: 12px; border-radius: 6px; margin-top: 15px;">
+                    <p style="font-size: 0.9em; color: #e65100;">
+                        <strong>💡 Exemple:</strong> Dans "Le chat noir mange", une tête capture "noir → chat" (accord adjectif-nom),
+                        une autre "mange → chat" (relation verbe-sujet), une troisième les positions relatives.
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; border-left: 4px solid #ff9800; margin-bottom: 20px;">
+                <h3 style="color: #e65100; margin-bottom: 10px;">🏗️ Architecture Complète</h3>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h4 style="color: #f39c12; margin-bottom: 10px;">Encoder (traitement de l'entrée)</h4>
+                    <ol style="margin-left: 20px; line-height: 1.8; font-size: 0.9em;">
+                        <li><strong>Input Embeddings</strong> + Positional Encoding</li>
+                        <li><strong>Multi-Head Self-Attention</strong> (chaque mot attend tous les autres)</li>
+                        <li><strong>Add & Norm</strong> (skip connection + layer normalization)</li>
+                        <li><strong>Feed-Forward Network</strong> (MLP par position)</li>
+                        <li><strong>Add & Norm</strong></li>
+                        <li>Répéter N fois (ex: 6 couches pour BERT base)</li>
+                    </ol>
+                </div>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h4 style="color: #e67e22; margin-bottom: 10px;">Decoder (génération de la sortie)</h4>
+                    <ol style="margin-left: 20px; line-height: 1.8; font-size: 0.9em;">
+                        <li><strong>Output Embeddings</strong> + Positional Encoding</li>
+                        <li><strong>Masked Multi-Head Self-Attention</strong> (ne voit que le passé)</li>
+                        <li><strong>Add & Norm</strong></li>
+                        <li><strong>Cross-Attention</strong> (attend l'encoder)</li>
+                        <li><strong>Add & Norm</strong></li>
+                        <li><strong>Feed-Forward Network</strong></li>
+                        <li><strong>Add & Norm</strong></li>
+                        <li>Répéter N fois</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; border-left: 4px solid #9c27b0;">
+                <h3 style="color: #7b1fa2; margin-bottom: 10px;">🚀 Modèles Célèbres</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>BERT (2018):</strong> Encoder-only, bidirectionnel, pré-entraîné sur MLM + NSP (110M-340M params)</li>
+                    <li><strong>GPT-3 (2020):</strong> Decoder-only, autorégressif, 175 milliards de paramètres</li>
+                    <li><strong>T5 (2019):</strong> Encoder-decoder, tout en text-to-text (11B params)</li>
+                    <li><strong>GPT-4 (2023):</strong> Multimodal (texte + images), >1T params (architecture secrète)</li>
+                    <li><strong>Llama 2 (2023):</strong> Open-source, 7B-70B params, optimisé pour instruction following</li>
+                    <li><strong>Claude (Anthropic):</strong> Constitutional AI, 100k+ tokens de contexte</li>
+                </ul>
+            </div>
+
+            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e91e63;">
+                <h3 style="color: #c2185b; margin-bottom: 10px;">💡 Applications</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Traduction automatique:</strong> Seq2seq avec attention (Google Translate, DeepL)</li>
+                    <li><strong>Génération de texte:</strong> GPT-3/4, ChatGPT, articles, code, poésie</li>
+                    <li><strong>Question Answering:</strong> BERT fine-tuné sur SQuAD, systèmes de Q&A</li>
+                    <li><strong>Résumé automatique:</strong> T5, BART pour abstractive summarization</li>
+                    <li><strong>Classification:</strong> Sentiment analysis, détection de spam, NER</li>
+                    <li><strong>Vision:</strong> Vision Transformer (ViT) pour classification d'images</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const words = ['Le', 'chat', 'noir', 'mange', 'la', 'souris'];
+        const labels = ['déterminant', 'nom', 'adjectif', 'verbe', 'déterminant', 'nom'];
+
+        // Attention patterns (simplified for visualization)
+        const attentionPatterns = [
+            { from: 2, to: 1, weight: 0.95, grammar: 'L\'adjectif "noir" fait attention au nom "chat" (accord)' },
+            { from: 3, to: 1, weight: 0.87, grammar: 'Le verbe "mange" fait attention au sujet "chat"' },
+            { from: 0, to: 1, weight: 0.92, grammar: 'Le déterminant "Le" fait attention au nom "chat"' },
+            { from: 5, to: 3, weight: 0.89, grammar: 'Le complément "souris" fait attention au verbe "mange"' },
+            { from: 4, to: 5, weight: 0.93, grammar: 'Le déterminant "la" fait attention au nom "souris"' }
+        ];
+
+        let currentStep = 0;
+        let currentPattern = 0;
+        const totalDuration = 20000; // 20 seconds per cycle
+
+        const steps = [
+            {
+                title: "Étape 1: Tokenisation et embeddings",
+                description: "Chaque mot de la phrase est transformé en vecteur (embedding) qui capture son sens",
+                time: 0
+            },
+            {
+                title: "Étape 2: Projections Q, K, V",
+                description: "Chaque embedding est projeté en 3 vecteurs: Query (que cherche ce mot?), Key (ce qu'il offre), Value (son contenu)",
+                time: 4000
+            },
+            {
+                title: "Étape 3: Calcul des scores d'attention",
+                description: "Produit scalaire Q·K^T pour mesurer la similarité entre chaque paire de mots, puis softmax pour normaliser",
+                time: 8000
+            },
+            {
+                title: "Étape 4: Relations grammaticales détectées",
+                description: "Les poids d'attention révèlent les dépendances grammaticales: adjectif→nom, verbe→sujet, déterminant→nom",
+                time: 12000
+            }
+        ];
+
+        function updateStep(stepIndex) {
+            document.getElementById('step-title').textContent = steps[stepIndex].title;
+            document.getElementById('step-description').textContent = steps[stepIndex].description;
+        }
+
+        function createAttentionMatrix() {
+            const matrix = document.getElementById('attentionMatrix');
+            matrix.innerHTML = '<h3 style="text-align: center; color: #667eea; margin-bottom: 15px;">Matrice d\'Attention</h3>';
+
+            // Header row
+            const headerRow = document.createElement('div');
+            headerRow.className = 'matrix-row';
+            headerRow.innerHTML = '<div class="matrix-label"></div>';
+            words.forEach(word => {
+                headerRow.innerHTML += `<div class="matrix-label">${word}</div>`;
+            });
+            matrix.appendChild(headerRow);
+
+            // Data rows
+            words.forEach((fromWord, i) => {
+                const row = document.createElement('div');
+                row.className = 'matrix-row';
+                row.innerHTML = `<div class="matrix-label">${fromWord}</div>`;
+
+                words.forEach((toWord, j) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'matrix-cell';
+                    cell.id = `cell-${i}-${j}`;
+
+                    // Calculate attention weight (simplified)
+                    let weight = 0.1;
+                    if (i === j) weight = 0.95; // Self-attention
+
+                    // Check if there's a specific pattern
+                    const pattern = attentionPatterns.find(p => p.from === i && p.to === j);
+                    if (pattern) weight = pattern.weight;
+
+                    // Color based on weight
+                    const intensity = Math.floor(weight * 255);
+                    cell.style.background = `rgba(102, 126, 234, ${weight})`;
+                    cell.style.color = weight > 0.5 ? 'white' : '#333';
+                    cell.textContent = weight.toFixed(2);
+
+                    row.appendChild(cell);
+                });
+
+                matrix.appendChild(row);
+            });
+        }
+
+        function highlightAttentionPattern(patternIndex) {
+            // Reset all
+            document.querySelectorAll('.word-token').forEach(el => {
+                el.classList.remove('active', 'target');
+            });
+            document.querySelectorAll('.matrix-cell').forEach(el => {
+                el.classList.remove('highlight');
+            });
+
+            if (patternIndex >= attentionPatterns.length) return;
+
+            const pattern = attentionPatterns[patternIndex];
+
+            // Highlight words
+            document.querySelector(`[data-idx="${pattern.from}"]`).classList.add('active');
+            document.querySelector(`[data-idx="${pattern.to}"]`).classList.add('target');
+
+            // Highlight matrix cell
+            const cell = document.getElementById(`cell-${pattern.from}-${pattern.to}`);
+            if (cell) cell.classList.add('highlight');
+
+            // Show grammar explanation
+            const grammarBox = document.getElementById('grammarExplanation');
+            grammarBox.textContent = pattern.grammar;
+            grammarBox.classList.add('show');
+        }
+
+        function runAnimation() {
+            // Reset
+            document.getElementById('formulaBox').classList.remove('show');
+            document.getElementById('queryBox').classList.remove('active');
+            document.getElementById('keyBox').classList.remove('active');
+            document.getElementById('valueBox').classList.remove('active');
+            document.getElementById('grammarExplanation').classList.remove('show');
+
+            createAttentionMatrix();
+
+            // Step 1: Show embeddings (0-4s)
+            setTimeout(() => {
+                updateStep(0);
+                document.querySelectorAll('.word-token').forEach((el, idx) => {
+                    setTimeout(() => {
+                        el.classList.add('pulse');
+                        setTimeout(() => el.classList.remove('pulse'), 500);
+                    }, idx * 150);
+                });
+            }, 0);
+
+            // Step 2: Show Q, K, V (4-8s)
+            setTimeout(() => {
+                updateStep(1);
+                document.getElementById('queryBox').classList.add('active');
+                setTimeout(() => {
+                    document.getElementById('keyBox').classList.add('active');
+                }, 1000);
+                setTimeout(() => {
+                    document.getElementById('valueBox').classList.add('active');
+                    document.getElementById('formulaBox').classList.add('show');
+                }, 2000);
+            }, 4000);
+
+            // Step 3: Show attention calculation (8-12s)
+            setTimeout(() => {
+                updateStep(2);
+            }, 8000);
+
+            // Step 4: Show attention patterns (12-20s)
+            setTimeout(() => {
+                updateStep(3);
+
+                let patternIdx = 0;
+                const showPattern = () => {
+                    if (patternIdx < attentionPatterns.length) {
+                        highlightAttentionPattern(patternIdx);
+                        patternIdx++;
+                        setTimeout(showPattern, 1500);
+                    }
+                };
+                showPattern();
+            }, 12000);
+
+            // Restart cycle
+            setTimeout(() => {
+                runAnimation();
+            }, totalDuration);
+        }
+
+        // Start animation
+        runAnimation();
+    </script>
+</body>
+</html>
