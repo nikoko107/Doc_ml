@@ -644,64 +644,61 @@
 
             const padding = 60;
             const graphWidth = convergenceCanvas.width - 2 * padding;
-            const graphHeight = convergenceCanvas.height - 2 * padding;
+            const graphHeight = (convergenceCanvas.height - 2 * padding - 30) / 2; // Split for 2 graphs
 
-            // Find max inertia for scaling
-            const maxInertia = Math.max(...inertiaHistory);
-            const minInertia = Math.min(...inertiaHistory);
+            // Calculate percentage changes
+            const percentageChanges = [];
+            for (let i = 1; i < inertiaHistory.length; i++) {
+                const change = ((inertiaHistory[i-1] - inertiaHistory[i]) / inertiaHistory[i-1]) * 100;
+                percentageChanges.push(change);
+            }
+
+            // === FIRST GRAPH: Inertia Values ===
+            convCtx.fillStyle = '#333';
+            convCtx.font = 'bold 14px Arial';
+            convCtx.textAlign = 'center';
+            convCtx.fillText('Inertie (WCSS)', convergenceCanvas.width / 2, 20);
+
+            // Find max inertia for scaling (exclude first value if it's too large)
+            let displayInertia = [...inertiaHistory];
+            let startIndex = 0;
+
+            // If first value is more than 3x the second, start from iteration 1
+            if (inertiaHistory.length > 1 && inertiaHistory[0] > inertiaHistory[1] * 3) {
+                displayInertia = inertiaHistory.slice(1);
+                startIndex = 1;
+            }
+
+            const maxInertia = Math.max(...displayInertia);
+            const minInertia = Math.min(...displayInertia);
             const inertiaRange = maxInertia - minInertia;
 
-            // Draw axes
+            // Draw axes for first graph
             convCtx.strokeStyle = '#333';
             convCtx.lineWidth = 2;
             convCtx.beginPath();
-            convCtx.moveTo(padding, padding);
-            convCtx.lineTo(padding, convergenceCanvas.height - padding);
-            convCtx.lineTo(convergenceCanvas.width - padding, convergenceCanvas.height - padding);
+            convCtx.moveTo(padding, padding + 30);
+            convCtx.lineTo(padding, padding + 30 + graphHeight);
+            convCtx.lineTo(convergenceCanvas.width - padding, padding + 30 + graphHeight);
             convCtx.stroke();
 
-            // Draw title
-            convCtx.fillStyle = '#333';
-            convCtx.font = 'bold 16px Arial';
-            convCtx.textAlign = 'center';
-            convCtx.fillText('Évolution de l\'Inertie (WCSS)', convergenceCanvas.width / 2, 30);
-
-            // Draw axis labels
-            convCtx.font = '14px Arial';
-            convCtx.fillText('Itération', convergenceCanvas.width / 2, convergenceCanvas.height - 15);
-
-            convCtx.save();
-            convCtx.translate(20, convergenceCanvas.height / 2);
-            convCtx.rotate(-Math.PI / 2);
-            convCtx.fillText('Inertie', 0, 0);
-            convCtx.restore();
-
-            // Draw grid lines and Y-axis labels
+            // Draw grid lines and Y-axis labels for first graph
             convCtx.strokeStyle = '#ddd';
             convCtx.lineWidth = 1;
             convCtx.fillStyle = '#666';
-            convCtx.font = '12px Arial';
+            convCtx.font = '11px Arial';
             convCtx.textAlign = 'right';
 
-            for (let i = 0; i <= 5; i++) {
-                const y = padding + (graphHeight * i / 5);
-                const value = maxInertia - (inertiaRange * i / 5);
+            for (let i = 0; i <= 4; i++) {
+                const y = padding + 30 + (graphHeight * i / 4);
+                const value = maxInertia - (inertiaRange * i / 4);
 
                 convCtx.beginPath();
                 convCtx.moveTo(padding, y);
                 convCtx.lineTo(convergenceCanvas.width - padding, y);
                 convCtx.stroke();
 
-                convCtx.fillText(value.toFixed(0), padding - 10, y + 5);
-            }
-
-            // Draw X-axis labels
-            convCtx.textAlign = 'center';
-            const maxIter = inertiaHistory.length - 1;
-            for (let i = 0; i <= Math.min(10, maxIter); i++) {
-                const iterValue = Math.floor((maxIter * i) / Math.min(10, maxIter));
-                const x = padding + (graphWidth * iterValue / maxIter);
-                convCtx.fillText(iterValue, x, convergenceCanvas.height - padding + 20);
+                convCtx.fillText(value.toFixed(0), padding - 5, y + 4);
             }
 
             // Draw inertia line
@@ -709,10 +706,10 @@
             convCtx.lineWidth = 3;
             convCtx.beginPath();
 
-            for (let i = 0; i < inertiaHistory.length; i++) {
-                const x = padding + (graphWidth * i / (inertiaHistory.length - 1));
-                const normalizedValue = (maxInertia - inertiaHistory[i]) / inertiaRange;
-                const y = padding + normalizedValue * graphHeight;
+            for (let i = 0; i < displayInertia.length; i++) {
+                const x = padding + (graphWidth * i / Math.max(1, displayInertia.length - 1));
+                const normalizedValue = inertiaRange > 0 ? (maxInertia - displayInertia[i]) / inertiaRange : 0.5;
+                const y = padding + 30 + normalizedValue * graphHeight;
 
                 if (i === 0) {
                     convCtx.moveTo(x, y);
@@ -722,16 +719,105 @@
             }
             convCtx.stroke();
 
-            // Draw points on the line
-            for (let i = 0; i < inertiaHistory.length; i++) {
-                const x = padding + (graphWidth * i / (inertiaHistory.length - 1));
-                const normalizedValue = (maxInertia - inertiaHistory[i]) / inertiaRange;
-                const y = padding + normalizedValue * graphHeight;
+            // Draw points on the inertia line
+            for (let i = 0; i < displayInertia.length; i++) {
+                const x = padding + (graphWidth * i / Math.max(1, displayInertia.length - 1));
+                const normalizedValue = inertiaRange > 0 ? (maxInertia - displayInertia[i]) / inertiaRange : 0.5;
+                const y = padding + 30 + normalizedValue * graphHeight;
 
-                convCtx.fillStyle = i === inertiaHistory.length - 1 ? '#ff6b6b' : '#667eea';
+                convCtx.fillStyle = i === displayInertia.length - 1 ? '#ff6b6b' : '#667eea';
                 convCtx.beginPath();
-                convCtx.arc(x, y, 5, 0, Math.PI * 2);
+                convCtx.arc(x, y, 4, 0, Math.PI * 2);
                 convCtx.fill();
+            }
+
+            // === SECOND GRAPH: Percentage Change ===
+            const graph2Y = padding + 30 + graphHeight + 40;
+
+            convCtx.fillStyle = '#333';
+            convCtx.font = 'bold 14px Arial';
+            convCtx.textAlign = 'center';
+            convCtx.fillText('Taux de réduction (%)', convergenceCanvas.width / 2, graph2Y - 10);
+
+            // Draw axes for second graph
+            convCtx.strokeStyle = '#333';
+            convCtx.lineWidth = 2;
+            convCtx.beginPath();
+            convCtx.moveTo(padding, graph2Y);
+            convCtx.lineTo(padding, graph2Y + graphHeight);
+            convCtx.lineTo(convergenceCanvas.width - padding, graph2Y + graphHeight);
+            convCtx.stroke();
+
+            if (percentageChanges.length > 0) {
+                const maxChange = Math.max(...percentageChanges, 0);
+                const minChange = Math.min(...percentageChanges, 0);
+                const changeRange = Math.max(maxChange - minChange, 1);
+
+                // Draw grid lines and Y-axis labels for second graph
+                convCtx.strokeStyle = '#ddd';
+                convCtx.lineWidth = 1;
+                convCtx.fillStyle = '#666';
+                convCtx.font = '11px Arial';
+                convCtx.textAlign = 'right';
+
+                for (let i = 0; i <= 4; i++) {
+                    const y = graph2Y + (graphHeight * i / 4);
+                    const value = maxChange - (changeRange * i / 4);
+
+                    convCtx.beginPath();
+                    convCtx.moveTo(padding, y);
+                    convCtx.lineTo(convergenceCanvas.width - padding, y);
+                    convCtx.stroke();
+
+                    convCtx.fillText(value.toFixed(1) + '%', padding - 5, y + 4);
+                }
+
+                // Draw percentage change line
+                convCtx.strokeStyle = '#2ecc71';
+                convCtx.lineWidth = 3;
+                convCtx.beginPath();
+
+                for (let i = 0; i < percentageChanges.length; i++) {
+                    const x = padding + (graphWidth * i / Math.max(1, percentageChanges.length - 1));
+                    const normalizedValue = changeRange > 0 ? (maxChange - percentageChanges[i]) / changeRange : 0.5;
+                    const y = graph2Y + normalizedValue * graphHeight;
+
+                    if (i === 0) {
+                        convCtx.moveTo(x, y);
+                    } else {
+                        convCtx.lineTo(x, y);
+                    }
+                }
+                convCtx.stroke();
+
+                // Draw points on the percentage line
+                for (let i = 0; i < percentageChanges.length; i++) {
+                    const x = padding + (graphWidth * i / Math.max(1, percentageChanges.length - 1));
+                    const normalizedValue = changeRange > 0 ? (maxChange - percentageChanges[i]) / changeRange : 0.5;
+                    const y = graph2Y + normalizedValue * graphHeight;
+
+                    convCtx.fillStyle = i === percentageChanges.length - 1 ? '#ff6b6b' : '#2ecc71';
+                    convCtx.beginPath();
+                    convCtx.arc(x, y, 4, 0, Math.PI * 2);
+                    convCtx.fill();
+                }
+            }
+
+            // Draw X-axis label
+            convCtx.fillStyle = '#333';
+            convCtx.font = '12px Arial';
+            convCtx.textAlign = 'center';
+            convCtx.fillText('Itération', convergenceCanvas.width / 2, convergenceCanvas.height - 5);
+
+            // Draw X-axis iteration labels
+            convCtx.fillStyle = '#666';
+            convCtx.font = '11px Arial';
+            const maxIter = inertiaHistory.length - 1;
+            for (let i = 0; i <= Math.min(10, maxIter - startIndex); i++) {
+                const iterValue = startIndex + Math.floor(((maxIter - startIndex) * i) / Math.min(10, maxIter - startIndex));
+                const displayIterValue = Math.floor((displayInertia.length - 1) * i / Math.min(10, maxIter - startIndex));
+                const x = padding + (graphWidth * displayIterValue / Math.max(1, displayInertia.length - 1));
+                convCtx.fillText(iterValue, x, convergenceCanvas.height - 20);
             }
 
             // Show convergence status
@@ -739,7 +825,15 @@
                 convCtx.fillStyle = '#2ecc71';
                 convCtx.font = 'bold 14px Arial';
                 convCtx.textAlign = 'center';
-                convCtx.fillText('✓ Convergé!', convergenceCanvas.width / 2, padding - 10);
+                convCtx.fillText('✓ Convergé!', convergenceCanvas.width / 2, padding - 5);
+            }
+
+            // Show note if first iteration was excluded
+            if (startIndex > 0) {
+                convCtx.fillStyle = '#999';
+                convCtx.font = '10px Arial';
+                convCtx.textAlign = 'right';
+                convCtx.fillText('(Itération 0 exclue pour meilleure lisibilité)', convergenceCanvas.width - padding, padding + 15);
             }
         }
 
