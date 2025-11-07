@@ -77,6 +77,16 @@
                     <input type="range" id="cParam" min="0.1" max="10" step="0.1" value="1" style="width: 100%;">
                     <div style="text-align: center; font-weight: bold; color: #667eea;" id="cValue">C = 1.0</div>
                 </div>
+                <div style="margin-bottom: 20px;" id="gammaControl">
+                    <label><strong>Gamma (RBF):</strong></label>
+                    <input type="range" id="gammaParam" min="0.1" max="5" step="0.1" value="1" style="width: 100%;">
+                    <div style="text-align: center; font-weight: bold; color: #667eea;" id="gammaValue">γ = 1.0</div>
+                </div>
+                <div style="margin-bottom: 20px; display: none;" id="degreeControl">
+                    <label><strong>Degré (Polynomial):</strong></label>
+                    <input type="range" id="degreeParam" min="2" max="5" step="1" value="3" style="width: 100%;">
+                    <div style="text-align: center; font-weight: bold; color: #667eea;" id="degreeValue">d = 3</div>
+                </div>
                 <button class="btn-primary" onclick="trainSVM()">Entraîner SVM</button>
                 <button class="btn-secondary" onclick="generatePattern('xor')">Motif XOR</button>
                 <button class="btn-secondary" onclick="generatePattern('circles')">Cercles Concentriques</button>
@@ -165,9 +175,29 @@ Seuls ces points déterminent l'hyperplan
         let points = [];
         let selectedClass = 0;
         let supportVectors = [];
+        let alphas = [];
 
         document.getElementById('cParam').addEventListener('input', (e) => {
             document.getElementById('cValue').textContent = 'C = ' + parseFloat(e.target.value).toFixed(1);
+        });
+
+        document.getElementById('gammaParam').addEventListener('input', (e) => {
+            document.getElementById('gammaValue').textContent = 'γ = ' + parseFloat(e.target.value).toFixed(1);
+            if (supportVectors.length > 0) draw();
+        });
+
+        document.getElementById('degreeParam').addEventListener('input', (e) => {
+            document.getElementById('degreeValue').textContent = 'd = ' + parseInt(e.target.value);
+            if (supportVectors.length > 0) draw();
+        });
+
+        document.getElementById('kernelSelect').addEventListener('change', (e) => {
+            const kernel = e.target.value;
+            document.getElementById('gammaControl').style.display = kernel === 'rbf' ? 'block' : 'none';
+            document.getElementById('degreeControl').style.display = kernel === 'poly' ? 'block' : 'none';
+            if (supportVectors.length > 0) {
+                trainSVM();
+            }
         });
 
         const canvas = document.getElementById('svmCanvas');
@@ -219,8 +249,48 @@ Seuls ces points déterminent l'hyperplan
             const kernel = document.getElementById('kernelSelect').value;
             const C = parseFloat(document.getElementById('cParam').value);
 
-            // Simplified SVM simulation
-            supportVectors = points.filter((p, i) => i % 3 === 0);
+            // Find potential support vectors near decision boundary
+            // First, find approximate decision boundary
+            const class0Points = points.filter(p => p.label === 0);
+            const class1Points = points.filter(p => p.label === 1);
+
+            if (class0Points.length === 0 || class1Points.length === 0) return;
+
+            // Select support vectors: points closest to the opposite class
+            supportVectors = [];
+            alphas = [];
+
+            // For each class, find points closest to opposite class
+            class0Points.forEach(p0 => {
+                let minDist = Infinity;
+                class1Points.forEach(p1 => {
+                    const dist = Math.sqrt(Math.pow(p0.x - p1.x, 2) + Math.pow(p0.y - p1.y, 2));
+                    if (dist < minDist) minDist = dist;
+                });
+                if (minDist < 0.3) { // Threshold for being near boundary
+                    supportVectors.push(p0);
+                    alphas.push(1.0);
+                }
+            });
+
+            class1Points.forEach(p1 => {
+                let minDist = Infinity;
+                class0Points.forEach(p0 => {
+                    const dist = Math.sqrt(Math.pow(p1.x - p0.x, 2) + Math.pow(p1.y - p0.y, 2));
+                    if (dist < minDist) minDist = dist;
+                });
+                if (minDist < 0.3) {
+                    supportVectors.push(p1);
+                    alphas.push(1.0);
+                }
+            });
+
+            // Ensure we have at least some support vectors
+            if (supportVectors.length === 0) {
+                supportVectors = [...class0Points.slice(0, 3), ...class1Points.slice(0, 3)];
+                alphas = new Array(supportVectors.length).fill(1.0);
+            }
+
             draw();
         }
 
@@ -228,20 +298,26 @@ Seuls ces points déterminent l'hyperplan
             if (supportVectors.length === 0) return 0;
 
             const kernel = document.getElementById('kernelSelect').value;
+            const gamma = parseFloat(document.getElementById('gammaParam').value);
+            const degree = parseInt(document.getElementById('degreeParam').value);
             let score = 0;
 
-            supportVectors.forEach(sv => {
+            supportVectors.forEach((sv, idx) => {
                 let k;
                 if (kernel === 'linear') {
+                    // Linear kernel: K(x,y) = x·y
                     k = x * sv.x + y * sv.y;
                 } else if (kernel === 'rbf') {
-                    const gamma = 2;
+                    // RBF kernel: K(x,y) = exp(-γ||x-y||²)
                     const dist = Math.pow(x - sv.x, 2) + Math.pow(y - sv.y, 2);
                     k = Math.exp(-gamma * dist);
-                } else {
-                    k = Math.pow(x * sv.x + y * sv.y + 1, 2);
+                } else if (kernel === 'poly') {
+                    // Polynomial kernel: K(x,y) = (x·y + 1)^d
+                    const dot = x * sv.x + y * sv.y;
+                    k = Math.pow(dot + 1, degree);
                 }
-                score += (sv.label === 1 ? 1 : -1) * k;
+                const alpha = alphas[idx] || 1.0;
+                score += alpha * (sv.label === 1 ? 1 : -1) * k;
             });
 
             return score > 0 ? 1 : 0;
