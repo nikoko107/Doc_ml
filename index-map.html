@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apprentissage Machine - Carte du Monde</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #1e3a5f 0%, #2d5a7b 50%, #1e3a5f 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: white;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            position: relative;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #f0e68c;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+            font-family: 'Georgia', serif;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: #ddd;
+            font-style: italic;
+        }
+
+        .view-toggles {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-toggle {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e3a5f;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .view-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+            background: white;
+        }
+
+        .map-container {
+            position: relative;
+            width: 100%;
+            max-width: 1600px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .world-map {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));
+        }
+
+        .continent {
+            fill: #8b7355;
+            stroke: #5a4a3a;
+            stroke-width: 2;
+            transition: all 0.3s;
+        }
+
+        .continent:hover {
+            filter: brightness(1.2);
+        }
+
+        .continent.historical {
+            fill: #d4756b;
+        }
+
+        .continent.modern {
+            fill: #6bb6d4;
+        }
+
+        .continent.nlp {
+            fill: #8bc34a;
+        }
+
+        .continent.evaluation {
+            fill: #ffd54f;
+        }
+
+        .continent.ia-moderne {
+            fill: #ba68c8;
+        }
+
+        .ocean {
+            fill: #2c5f7f;
+        }
+
+        .city {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .city circle {
+            fill: #ff4444;
+            stroke: white;
+            stroke-width: 2;
+        }
+
+        .city:hover circle {
+            fill: #ffaa00;
+            r: 8;
+        }
+
+        .city-label {
+            fill: white;
+            font-size: 11px;
+            font-weight: bold;
+            text-anchor: middle;
+            pointer-events: none;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        .continent-label {
+            fill: #2c1810;
+            font-size: 28px;
+            font-weight: bold;
+            text-anchor: middle;
+            font-family: 'Georgia', serif;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(20, 20, 20, 0.95);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            max-width: 300px;
+            border: 2px solid #ffd700;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        .tooltip h3 {
+            color: #ffd700;
+            margin-bottom: 8px;
+            font-size: 1.2em;
+        }
+
+        .tooltip p {
+            font-size: 0.9em;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .tooltip .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .badge-interactive {
+            background: #2196f3;
+        }
+
+        .badge-animation {
+            background: #9c27b0;
+        }
+
+        .legend {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #ffd700;
+            backdrop-filter: blur(10px);
+        }
+
+        .legend h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 1px solid #666;
+        }
+
+        .compass {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 80px;
+            height: 80px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 50%;
+            border: 3px solid #ffd700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            color: #ffd700;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .view-toggles {
+                position: static;
+                justify-content: center;
+                margin-top: 15px;
+            }
+
+            .legend, .compass {
+                display: none;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="view-toggles">
+            <a href="index.html" class="view-toggle">📋 Vue Liste</a>
+            <a href="index-cards.html" class="view-toggle">🎴 Vue Cartes</a>
+        </div>
+        <h1>🗺️ Le Monde de l'Apprentissage Machine</h1>
+        <p class="subtitle">Explorez les continents de l'Intelligence Artificielle</p>
+    </div>
+
+    <div class="map-container">
+        <svg class="world-map" viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg">
+            <!-- Ocean Background -->
+            <rect class="ocean" x="0" y="0" width="1400" height="900"/>
+
+            <!-- Waves decoration -->
+            <defs>
+                <pattern id="waves" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                    <path d="M0,50 Q25,40 50,50 T100,50" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                    <path d="M0,60 Q25,50 50,60 T100,60" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                </pattern>
+            </defs>
+            <rect x="0" y="0" width="1400" height="900" fill="url(#waves)"/>
+
+            <!-- Continent 1: ML Historique (Nord-Ouest) -->
+            <path class="continent historical" d="M 100,120 Q 150,100 250,120 L 320,150 Q 340,180 320,220 L 280,280 Q 250,300 200,290 L 150,260 Q 120,230 100,200 Q 80,160 100,120 Z"/>
+            <text class="continent-label" x="210" y="210">Historica</text>
+
+            <!-- Continent 2: ML Moderne (Nord-Est) -->
+            <path class="continent modern" d="M 900,100 Q 950,80 1050,110 L 1150,140 Q 1180,170 1170,220 L 1140,290 Q 1100,330 1020,320 L 950,300 Q 910,270 900,230 Q 880,150 900,100 Z"/>
+            <text class="continent-label" x="1035" y="215">Moderna</text>
+
+            <!-- Continent 3: Archipel NLP (Ouest) -->
+            <ellipse class="continent nlp" cx="250" cy="480" rx="120" ry="90"/>
+            <ellipse class="continent nlp" cx="180" cy="580" rx="70" ry="60"/>
+            <ellipse class="continent nlp" cx="320" cy="570" rx="80" ry="65"/>
+            <text class="continent-label" x="250" y="490">NLP</text>
+
+            <!-- Continent 4: Évaluation (Centre) -->
+            <path class="continent evaluation" d="M 550,350 Q 600,320 700,340 L 780,380 Q 800,420 790,480 L 760,550 Q 720,590 640,580 L 570,550 Q 540,510 540,460 Q 535,390 550,350 Z"/>
+            <text class="continent-label" x="665" y="465">Evaluatia</text>
+
+            <!-- Continent 5: IA Moderne (Sud-Est - Le plus grand) -->
+            <path class="continent ia-moderne" d="M 950,450 Q 1000,420 1100,440 L 1200,470 Q 1250,500 1260,560 L 1250,640 Q 1230,700 1180,740 L 1100,770 Q 1020,780 950,760 L 880,720 Q 850,680 850,620 L 860,550 Q 890,490 950,450 Z"/>
+            <text class="continent-label" x="1055" y="610">IA Moderna</text>
+
+            <!-- Cities - ML Historique -->
+            <g class="city" data-app="linear-regression">
+                <circle cx="180" cy="160" r="6"/>
+                <text class="city-label" x="180" y="150">Linearville</text>
+            </g>
+            <g class="city" data-app="perceptron">
+                <circle cx="250" cy="180" r="6"/>
+                <text class="city-label" x="250" y="170">Perceptron</text>
+            </g>
+            <g class="city" data-app="kmeans">
+                <circle cx="220" cy="240" r="6"/>
+                <text class="city-label" x="220" y="230">K-Meansburg</text>
+            </g>
+            <g class="city" data-app="svm">
+                <circle cx="160" cy="220" r="6"/>
+                <text class="city-label" x="160" y="210">SVM City</text>
+            </g>
+
+            <!-- Cities - ML Moderne -->
+            <g class="city" data-app="neural-network">
+                <circle cx="1000" cy="150" r="6"/>
+                <text class="city-label" x="1000" y="140">Neuralville</text>
+            </g>
+            <g class="city" data-app="gradient-descent">
+                <circle cx="1080" cy="180" r="6"/>
+                <text class="city-label" x="1080" y="170">Gradient Peak</text>
+            </g>
+            <g class="city" data-app="backpropagation">
+                <circle cx="1050" cy="240" r="6"/>
+                <text class="city-label" x="1050" y="230">Backprop Bay</text>
+            </g>
+            <g class="city" data-app="cnn">
+                <circle cx="980" cy="260" r="6"/>
+                <text class="city-label" x="980" y="250">CNN Valley</text>
+            </g>
+
+            <!-- Cities - NLP Archipel -->
+            <g class="city" data-app="one-hot-encoding">
+                <circle cx="240" cy="460" r="6"/>
+                <text class="city-label" x="240" y="450">One-Hot Isle</text>
+            </g>
+            <g class="city" data-app="bag-of-words">
+                <circle cx="260" cy="500" r="6"/>
+                <text class="city-label" x="260" y="490">BoW Island</text>
+            </g>
+            <g class="city" data-app="tfidf">
+                <circle cx="190" cy="570" r="6"/>
+                <text class="city-label" x="190" y="560">TF-IDF Port</text>
+            </g>
+            <g class="city" data-app="embeddings-animation">
+                <circle cx="310" cy="560" r="6"/>
+                <text class="city-label" x="310" y="550">Embedding Cove</text>
+            </g>
+
+            <!-- Cities - Évaluation -->
+            <g class="city" data-app="metrics-evaluation">
+                <circle cx="650" cy="400" r="6"/>
+                <text class="city-label" x="650" y="390">Metrics Town</text>
+            </g>
+            <g class="city" data-app="data-preprocessing">
+                <circle cx="720" cy="430" r="6"/>
+                <text class="city-label" x="720" y="420">Preprocess</text>
+            </g>
+            <g class="city" data-app="random-forest">
+                <circle cx="680" cy="490" r="6"/>
+                <text class="city-label" x="680" y="480">Forest Glen</text>
+            </g>
+            <g class="city" data-app="genetic-algorithm">
+                <circle cx="600" cy="470" r="6"/>
+                <text class="city-label" x="600" y="460">Genetic Labs</text>
+            </g>
+            <g class="city" data-app="q-learning">
+                <circle cx="640" cy="530" r="6"/>
+                <text class="city-label" x="640" y="520">Q-Learning Bay</text>
+            </g>
+
+            <!-- Cities - IA Moderne -->
+            <g class="city" data-app="rag-animation">
+                <circle cx="1050" cy="520" r="6"/>
+                <text class="city-label" x="1050" y="510">RAG Harbor</text>
+            </g>
+            <g class="city" data-app="mcp-animation">
+                <circle cx="1130" cy="550" r="6"/>
+                <text class="city-label" x="1130" y="540">MCP Station</text>
+            </g>
+            <g class="city" data-app="lora-animation">
+                <circle cx="1180" cy="600" r="6"/>
+                <text class="city-label" x="1180" y="590">LoRA Springs</text>
+            </g>
+            <g class="city" data-app="deep-learning-training">
+                <circle cx="1100" cy="650" r="6"/>
+                <text class="city-label" x="1100" y="640">Deep Learn</text>
+            </g>
+            <g class="city" data-app="transformers-attention">
+                <circle cx="1020" cy="640" r="6"/>
+                <text class="city-label" x="1020" y="630">Transformer</text>
+            </g>
+            <g class="city" data-app="diffusion-models">
+                <circle cx="960" cy="600" r="6"/>
+                <text class="city-label" x="960" y="590">Diffusion</text>
+            </g>
+            <g class="city" data-app="beam-search-temperature">
+                <circle cx="970" cy="530" r="6"/>
+                <text class="city-label" x="970" y="520">Beam City</text>
+            </g>
+            <g class="city" data-app="graph-neural-networks">
+                <circle cx="1150" cy="680" r="6"/>
+                <text class="city-label" x="1150" y="670">Graph Nexus</text>
+            </g>
+        </svg>
+    </div>
+
+    <div class="tooltip" id="tooltip">
+        <h3 id="tooltip-title"></h3>
+        <p id="tooltip-description"></p>
+        <span class="badge" id="tooltip-badge"></span>
+    </div>
+
+    <div class="legend">
+        <h3>🗺️ Légende</h3>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #d4756b;"></div>
+            <span>ML Historique</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #6bb6d4;"></div>
+            <span>ML Moderne</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #8bc34a;"></div>
+            <span>NLP</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffd54f;"></div>
+            <span>Évaluation</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ba68c8;"></div>
+            <span>IA Moderne</span>
+        </div>
+    </div>
+
+    <div class="compass">🧭</div>
+
+    <footer>
+        <p>🗺️ Carte du Monde de l'Apprentissage Machine • 25 Applications • 5 Continents</p>
+    </footer>
+
+    <script>
+        const apps = {
+            'linear-regression': {
+                title: 'Régression Linéaire',
+                description: 'Descente de gradient et solution analytique optimale pour prédire des valeurs continues.',
+                type: 'interactive',
+                url: 'apps/linear-regression.html'
+            },
+            'perceptron': {
+                title: 'Perceptron',
+                description: 'Premier réseau de neurones (1958). Classification binaire avec frontière de décision linéaire.',
+                type: 'interactive',
+                url: 'apps/perceptron.html'
+            },
+            'kmeans': {
+                title: 'K-Means Clustering',
+                description: 'Clustering non supervisé. Groupe automatiquement vos données en K clusters.',
+                type: 'interactive',
+                url: 'apps/kmeans.html'
+            },
+            'svm': {
+                title: 'SVM',
+                description: 'Support Vector Machines avec kernel trick (Linéaire, RBF, Polynomial).',
+                type: 'interactive',
+                url: 'apps/svm.html'
+            },
+            'neural-network': {
+                title: 'Réseau de Neurones',
+                description: 'Réseau multicouche avec visualisation de l\'apprentissage en temps réel.',
+                type: 'interactive',
+                url: 'apps/neural-network.html'
+            },
+            'gradient-descent': {
+                title: 'Descente de Gradient',
+                description: 'Le cœur de l\'apprentissage profond. Trouve le minimum d\'une fonction par itérations.',
+                type: 'interactive',
+                url: 'apps/gradient-descent.html'
+            },
+            'backpropagation': {
+                title: 'Backpropagation',
+                description: 'Propagation des erreurs à travers le réseau pour ajuster les poids.',
+                type: 'interactive',
+                url: 'apps/backpropagation.html'
+            },
+            'cnn': {
+                title: 'CNN',
+                description: 'Réseaux convolutifs pour la vision par ordinateur. Détection de features visuelles.',
+                type: 'interactive',
+                url: 'apps/cnn.html'
+            },
+            'one-hot-encoding': {
+                title: 'One-Hot Encoding',
+                description: 'Transformation de mots en vecteurs binaires. Technique de base du NLP.',
+                type: 'interactive',
+                url: 'apps/one-hot-encoding.html'
+            },
+            'bag-of-words': {
+                title: 'Bag of Words',
+                description: 'Représentation de documents par fréquence des mots.',
+                type: 'interactive',
+                url: 'apps/bag-of-words.html'
+            },
+            'tfidf': {
+                title: 'TF-IDF',
+                description: 'Identifie les mots importants. Utilisé par les moteurs de recherche.',
+                type: 'interactive',
+                url: 'apps/tfidf.html'
+            },
+            'embeddings-animation': {
+                title: 'Word Embeddings',
+                description: 'Roi - Homme + Femme ≈ Reine. Visualisation de l\'algèbre vectorielle.',
+                type: 'animation',
+                url: 'apps/embeddings-animation.html'
+            },
+            'metrics-evaluation': {
+                title: 'Métriques & Évaluation',
+                description: 'Matrice de confusion, ROC/AUC, classes déséquilibrées.',
+                type: 'interactive',
+                url: 'apps/metrics-evaluation.html'
+            },
+            'data-preprocessing': {
+                title: 'Prétraitement',
+                description: 'Normalisation, outliers, valeurs manquantes. 80% du travail en ML.',
+                type: 'interactive',
+                url: 'apps/data-preprocessing.html'
+            },
+            'random-forest': {
+                title: 'Random Forest',
+                description: 'Ensemble d\'arbres de décision. Bootstrap sampling et feature importance.',
+                type: 'interactive',
+                url: 'apps/random-forest.html'
+            },
+            'genetic-algorithm': {
+                title: 'Algorithme Génétique',
+                description: 'Optimisation inspirée de l\'évolution. Sélection, croisement, mutation.',
+                type: 'interactive',
+                url: 'apps/genetic-algorithm.html'
+            },
+            'q-learning': {
+                title: 'Q-Learning',
+                description: 'Apprentissage par renforcement. Agent apprend par essai-erreur.',
+                type: 'interactive',
+                url: 'apps/q-learning.html'
+            },
+            'rag-animation': {
+                title: 'RAG',
+                description: 'Retrieval Augmented Generation. Recherche vectorielle + génération LLM.',
+                type: 'animation',
+                url: 'apps/rag-animation.html'
+            },
+            'mcp-animation': {
+                title: 'MCP',
+                description: 'Model Context Protocol. Connexion standardisée IA ↔ contexte.',
+                type: 'animation',
+                url: 'apps/mcp-animation.html'
+            },
+            'lora-animation': {
+                title: 'LoRA',
+                description: 'Low-Rank Adaptation. Fine-tuning efficace via décomposition matricielle.',
+                type: 'animation',
+                url: 'apps/lora-animation.html'
+            },
+            'deep-learning-training': {
+                title: 'Entraînement Deep Learning',
+                description: 'Forward pass → Loss → Backprop → Optimiseur. Cycle complet.',
+                type: 'animation',
+                url: 'apps/deep-learning-training.html'
+            },
+            'transformers-attention': {
+                title: 'Transformers & Attention',
+                description: 'Mécanisme Q, K, V. Relations grammaticales en français.',
+                type: 'animation',
+                url: 'apps/transformers-attention.html'
+            },
+            'diffusion-models': {
+                title: 'Modèles de Diffusion',
+                description: 'Génération d\'images par ajout puis retrait progressif de bruit.',
+                type: 'animation',
+                url: 'apps/diffusion-models.html'
+            },
+            'beam-search-temperature': {
+                title: 'Beam Search & Température',
+                description: 'Stratégies de génération : Greedy, Beam, Temperature sampling.',
+                type: 'interactive',
+                url: 'apps/beam-search-temperature.html'
+            },
+            'graph-neural-networks': {
+                title: 'Graph Neural Networks',
+                description: 'Message passing sur graphes. GCN, GraphSAGE, GAT.',
+                type: 'animation',
+                url: 'apps/graph-neural-networks.html'
+            }
+        };
+
+        const tooltip = document.getElementById('tooltip');
+        const cities = document.querySelectorAll('.city');
+
+        cities.forEach(city => {
+            city.addEventListener('mouseenter', (e) => {
+                const appId = city.getAttribute('data-app');
+                const app = apps[appId];
+
+                document.getElementById('tooltip-title').textContent = app.title;
+                document.getElementById('tooltip-description').textContent = app.description;
+
+                const badge = document.getElementById('tooltip-badge');
+                badge.textContent = app.type === 'interactive' ? '🎮 Interactif' : '🎬 Animation';
+                badge.className = 'badge ' + (app.type === 'interactive' ? 'badge-interactive' : 'badge-animation');
+
+                tooltip.classList.add('show');
+            });
+
+            city.addEventListener('mousemove', (e) => {
+                tooltip.style.left = e.pageX + 20 + 'px';
+                tooltip.style.top = e.pageY - 80 + 'px';
+            });
+
+            city.addEventListener('mouseleave', () => {
+                tooltip.classList.remove('show');
+            });
+
+            city.addEventListener('click', () => {
+                const appId = city.getAttribute('data-app');
+                window.location.href = apps[appId].url;
+            });
+        });
+    </script>
+</body>
+</html>
