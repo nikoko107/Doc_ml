@@ -51,6 +51,13 @@
             margin-bottom: 20px;
         }
 
+        .visualization-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
         .canvas-container {
             background: white;
             border-radius: 15px;
@@ -156,23 +163,55 @@
             <p>Cliquez sur le canvas pour ajouter des points</p>
         </header>
 
-        <div class="main-content">
+        <div class="visualization-grid">
             <div class="canvas-container">
-                <canvas id="canvas" width="800" height="600"></canvas>
+                <h3 style="color: #667eea; margin-bottom: 15px; text-align: center;">Régression Linéaire</h3>
+                <canvas id="canvas" width="700" height="500"></canvas>
+            </div>
+
+            <div class="canvas-container">
+                <h3 style="color: #667eea; margin-bottom: 15px; text-align: center;">Convergence de l'erreur</h3>
+                <canvas id="convergenceCanvas" width="700" height="500"></canvas>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="explanation">
+                <h3>🎓 Comment ça marche ?</h3>
+                <p>
+                    La <strong>régression linéaire</strong> utilise la <strong>descente de gradient</strong> pour optimiser les paramètres m (pente) et b (ordonnée).
+                    L'algorithme ajuste progressivement ces valeurs pour minimiser l'erreur quadratique moyenne (MSE).
+                </p>
+                <div class="formula">
+                    MSE = (1/n) Σ (y_réel - y_prédit)²
+                </div>
+                <p>
+                    Le graphique de convergence à droite montre:
+                </p>
+                <ul style="line-height: 1.8; color: #666;">
+                    <li><strong>MSE</strong>: L'évolution de l'erreur au fil des itérations</li>
+                    <li><strong>Taux de réduction</strong>: Le pourcentage de réduction de l'erreur entre chaque itération</li>
+                </ul>
+                <p>
+                    <strong>Conseil:</strong> Ajustez la vitesse d'apprentissage pour voir son impact sur la convergence!
+                </p>
             </div>
 
             <div class="controls">
                 <h3>📊 Informations</h3>
                 <div class="info-box">
                     <p><strong>Nombre de points:</strong> <span id="pointCount">0</span></p>
+                    <p><strong>Itération:</strong> <span id="iteration">0</span> / <span id="maxIterations">1000</span></p>
                     <p><strong>Équation:</strong></p>
                     <p id="equation">y = mx + b</p>
                     <p><strong>Pente (m):</strong> <span id="slope">-</span></p>
                     <p><strong>Ordonnée (b):</strong> <span id="intercept">-</span></p>
                     <p><strong>Erreur (MSE):</strong> <span id="error">-</span></p>
+                    <p><strong>Réduction:</strong> <span id="reduction">-</span></p>
                 </div>
 
                 <button class="btn-primary" onclick="addRandomPoints()">Ajouter 10 points aléatoires</button>
+                <button class="btn-primary" onclick="startOptimization()" id="optimizeBtn">Optimiser (animation)</button>
                 <button class="btn-secondary" onclick="clearPoints()">Effacer tous les points</button>
 
                 <div style="margin-top: 20px;">
@@ -182,36 +221,24 @@
                 </div>
             </div>
         </div>
-
-        <div class="explanation">
-            <h3>🎓 Comment ça marche ?</h3>
-            <p>
-                La <strong>régression linéaire</strong> est l'un des algorithmes les plus anciens et fondamentaux du machine learning (Francis Galton, 1886).
-                Elle cherche à trouver la meilleure ligne droite qui passe à travers vos points de données.
-            </p>
-            <div class="formula">
-                y = mx + b
-            </div>
-            <p>
-                Où <strong>m</strong> est la pente de la ligne et <strong>b</strong> est l'ordonnée à l'origine.
-            </p>
-            <p>
-                L'algorithme utilise la <strong>descente de gradient</strong> pour minimiser l'erreur quadratique moyenne (MSE) entre
-                les prédictions et les vraies valeurs. À chaque itération, il ajuste m et b pour réduire l'erreur.
-            </p>
-            <div class="formula">
-                MSE = (1/n) Σ (y_réel - y_prédit)²
-            </div>
-        </div>
     </div>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
+        const convergenceCanvas = document.getElementById('convergenceCanvas');
+        const convCtx = convergenceCanvas.getContext('2d');
+
         const points = [];
         let m = 0; // slope
         let b = 0.5; // intercept (normalized)
         let learningRate = 0.01;
+
+        // Tracking convergence metrics
+        let mseHistory = [];
+        let currentIteration = 0;
+        let isOptimizing = false;
+        let animationId = null;
 
         document.getElementById('learningRate').addEventListener('input', (e) => {
             learningRate = parseFloat(e.target.value);
@@ -223,36 +250,70 @@
         document.getElementById('learningRate').value = learningRate;
 
         canvas.addEventListener('click', (e) => {
+            if (isOptimizing) return; // Don't add points during optimization
             const rect = canvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             points.push({x, y});
-            train();
             draw();
             updateInfo();
         });
 
         function addRandomPoints() {
+            if (isOptimizing) return; // Don't add points during optimization
             for (let i = 0; i < 10; i++) {
                 const x = Math.random() * canvas.width;
                 const y = Math.random() * canvas.height;
                 points.push({x, y});
             }
-            train();
             draw();
             updateInfo();
         }
 
         function clearPoints() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            isOptimizing = false;
             points.length = 0;
             m = 0;
             b = 0.5;
+            mseHistory = [];
+            currentIteration = 0;
             draw();
+            drawConvergenceGraph();
             updateInfo();
+            document.getElementById('optimizeBtn').disabled = false;
+            document.getElementById('optimizeBtn').textContent = 'Optimiser (animation)';
         }
 
-        function train() {
-            if (points.length < 2) return;
+        function startOptimization() {
+            if (points.length < 2) {
+                alert('Ajoutez au moins 2 points pour commencer l\'optimisation!');
+                return;
+            }
+            if (isOptimizing) return;
+
+            isOptimizing = true;
+            currentIteration = 0;
+            mseHistory = [];
+            m = 0;
+            b = 0.5;
+
+            document.getElementById('optimizeBtn').disabled = true;
+            document.getElementById('optimizeBtn').textContent = 'Optimisation en cours...';
+
+            optimizeStep();
+        }
+
+        function optimizeStep() {
+            if (!isOptimizing || currentIteration >= 1000) {
+                isOptimizing = false;
+                document.getElementById('optimizeBtn').disabled = false;
+                document.getElementById('optimizeBtn').textContent = 'Optimiser (animation)';
+                return;
+            }
 
             // Normalize coordinates to [0, 1]
             const normalizedPoints = points.map(p => ({
@@ -260,31 +321,49 @@
                 y: p.y / canvas.height
             }));
 
-            // Gradient descent for 1000 iterations
-            for (let iter = 0; iter < 1000; iter++) {
-                let dm = 0;
-                let db = 0;
+            // Perform one gradient descent iteration
+            let dm = 0;
+            let db = 0;
 
-                for (let point of normalizedPoints) {
-                    const prediction = m * point.x + b;
-                    const error = prediction - point.y;
-                    dm += error * point.x;
-                    db += error;
-                }
+            for (let point of normalizedPoints) {
+                const prediction = m * point.x + b;
+                const error = prediction - point.y;
+                dm += error * point.x;
+                db += error;
+            }
 
-                dm = dm * 2 / normalizedPoints.length;
-                db = db * 2 / normalizedPoints.length;
+            dm = dm * 2 / normalizedPoints.length;
+            db = db * 2 / normalizedPoints.length;
 
-                m -= learningRate * dm;
-                b -= learningRate * db;
+            m -= learningRate * dm;
+            b -= learningRate * db;
 
-                // Check for NaN
-                if (isNaN(m) || isNaN(b)) {
-                    console.error('NaN detected! Resetting...');
-                    m = 0;
-                    b = 0.5;
-                    break;
-                }
+            // Check for NaN
+            if (isNaN(m) || isNaN(b)) {
+                console.error('NaN detected! Resetting...');
+                m = 0;
+                b = 0.5;
+                isOptimizing = false;
+                document.getElementById('optimizeBtn').disabled = false;
+                document.getElementById('optimizeBtn').textContent = 'Optimiser (animation)';
+                return;
+            }
+
+            // Track MSE
+            const mse = calculateMSE();
+            mseHistory.push(mse);
+            currentIteration++;
+
+            // Update display
+            draw();
+            drawConvergenceGraph();
+            updateInfo();
+
+            // Continue animation - adjust speed here (lower = faster)
+            if (currentIteration % 2 === 0) {  // Update display every 2 iterations for smoother animation
+                animationId = requestAnimationFrame(optimizeStep);
+            } else {
+                optimizeStep(); // Call directly for faster execution
             }
         }
 
@@ -369,21 +448,218 @@
 
         function updateInfo() {
             document.getElementById('pointCount').textContent = points.length;
+            document.getElementById('iteration').textContent = currentIteration;
+
             if (points.length >= 2) {
                 document.getElementById('slope').textContent = m.toFixed(4);
                 document.getElementById('intercept').textContent = b.toFixed(4);
                 document.getElementById('equation').textContent = `y = ${m.toFixed(4)}x + ${b.toFixed(4)}`;
-                document.getElementById('error').textContent = calculateMSE().toFixed(2);
+                const currentMSE = calculateMSE();
+                document.getElementById('error').textContent = currentMSE.toFixed(6);
+
+                // Calculate reduction percentage
+                if (mseHistory.length > 1) {
+                    const prevMSE = mseHistory[mseHistory.length - 2];
+                    const reduction = ((prevMSE - currentMSE) / prevMSE * 100).toFixed(2);
+                    document.getElementById('reduction').textContent = reduction + '%';
+                } else {
+                    document.getElementById('reduction').textContent = '-';
+                }
             } else {
                 document.getElementById('slope').textContent = '-';
                 document.getElementById('intercept').textContent = '-';
                 document.getElementById('equation').textContent = 'y = mx + b';
                 document.getElementById('error').textContent = '-';
+                document.getElementById('reduction').textContent = '-';
             }
+        }
+
+        function drawConvergenceGraph() {
+            // Clear convergence canvas
+            convCtx.fillStyle = '#f9f9f9';
+            convCtx.fillRect(0, 0, convergenceCanvas.width, convergenceCanvas.height);
+
+            if (mseHistory.length < 2) {
+                // Show placeholder text
+                convCtx.fillStyle = '#999';
+                convCtx.font = '18px Arial';
+                convCtx.textAlign = 'center';
+                convCtx.fillText('Le graphique de convergence', convergenceCanvas.width / 2, convergenceCanvas.height / 2 - 20);
+                convCtx.fillText('apparaîtra ici pendant l\'optimisation', convergenceCanvas.width / 2, convergenceCanvas.height / 2 + 10);
+                return;
+            }
+
+            const padding = 60;
+            const graphWidth = convergenceCanvas.width - 2 * padding;
+            const graphHeight = (convergenceCanvas.height - 2 * padding - 30) / 2; // Split for 2 graphs
+
+            // Calculate percentage changes
+            const percentageChanges = [];
+            for (let i = 1; i < mseHistory.length; i++) {
+                const change = ((mseHistory[i-1] - mseHistory[i]) / mseHistory[i-1]) * 100;
+                percentageChanges.push(change);
+            }
+
+            // === FIRST GRAPH: MSE Values ===
+            convCtx.fillStyle = '#333';
+            convCtx.font = 'bold 14px Arial';
+            convCtx.textAlign = 'center';
+            convCtx.fillText('Erreur Quadratique Moyenne (MSE)', convergenceCanvas.width / 2, 20);
+
+            // Find max and min MSE for scaling
+            let displayMSE = [...mseHistory];
+            let startIndex = 0;
+
+            // If first value is more than 3x the second, start from iteration 1
+            if (mseHistory.length > 1 && mseHistory[0] > mseHistory[1] * 3) {
+                displayMSE = mseHistory.slice(1);
+                startIndex = 1;
+            }
+
+            const maxMSE = Math.max(...displayMSE);
+            const minMSE = Math.min(...displayMSE);
+            const mseRange = maxMSE - minMSE;
+
+            // Draw axes for first graph
+            convCtx.strokeStyle = '#333';
+            convCtx.lineWidth = 2;
+            convCtx.beginPath();
+            convCtx.moveTo(padding, padding + 30);
+            convCtx.lineTo(padding, padding + 30 + graphHeight);
+            convCtx.lineTo(convergenceCanvas.width - padding, padding + 30 + graphHeight);
+            convCtx.stroke();
+
+            // Draw grid lines and Y-axis labels for first graph
+            convCtx.strokeStyle = '#ddd';
+            convCtx.lineWidth = 1;
+            convCtx.fillStyle = '#666';
+            convCtx.font = '11px Arial';
+            convCtx.textAlign = 'right';
+
+            for (let i = 0; i <= 4; i++) {
+                const y = padding + 30 + (graphHeight * i / 4);
+                const value = maxMSE - (mseRange * i / 4);
+
+                convCtx.beginPath();
+                convCtx.moveTo(padding, y);
+                convCtx.lineTo(convergenceCanvas.width - padding, y);
+                convCtx.stroke();
+
+                convCtx.fillText(value.toFixed(4), padding - 5, y + 4);
+            }
+
+            // Draw MSE line
+            convCtx.strokeStyle = '#667eea';
+            convCtx.lineWidth = 3;
+            convCtx.beginPath();
+
+            for (let i = 0; i < displayMSE.length; i++) {
+                const x = padding + (graphWidth * i / Math.max(1, displayMSE.length - 1));
+                const normalizedValue = mseRange > 0 ? (maxMSE - displayMSE[i]) / mseRange : 0.5;
+                const y = padding + 30 + normalizedValue * graphHeight;
+
+                if (i === 0) {
+                    convCtx.moveTo(x, y);
+                } else {
+                    convCtx.lineTo(x, y);
+                }
+            }
+            convCtx.stroke();
+
+            // Draw points on the MSE line
+            for (let i = 0; i < displayMSE.length; i++) {
+                const x = padding + (graphWidth * i / Math.max(1, displayMSE.length - 1));
+                const normalizedValue = mseRange > 0 ? (maxMSE - displayMSE[i]) / mseRange : 0.5;
+                const y = padding + 30 + normalizedValue * graphHeight;
+
+                convCtx.fillStyle = i === displayMSE.length - 1 ? '#ff6b6b' : '#667eea';
+                convCtx.beginPath();
+                convCtx.arc(x, y, 4, 0, Math.PI * 2);
+                convCtx.fill();
+            }
+
+            // === SECOND GRAPH: Percentage Change ===
+            const graph2Y = padding + 30 + graphHeight + 40;
+
+            convCtx.fillStyle = '#333';
+            convCtx.font = 'bold 14px Arial';
+            convCtx.textAlign = 'center';
+            convCtx.fillText('Taux de réduction (%)', convergenceCanvas.width / 2, graph2Y - 10);
+
+            // Draw axes for second graph
+            convCtx.strokeStyle = '#333';
+            convCtx.lineWidth = 2;
+            convCtx.beginPath();
+            convCtx.moveTo(padding, graph2Y);
+            convCtx.lineTo(padding, graph2Y + graphHeight);
+            convCtx.lineTo(convergenceCanvas.width - padding, graph2Y + graphHeight);
+            convCtx.stroke();
+
+            if (percentageChanges.length > 0) {
+                const maxChange = Math.max(...percentageChanges, 0);
+                const minChange = Math.min(...percentageChanges, 0);
+                const changeRange = Math.max(maxChange - minChange, 1);
+
+                // Draw grid lines and Y-axis labels for second graph
+                convCtx.strokeStyle = '#ddd';
+                convCtx.lineWidth = 1;
+                convCtx.fillStyle = '#666';
+                convCtx.font = '11px Arial';
+                convCtx.textAlign = 'right';
+
+                for (let i = 0; i <= 4; i++) {
+                    const y = graph2Y + (graphHeight * i / 4);
+                    const value = maxChange - (changeRange * i / 4);
+
+                    convCtx.beginPath();
+                    convCtx.moveTo(padding, y);
+                    convCtx.lineTo(convergenceCanvas.width - padding, y);
+                    convCtx.stroke();
+
+                    convCtx.fillText(value.toFixed(2) + '%', padding - 5, y + 4);
+                }
+
+                // Draw percentage change line
+                convCtx.strokeStyle = '#ff6b6b';
+                convCtx.lineWidth = 2;
+                convCtx.beginPath();
+
+                for (let i = 0; i < percentageChanges.length; i++) {
+                    const x = padding + (graphWidth * i / Math.max(1, percentageChanges.length - 1));
+                    const normalizedValue = changeRange > 0 ? (maxChange - percentageChanges[i]) / changeRange : 0.5;
+                    const y = graph2Y + normalizedValue * graphHeight;
+
+                    if (i === 0) {
+                        convCtx.moveTo(x, y);
+                    } else {
+                        convCtx.lineTo(x, y);
+                    }
+                }
+                convCtx.stroke();
+
+                // Draw points on the percentage change line
+                for (let i = 0; i < percentageChanges.length; i++) {
+                    const x = padding + (graphWidth * i / Math.max(1, percentageChanges.length - 1));
+                    const normalizedValue = changeRange > 0 ? (maxChange - percentageChanges[i]) / changeRange : 0.5;
+                    const y = graph2Y + normalizedValue * graphHeight;
+
+                    convCtx.fillStyle = i === percentageChanges.length - 1 ? '#764ba2' : '#ff6b6b';
+                    convCtx.beginPath();
+                    convCtx.arc(x, y, 3, 0, Math.PI * 2);
+                    convCtx.fill();
+                }
+            }
+
+            // Draw X-axis label
+            convCtx.fillStyle = '#333';
+            convCtx.font = '12px Arial';
+            convCtx.textAlign = 'center';
+            convCtx.fillText('Itérations', convergenceCanvas.width / 2, convergenceCanvas.height - 10);
         }
 
         // Initial draw
         draw();
+        drawConvergenceGraph();
     </script>
 </body>
 </html>
