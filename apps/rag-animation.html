@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG - Retrieval Augmented Generation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block; background: rgba(255,255,255,0.2); color: white;
+            padding: 10px 20px; font-weight: 600; text-decoration: none; border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .back-link:hover { background: rgba(255,255,255,0.3); }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .animation-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            height: 700px;
+            overflow: hidden;
+        }
+
+        .component {
+            position: absolute;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            min-width: 180px;
+        }
+
+        .component h3 {
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+
+        .component p {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        .user {
+            top: 50px;
+            left: 50px;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        }
+
+        .embedding-model {
+            top: 50px;
+            left: 350px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        }
+
+        .vector-db {
+            top: 200px;
+            left: 350px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            min-width: 220px;
+        }
+
+        .llm {
+            top: 350px;
+            left: 350px;
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            min-width: 200px;
+        }
+
+        .response {
+            top: 500px;
+            left: 50px;
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        }
+
+        .document {
+            position: absolute;
+            background: #ecf0f1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.75em;
+            color: #2c3e50;
+            border: 2px solid #95a5a6;
+            max-width: 140px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .doc1 { top: 220px; right: 80px; }
+        .doc2 { top: 280px; right: 80px; }
+        .doc3 { top: 340px; right: 80px; }
+
+        .data-packet {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            animation-timing-function: ease-in-out;
+        }
+
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px 30px;
+            min-width: 500px;
+            text-align: center;
+        }
+
+        .info-panel h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .info-panel p {
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        .arrow {
+            position: absolute;
+            background: #95a5a6;
+            height: 3px;
+            transform-origin: left center;
+        }
+
+        .arrow::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -4px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid #95a5a6;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+
+        @keyframes question-to-embedding {
+            0% { top: 80px; left: 200px; opacity: 0; }
+            20% { opacity: 1; }
+            100% { top: 80px; left: 360px; }
+        }
+
+        @keyframes embedding-to-vectordb {
+            0% { top: 110px; left: 430px; opacity: 0; }
+            20% { opacity: 1; }
+            100% { top: 210px; left: 430px; }
+        }
+
+        @keyframes docs-to-llm {
+            0% { top: 270px; right: 100px; opacity: 0; }
+            10% { opacity: 1; }
+            100% { top: 380px; left: 420px; }
+        }
+
+        @keyframes llm-to-response {
+            0% { top: 400px; left: 380px; opacity: 0; }
+            20% { opacity: 1; }
+            100% { top: 520px; left: 150px; }
+        }
+
+        .stage-1 { animation: question-to-embedding 2s ease-in-out; }
+        .stage-2 { animation: embedding-to-vectordb 2s ease-in-out; animation-delay: 2s; opacity: 0; }
+        .stage-3 { animation: docs-to-llm 2s ease-in-out; animation-delay: 4s; opacity: 0; }
+        .stage-4 { animation: llm-to-response 2s ease-in-out; animation-delay: 6s; opacity: 0; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+            50% { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+        }
+
+        .active { animation: pulse 1s ease-in-out; }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .document.highlight {
+            animation: fadeInOut 1s ease-in-out;
+            animation-delay: 3.5s;
+            border-color: #e74c3c;
+            border-width: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">← Retour au menu</a>
+
+        <h1>🔍 RAG - Retrieval Augmented Generation</h1>
+        <p class="subtitle">Génération augmentée par récupération de documents</p>
+
+        <div class="animation-container">
+            <!-- Composants -->
+            <div class="component user">
+                <h3>👤 Utilisateur</h3>
+                <p>Question</p>
+            </div>
+
+            <div class="component embedding-model">
+                <h3>🧮 Embedding</h3>
+                <p>Vectorisation</p>
+            </div>
+
+            <div class="component vector-db">
+                <h3>🗄️ Base Vectorielle</h3>
+                <p>Documents indexés</p>
+            </div>
+
+            <div class="component llm">
+                <h3>🤖 LLM</h3>
+                <p>Modèle de langage</p>
+            </div>
+
+            <div class="component response">
+                <h3>💬 Réponse</h3>
+                <p>Contextualisée</p>
+            </div>
+
+            <!-- Documents dans la base -->
+            <div class="document doc1">
+                📄 Doc 1: Python basics
+            </div>
+            <div class="document doc2">
+                📄 Doc 2: Machine Learning
+            </div>
+            <div class="document doc3">
+                📄 Doc 3: Deep Learning
+            </div>
+
+            <!-- Info Panel -->
+            <div class="info-panel">
+                <h4 id="step-title">Étape 1: Question utilisateur</h4>
+                <p id="step-description">L'utilisateur pose une question au système RAG</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <h2 style="color: #667eea; margin-bottom: 20px;">📖 Comprendre le RAG</h2>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #2ecc71; margin-bottom: 10px;">🎯 Objectif</h3>
+                    <p>Améliorer les réponses d'un LLM en lui fournissant des informations pertinentes extraites d'une base de connaissances externe.</p>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #3498db; margin-bottom: 10px;">⚡ Avantages</h3>
+                    <p>• Réponses basées sur des sources fiables<br>• Informations à jour<br>• Réduction des hallucinations<br>• Traçabilité des sources</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; background: #e3f2fd; padding: 20px; border-radius: 10px; border-left: 4px solid #2196f3;">
+                <h3 style="color: #1976d2; margin-bottom: 10px;">🔄 Processus</h3>
+                <ol style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Vectorisation de la question:</strong> Transformation de la question en vecteur numérique</li>
+                    <li><strong>Recherche de similarité:</strong> Calcul de la distance entre le vecteur question et les vecteurs documents</li>
+                    <li><strong>Récupération:</strong> Extraction des top-k documents les plus pertinents</li>
+                    <li><strong>Augmentation du prompt:</strong> Ajout du contexte récupéré à la question originale</li>
+                    <li><strong>Génération:</strong> Le LLM génère une réponse basée sur le contexte fourni</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let animationCycle = 0;
+        const totalDuration = 8000; // 8 secondes par cycle
+
+        const steps = [
+            {
+                title: "Étape 1: Question utilisateur",
+                description: "L'utilisateur pose une question: 'Comment créer un réseau de neurones en Python?'",
+                activeComponents: ['user'],
+                time: 0
+            },
+            {
+                title: "Étape 2: Vectorisation de la question",
+                description: "La question est transformée en vecteur numérique (embedding) pour permettre la recherche",
+                activeComponents: ['embedding-model'],
+                time: 2000
+            },
+            {
+                title: "Étape 3: Recherche dans la base vectorielle",
+                description: "Le système calcule la similarité cosinus et récupère les documents les plus pertinents",
+                activeComponents: ['vector-db'],
+                time: 4000
+            },
+            {
+                title: "Étape 4: Génération avec contexte",
+                description: "Le LLM reçoit la question + le contexte des documents et génère une réponse précise",
+                activeComponents: ['llm'],
+                time: 6000
+            }
+        ];
+
+        function createDataPacket(emoji, className) {
+            const packet = document.createElement('div');
+            packet.className = `data-packet ${className}`;
+            packet.innerHTML = emoji;
+            packet.style.opacity = '0';
+            document.querySelector('.animation-container').appendChild(packet);
+
+            // Animation avec opacité
+            setTimeout(() => {
+                packet.style.opacity = '1';
+            }, 100);
+
+            setTimeout(() => {
+                packet.style.opacity = '0';
+                setTimeout(() => packet.remove(), 500);
+            }, 1900);
+        }
+
+        function runAnimation() {
+            // Étape 1: Question (emoji ❓)
+            setTimeout(() => {
+                document.getElementById('step-title').textContent = steps[0].title;
+                document.getElementById('step-description').textContent = steps[0].description;
+                document.querySelector('.user').classList.add('active');
+                createDataPacket('❓', 'stage-1');
+            }, 0);
+
+            setTimeout(() => {
+                document.querySelector('.user').classList.remove('active');
+            }, 1000);
+
+            // Étape 2: Embedding (emoji 🔢)
+            setTimeout(() => {
+                document.getElementById('step-title').textContent = steps[1].title;
+                document.getElementById('step-description').textContent = steps[1].description;
+                document.querySelector('.embedding-model').classList.add('active');
+                createDataPacket('🔢', 'stage-2');
+            }, 2000);
+
+            setTimeout(() => {
+                document.querySelector('.embedding-model').classList.remove('active');
+            }, 3000);
+
+            // Étape 3: Recherche vectorielle (emoji 🔍)
+            setTimeout(() => {
+                document.getElementById('step-title').textContent = steps[2].title;
+                document.getElementById('step-description').textContent = steps[2].description;
+                document.querySelector('.vector-db').classList.add('active');
+
+                // Highlight documents
+                document.querySelectorAll('.document').forEach(doc => {
+                    doc.classList.add('highlight');
+                });
+
+                createDataPacket('📚', 'stage-3');
+            }, 4000);
+
+            setTimeout(() => {
+                document.querySelector('.vector-db').classList.remove('active');
+                document.querySelectorAll('.document').forEach(doc => {
+                    doc.classList.remove('highlight');
+                });
+            }, 5000);
+
+            // Étape 4: Génération LLM (emoji ✨)
+            setTimeout(() => {
+                document.getElementById('step-title').textContent = steps[3].title;
+                document.getElementById('step-description').textContent = steps[3].description;
+                document.querySelector('.llm').classList.add('active');
+                createDataPacket('✨', 'stage-4');
+            }, 6000);
+
+            setTimeout(() => {
+                document.querySelector('.llm').classList.remove('active');
+                document.querySelector('.response').classList.add('active');
+            }, 7000);
+
+            setTimeout(() => {
+                document.querySelector('.response').classList.remove('active');
+            }, 7500);
+
+            // Recommencer le cycle
+            setTimeout(() => {
+                runAnimation();
+            }, totalDuration);
+        }
+
+        // Démarrer l'animation
+        runAnimation();
+    </script>
+</body>
+</html>
