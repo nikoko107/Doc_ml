@@ -325,6 +325,93 @@
         .fade-out {
             animation: fadeOut 0.5s forwards;
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .back-link {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+
+            .animation-container {
+                padding: 20px 15px;
+                min-height: auto;
+            }
+
+            .step-title {
+                font-size: 1.2em;
+            }
+
+            .visualization {
+                height: 400px;
+            }
+
+            .matrix, .weight-matrix {
+                transform: scale(0.8);
+            }
+
+            .param-box {
+                padding: 12px;
+                font-size: 0.85em;
+            }
+
+            .info-box {
+                padding: 15px;
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .subtitle {
+                font-size: 0.9em;
+            }
+
+            .animation-container {
+                padding: 15px 10px;
+            }
+
+            .step-title {
+                font-size: 1em;
+            }
+
+            .visualization {
+                height: 350px;
+            }
+
+            .matrix, .weight-matrix {
+                transform: scale(0.7);
+            }
+
+            .param-box {
+                padding: 10px;
+                font-size: 0.8em;
+            }
+
+            .info-box {
+                padding: 12px;
+                font-size: 0.85em;
+            }
+        }
     </style>
 </head>
 <body>
