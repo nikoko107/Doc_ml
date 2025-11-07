@@ -211,15 +211,13 @@
                     <strong>⚡ Visualisation en temps réel:</strong>
                 </p>
                 <ul style="line-height: 1.8; color: #666; margin-bottom: 10px;">
-                    <li><strong>3 droites de régression simultanées</strong> - Une pour chaque fonction de perte (MSE 🔵, MAE 🟢, RMSE 🟠)</li>
+                    <li><strong>3 droites de régression simultanées</strong> - MSE (pointillés bleus 🔵), MAE (ligne verte 🟢), RMSE (ligne orange 🟠)</li>
                     <li><strong>3 courbes de convergence</strong> - Comparez l'évolution de chaque métrique en temps réel</li>
-                    <li><strong>Gradients adaptatifs</strong> - Chaque modèle utilise ses propres gradients pour converger</li>
+                    <li><strong>Gradients adaptatifs</strong> - Chaque modèle utilise ses propres gradients pour converger indépendamment</li>
+                    <li><strong>Transparence</strong> - Les droites MSE et RMSE se superposent presque parfaitement (même gradient)</li>
                 </ul>
-                <p style="margin-top: 15px;">
-                    La fonction de perte sélectionnée détermine quelle droite est utilisée pour calculer les erreurs affichées et les lignes verticales.
-                </p>
                 <p>
-                    <strong>🔬 Expérience:</strong> Ajoutez des points avec outliers et observez comment les 3 droites et courbes évoluent différemment!
+                    <strong>🔬 Expérience:</strong> Ajoutez des points avec outliers et observez comment MAE ignore les outliers tandis que MSE/RMSE sont attirées vers eux!
                 </p>
             </div>
 
@@ -228,30 +226,24 @@
                 <div class="info-box">
                     <p><strong>Nombre de points:</strong> <span id="pointCount">0</span></p>
                     <p><strong>Itération:</strong> <span id="iteration">0</span> / <span id="maxIterations">1000</span></p>
-                    <p><strong>Équation:</strong></p>
-                    <p id="equation">y = mx + b</p>
-                    <p><strong>Pente (m):</strong> <span id="slope">-</span></p>
-                    <p><strong>Ordonnée (b):</strong> <span id="intercept">-</span></p>
-                    <p><strong>Erreur (<span id="errorLabel">MSE</span>):</strong> <span id="error">-</span></p>
-                    <p><strong>Réduction:</strong> <span id="reduction">-</span></p>
+
+                    <p style="margin-top: 10px;"><strong style="color: #667eea;">MSE (pointillés bleus):</strong></p>
+                    <p style="font-size: 0.9em;">y = <span id="slopeMSE">-</span>x + <span id="interceptMSE">-</span></p>
+                    <p style="font-size: 0.9em;">Erreur: <span id="errorMSE">-</span></p>
+
+                    <p style="margin-top: 10px;"><strong style="color: #10b981;">MAE (ligne verte):</strong></p>
+                    <p style="font-size: 0.9em;">y = <span id="slopeMAE">-</span>x + <span id="interceptMAE">-</span></p>
+                    <p style="font-size: 0.9em;">Erreur: <span id="errorMAE">-</span></p>
+
+                    <p style="margin-top: 10px;"><strong style="color: #f59e0b;">RMSE (ligne orange):</strong></p>
+                    <p style="font-size: 0.9em;">y = <span id="slopeRMSE">-</span>x + <span id="interceptRMSE">-</span></p>
+                    <p style="font-size: 0.9em;">Erreur: <span id="errorRMSE">-</span></p>
                 </div>
 
                 <button class="btn-primary" onclick="addRandomPoints()">Ajouter 10 points aléatoires</button>
                 <button class="btn-primary" onclick="addRandomPointsWithOutliers()">Ajouter points + outliers</button>
                 <button class="btn-primary" onclick="startOptimization()" id="optimizeBtn">Optimiser (animation)</button>
                 <button class="btn-secondary" onclick="clearPoints()">Effacer tous les points</button>
-
-                <div style="margin-top: 20px;">
-                    <label><strong>Fonction de perte:</strong></label>
-                    <select id="lossFunction" style="width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                        <option value="mse">MSE - Mean Squared Error</option>
-                        <option value="mae">MAE - Mean Absolute Error</option>
-                        <option value="rmse">RMSE - Root Mean Squared Error</option>
-                    </select>
-                    <p style="font-size: 0.85em; color: #666; margin-top: 5px;" id="lossDescription">
-                        MSE est sensible aux outliers (valeurs aberrantes)
-                    </p>
-                </div>
 
                 <div style="margin-top: 20px;">
                     <label><strong>Vitesse d'apprentissage:</strong></label>
@@ -276,7 +268,6 @@
         let mRMSE = 0, bRMSE = 0.5; // RMSE parameters
 
         let learningRate = 0.01;
-        let lossFunction = 'mse'; // Current loss function: 'mse', 'mae', or 'rmse'
 
         // Tracking convergence metrics
         let mseHistory = [];
@@ -289,24 +280,6 @@
         document.getElementById('learningRate').addEventListener('input', (e) => {
             learningRate = parseFloat(e.target.value);
             document.getElementById('lrValue').textContent = learningRate.toFixed(4);
-        });
-
-        document.getElementById('lossFunction').addEventListener('change', (e) => {
-            lossFunction = e.target.value;
-            document.getElementById('errorLabel').textContent = lossFunction.toUpperCase();
-
-            // Update description
-            const descriptions = {
-                'mse': 'MSE est sensible aux outliers (valeurs aberrantes)',
-                'mae': 'MAE est robuste aux outliers (moins sensible)',
-                'rmse': 'RMSE est sensible aux outliers comme MSE'
-            };
-            document.getElementById('lossDescription').textContent = descriptions[lossFunction];
-
-            // Update info if points exist
-            if (points.length >= 2) {
-                updateInfo();
-            }
         });
 
         // Update learning rate display
@@ -537,30 +510,6 @@
             return 0;
         }
 
-        function calculateLoss() {
-            // Return the loss for the currently selected loss function
-            if (lossFunction === 'mse') {
-                return calculateMetric('mse', mMSE, bMSE);
-            } else if (lossFunction === 'mae') {
-                return calculateMetric('mae', mMAE, bMAE);
-            } else if (lossFunction === 'rmse') {
-                return calculateMetric('rmse', mRMSE, bRMSE);
-            }
-            return 0;
-        }
-
-        // Keep calculateMSE for backward compatibility (used in updateInfo)
-        function calculateMSE() {
-            return calculateLoss();
-        }
-
-        // Get current model parameters based on selected loss function
-        function getCurrentParams() {
-            if (lossFunction === 'mse') return { m: mMSE, b: bMSE };
-            if (lossFunction === 'mae') return { m: mMAE, b: bMAE };
-            if (lossFunction === 'rmse') return { m: mRMSE, b: bRMSE };
-            return { m: mMSE, b: bMSE };
-        }
 
         function draw() {
             // Clear canvas
@@ -586,14 +535,17 @@
             // Draw the three regression lines
             if (points.length >= 2) {
                 const lines = [
-                    { m: mMSE, b: bMSE, color: '#667eea', label: 'MSE', lineWidth: 2 },
-                    { m: mMAE, b: bMAE, color: '#10b981', label: 'MAE', lineWidth: 2 },
-                    { m: mRMSE, b: bRMSE, color: '#f59e0b', label: 'RMSE', lineWidth: 2 }
+                    { m: mRMSE, b: bRMSE, color: '#f59e0b', label: 'RMSE', lineWidth: 3, dash: [] },
+                    { m: mMAE, b: bMAE, color: '#10b981', label: 'MAE', lineWidth: 3, dash: [] },
+                    { m: mMSE, b: bMSE, color: '#667eea', label: 'MSE', lineWidth: 3, dash: [8, 4] }
                 ];
 
                 for (const line of lines) {
+                    ctx.save();
                     ctx.strokeStyle = line.color;
                     ctx.lineWidth = line.lineWidth;
+                    ctx.globalAlpha = 0.8; // Semi-transparent
+                    ctx.setLineDash(line.dash);
                     ctx.beginPath();
                     // Use normalized coordinates: x from 0 to 1
                     const y1_norm = line.m * 0 + line.b;  // at x=0
@@ -604,6 +556,7 @@
                     ctx.moveTo(0, y1);
                     ctx.lineTo(canvas.width, y2);
                     ctx.stroke();
+                    ctx.restore();
                 }
             }
 
@@ -613,33 +566,7 @@
                 ctx.beginPath();
                 ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
                 ctx.fill();
-
-                // Draw error line (only for the currently selected loss function)
-                if (points.length >= 2) {
-                    const params = getCurrentParams();
-                    // Normalize point coordinates
-                    const x_norm = point.x / canvas.width;
-                    const y_norm = point.y / canvas.height;
-                    // Calculate prediction in normalized space
-                    const prediction_norm = params.m * x_norm + params.b;
-                    // Convert back to pixels
-                    const prediction = prediction_norm * canvas.height;
-
-                    ctx.strokeStyle = 'rgba(255, 107, 107, 0.3)';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(point.x, point.y);
-                    ctx.lineTo(point.x, prediction);
-                    ctx.stroke();
-                }
             }
-        }
-
-        function getCurrentHistory() {
-            if (lossFunction === 'mse') return mseHistory;
-            if (lossFunction === 'mae') return maeHistory;
-            if (lossFunction === 'rmse') return rmseHistory;
-            return mseHistory;
         }
 
         function updateInfo() {
@@ -647,28 +574,36 @@
             document.getElementById('iteration').textContent = currentIteration;
 
             if (points.length >= 2) {
-                const params = getCurrentParams();
-                document.getElementById('slope').textContent = params.m.toFixed(4);
-                document.getElementById('intercept').textContent = params.b.toFixed(4);
-                document.getElementById('equation').textContent = `y = ${params.m.toFixed(4)}x + ${params.b.toFixed(4)}`;
-                const currentLoss = calculateLoss();
-                document.getElementById('error').textContent = currentLoss.toFixed(6);
+                // Update MSE info
+                document.getElementById('slopeMSE').textContent = mMSE.toFixed(4);
+                document.getElementById('interceptMSE').textContent = bMSE.toFixed(4);
+                const currentMSE = calculateMetric('mse', mMSE, bMSE);
+                document.getElementById('errorMSE').textContent = currentMSE.toFixed(6);
 
-                // Calculate reduction percentage
-                const currentLossHistory = getCurrentHistory();
-                if (currentLossHistory.length > 1) {
-                    const prevLoss = currentLossHistory[currentLossHistory.length - 2];
-                    const reduction = ((prevLoss - currentLoss) / prevLoss * 100).toFixed(2);
-                    document.getElementById('reduction').textContent = reduction + '%';
-                } else {
-                    document.getElementById('reduction').textContent = '-';
-                }
+                // Update MAE info
+                document.getElementById('slopeMAE').textContent = mMAE.toFixed(4);
+                document.getElementById('interceptMAE').textContent = bMAE.toFixed(4);
+                const currentMAE = calculateMetric('mae', mMAE, bMAE);
+                document.getElementById('errorMAE').textContent = currentMAE.toFixed(6);
+
+                // Update RMSE info
+                document.getElementById('slopeRMSE').textContent = mRMSE.toFixed(4);
+                document.getElementById('interceptRMSE').textContent = bRMSE.toFixed(4);
+                const currentRMSE = calculateMetric('rmse', mRMSE, bRMSE);
+                document.getElementById('errorRMSE').textContent = currentRMSE.toFixed(6);
             } else {
-                document.getElementById('slope').textContent = '-';
-                document.getElementById('intercept').textContent = '-';
-                document.getElementById('equation').textContent = 'y = mx + b';
-                document.getElementById('error').textContent = '-';
-                document.getElementById('reduction').textContent = '-';
+                // Reset all displays
+                document.getElementById('slopeMSE').textContent = '-';
+                document.getElementById('interceptMSE').textContent = '-';
+                document.getElementById('errorMSE').textContent = '-';
+
+                document.getElementById('slopeMAE').textContent = '-';
+                document.getElementById('interceptMAE').textContent = '-';
+                document.getElementById('errorMAE').textContent = '-';
+
+                document.getElementById('slopeRMSE').textContent = '-';
+                document.getElementById('interceptRMSE').textContent = '-';
+                document.getElementById('errorRMSE').textContent = '-';
             }
         }
 
