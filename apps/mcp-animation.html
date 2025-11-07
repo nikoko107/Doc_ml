@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP - Model Context Protocol</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block; background: rgba(255,255,255,0.2); color: white;
+            padding: 10px 20px; font-weight: 600; text-decoration: none; border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .back-link:hover { background: rgba(255,255,255,0.3); }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .animation-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            height: 700px;
+            overflow: hidden;
+        }
+
+        .component {
+            position: absolute;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .component h3 {
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+
+        .component p {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        .client {
+            top: 50px;
+            left: 80px;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            min-width: 200px;
+        }
+
+        .server {
+            top: 50px;
+            right: 80px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            min-width: 200px;
+        }
+
+        .resources-box {
+            top: 250px;
+            right: 50px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            min-width: 180px;
+        }
+
+        .tools-box {
+            top: 380px;
+            right: 50px;
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            min-width: 180px;
+        }
+
+        .prompts-box {
+            top: 510px;
+            right: 50px;
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+            min-width: 180px;
+        }
+
+        .connection-line {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            width: 2px;
+            height: 450px;
+            background: repeating-linear-gradient(
+                to bottom,
+                #95a5a6 0px,
+                #95a5a6 10px,
+                transparent 10px,
+                transparent 20px
+            );
+            transform: translateX(-50%);
+        }
+
+        .data-packet {
+            position: absolute;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            color: white;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+            max-width: 250px;
+            font-weight: 600;
+            animation-timing-function: ease-in-out;
+        }
+
+        .request {
+            background: linear-gradient(135deg, #16a085 0%, #138d75 100%);
+        }
+
+        .response {
+            background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);
+        }
+
+        @keyframes request-to-server {
+            0% { left: 180px; top: 110px; opacity: 0; transform: translateY(0); }
+            15% { opacity: 1; }
+            100% { left: 50%; top: 110px; opacity: 1; transform: translateX(-50%); }
+        }
+
+        @keyframes server-processing {
+            0% { right: 180px; top: 150px; opacity: 0; }
+            15% { opacity: 1; }
+            100% { right: 80px; top: 150px; }
+        }
+
+        @keyframes access-resource {
+            0% { right: 240px; top: 270px; opacity: 0; }
+            15% { opacity: 1; }
+            100% { right: 240px; top: 270px; transform: scale(1.1); }
+        }
+
+        @keyframes response-to-client {
+            0% { left: 50%; top: 150px; opacity: 0; transform: translateX(-50%); }
+            15% { opacity: 1; }
+            100% { left: 180px; top: 150px; opacity: 1; }
+        }
+
+        .stage-1 { animation: request-to-server 2s ease-in-out; }
+        .stage-2 { animation: server-processing 2s ease-in-out; animation-delay: 2s; opacity: 0; }
+        .stage-3 { animation: access-resource 2s ease-in-out; animation-delay: 4s; opacity: 0; }
+        .stage-4 { animation: response-to-client 2s ease-in-out; animation-delay: 6s; opacity: 0; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+            50% { transform: scale(1.05); box-shadow: 0 6px 25px rgba(0,0,0,0.4); }
+        }
+
+        .active { animation: pulse 1.5s ease-in-out; }
+
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px 30px;
+            min-width: 600px;
+            text-align: center;
+        }
+
+        .info-panel h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .info-panel p {
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        .primitive-item {
+            background: rgba(255,255,255,0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-size: 0.75em;
+        }
+
+        .json-display {
+            position: absolute;
+            background: #2c3e50;
+            color: #2ecc71;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.7em;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .json-display.show {
+            opacity: 1;
+        }
+
+        .json-request {
+            top: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .json-response {
+            top: 320px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">← Retour au menu</a>
+
+        <h1>🔌 MCP - Model Context Protocol</h1>
+        <p class="subtitle">Protocole de communication standardisé pour les modèles IA</p>
+
+        <div class="animation-container">
+            <!-- Connection line -->
+            <div class="connection-line"></div>
+
+            <!-- Composants principaux -->
+            <div class="component client">
+                <h3>💻 Client</h3>
+                <p>Application Host<br>(IDE, Agent IA)</p>
+            </div>
+
+            <div class="component server">
+                <h3>🖥️ Serveur MCP</h3>
+                <p>Fournisseur de<br>contexte</p>
+            </div>
+
+            <!-- Primitives -->
+            <div class="component resources-box">
+                <h3>📚 Resources</h3>
+                <div class="primitive-item">📄 Fichiers</div>
+                <div class="primitive-item">🗄️ Base de données</div>
+            </div>
+
+            <div class="component tools-box">
+                <h3>🛠️ Tools</h3>
+                <div class="primitive-item">🔧 execute_code()</div>
+                <div class="primitive-item">📝 write_file()</div>
+            </div>
+
+            <div class="component prompts-box">
+                <h3>💭 Prompts</h3>
+                <div class="primitive-item">🎯 Templates</div>
+                <div class="primitive-item">📋 Instructions</div>
+            </div>
+
+            <!-- JSON displays -->
+            <div class="json-display json-request" id="jsonRequest">
+                {"method": "resources/read",<br>
+                "params": {"uri": "file:///..."}}
+            </div>
+
+            <div class="json-display json-response" id="jsonResponse">
+                {"result": {"contents": [<br>
+                {"text": "contenu..."}]}}
+            </div>
+
+            <!-- Info Panel -->
+            <div class="info-panel">
+                <h4 id="step-title">Initialisation de la connexion</h4>
+                <p id="step-description">Le client établit une connexion avec le serveur MCP via stdio/HTTP</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <h2 style="color: #667eea; margin-bottom: 20px;">📖 Comprendre le MCP</h2>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #2ecc71; margin-bottom: 10px;">🎯 Objectif</h3>
+                    <p>Standardiser la communication entre les applications IA et les sources de contexte (fichiers, APIs, bases de données, etc.).</p>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #3498db; margin-bottom: 10px;">⚡ Avantages</h3>
+                    <p>• Architecture modulaire<br>• Interopérabilité<br>• Sécurité renforcée<br>• Extensibilité</p>
+                </div>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 10px;">🔧 Les trois primitives</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 15px;">
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #e74c3c; margin-bottom: 8px;">📚 Resources</h4>
+                        <p style="font-size: 0.9em;">Données statiques ou dynamiques que le serveur expose (fichiers, URLs, contenus de base de données).</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #f39c12; margin-bottom: 8px;">🛠️ Tools</h4>
+                        <p style="font-size: 0.9em;">Fonctions que le LLM peut appeler pour effectuer des actions (exécution de code, écriture de fichiers).</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #9b59b6; margin-bottom: 8px;">💭 Prompts</h4>
+                        <p style="font-size: 0.9em;">Templates pré-configurés avec instructions et contexte pour guider le LLM.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; border-left: 4px solid #2196f3;">
+                <h3 style="color: #1976d2; margin-bottom: 10px;">🔄 Flux de communication</h3>
+                <ol style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Connexion:</strong> Le client se connecte au serveur MCP (stdio, SSE, ou HTTP)</li>
+                    <li><strong>Découverte:</strong> Le client interroge les capacités du serveur (resources, tools, prompts disponibles)</li>
+                    <li><strong>Requête:</strong> Le client envoie une requête JSON-RPC pour accéder à une resource ou exécuter un tool</li>
+                    <li><strong>Traitement:</strong> Le serveur traite la requête et accède aux données/services nécessaires</li>
+                    <li><strong>Réponse:</strong> Le serveur retourne les résultats au format JSON-RPC structuré</li>
+                    <li><strong>Utilisation:</strong> Le client (ou le LLM) utilise le contexte obtenu pour générer une réponse</li>
+                </ol>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #ff9800;">
+                <h3 style="color: #e65100; margin-bottom: 10px;">💡 Cas d'usage</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>IDE Integration:</strong> Accès au code, système de fichiers, git</li>
+                    <li><strong>Database Access:</strong> Requêtes SQL, lecture de schémas</li>
+                    <li><strong>API Integration:</strong> Connexion à des services externes (Slack, GitHub, etc.)</li>
+                    <li><strong>Knowledge Bases:</strong> Accès à des documentations, wikis internes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const totalDuration = 10000; // 10 secondes par cycle
+
+        const steps = [
+            {
+                title: "Étape 1: Requête du client",
+                description: "Le client envoie une requête JSON-RPC pour accéder à une resource",
+                time: 0
+            },
+            {
+                title: "Étape 2: Réception par le serveur",
+                description: "Le serveur MCP reçoit et parse la requête JSON-RPC",
+                time: 2000
+            },
+            {
+                title: "Étape 3: Accès à la resource",
+                description: "Le serveur accède à la resource demandée (fichier, DB, API...)",
+                time: 4000
+            },
+            {
+                title: "Étape 4: Réponse au client",
+                description: "Le serveur renvoie les données formatées au client pour utilisation par le LLM",
+                time: 6000
+            }
+        ];
+
+        function createDataPacket(text, className, stage) {
+            const packet = document.createElement('div');
+            packet.className = `data-packet ${className} stage-${stage}`;
+            packet.innerHTML = text;
+            packet.style.opacity = '0';
+            document.querySelector('.animation-container').appendChild(packet);
+
+            setTimeout(() => {
+                packet.style.opacity = '0';
+                setTimeout(() => packet.remove(), 500);
+            }, 2000 * stage - 100);
+        }
+
+        function runAnimation() {
+            // Étape 1: Requête du client
+            setTimeout(() => {
+                document.getElementById('step-title').textContent = steps[0].title;
+                document.getElementById('step-description').textContent = steps[0].description;
+                document.querySelector('.client').classList.add('active');
+                createDataPacket('🔍 resources/read', 'request', 1);
+                document.getElementById('jsonRequest').classList.add('show');
+            }, 0);
+
+            setTimeout(() => {
+                document.querySelector('.client').classList.remove('active');
+                document.getElementById('jsonRequest').classList.remove('show');
+            }, 1500);
+
+            // Étape 2: Serveur reçoit
+            setTimeout(() => {
+                document.getElementById('step-title').textContent = steps[1].title;
+                document.getElementById('step-description').textContent = steps[1].description;
+                document.querySelector('.server').classList.add('active');
+                createDataPacket('📨 Processing...', 'request', 2);
+            }, 2000);
+
+            setTimeout(() => {
+                document.querySelector('.server').classList.remove('active');
+            }, 3500);
+
+            // Étape 3: Accès resource
+            setTimeout(() => {
+                document.getElementById('step-title').textContent = steps[2].title;
+                document.getElementById('step-description').textContent = steps[2].description;
+                document.querySelector('.resources-box').classList.add('active');
+                createDataPacket('📄 Lecture fichier...', 'request', 3);
+            }, 4000);
+
+            setTimeout(() => {
+                document.querySelector('.resources-box').classList.remove('active');
+            }, 5500);
+
+            // Étape 4: Réponse au client
+            setTimeout(() => {
+                document.getElementById('step-title').textContent = steps[3].title;
+                document.getElementById('step-description').textContent = steps[3].description;
+                document.querySelector('.server').classList.add('active');
+                createDataPacket('✅ Contenu: {...}', 'response', 4);
+                document.getElementById('jsonResponse').classList.add('show');
+            }, 6000);
+
+            setTimeout(() => {
+                document.querySelector('.server').classList.remove('active');
+                document.querySelector('.client').classList.add('active');
+            }, 7000);
+
+            setTimeout(() => {
+                document.querySelector('.client').classList.remove('active');
+                document.getElementById('jsonResponse').classList.remove('show');
+            }, 8500);
+
+            // Animation des autres primitives
+            setTimeout(() => {
+                document.querySelector('.tools-box').classList.add('active');
+            }, 3000);
+
+            setTimeout(() => {
+                document.querySelector('.tools-box').classList.remove('active');
+                document.querySelector('.prompts-box').classList.add('active');
+            }, 4500);
+
+            setTimeout(() => {
+                document.querySelector('.prompts-box').classList.remove('active');
+            }, 6000);
+
+            // Recommencer le cycle
+            setTimeout(() => {
+                runAnimation();
+            }, totalDuration);
+        }
+
+        // Démarrer l'animation
+        runAnimation();
+    </script>
+</body>
+</html>

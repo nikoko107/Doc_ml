@@ -183,6 +183,59 @@
                     Vous pouvez choisir différentes fonctions de perte:
                 </p>
 
+                <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #ff9800;">
+                    <h4 style="color: #e65100; margin-bottom: 15px;">📐 Solution Analytique Optimale</h4>
+
+                    <p style="margin-bottom: 15px; font-size: 0.95em;"><strong>Pour le cas 2D (y = mx + b):</strong></p>
+
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                        <div class="formula" style="font-size: 1em; margin: 8px 0; background: #f5f5f5;">
+                            m = Σ((xᵢ - x̄)(yᵢ - ȳ)) / Σ((xᵢ - x̄)²)
+                        </div>
+                        <div class="formula" style="font-size: 1em; margin: 8px 0; background: #f5f5f5;">
+                            b = ȳ - m·x̄
+                        </div>
+                        <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
+                            Où x̄ et ȳ sont les moyennes des coordonnées x et y
+                        </p>
+                    </div>
+
+                    <p style="margin: 15px 0 10px 0; font-size: 0.95em;"><strong>Formulation alternative:</strong></p>
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                        <div class="formula" style="font-size: 0.95em; margin: 8px 0; background: #f5f5f5;">
+                            m = (n·Σ(xᵢyᵢ) - Σxᵢ·Σyᵢ) / (n·Σ(xᵢ²) - (Σxᵢ)²)
+                        </div>
+                        <div class="formula" style="font-size: 0.95em; margin: 8px 0; background: #f5f5f5;">
+                            b = (Σyᵢ - m·Σxᵢ) / n
+                        </div>
+                        <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
+                            Où n est le nombre de points
+                        </p>
+                    </div>
+
+                    <p style="margin: 20px 0 10px 0; font-size: 0.95em;"><strong>Pour n dimensions (régression multiple):</strong></p>
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                        <div class="formula" style="font-size: 1.05em; margin: 8px 0; background: #f5f5f5;">
+                            β = (X<sup>T</sup>X)<sup>-1</sup> X<sup>T</sup>y
+                        </div>
+                        <p style="font-size: 0.85em; color: #666; margin-top: 10px; line-height: 1.6;">
+                            <strong>Où:</strong><br>
+                            • <strong>β</strong> = vecteur des coefficients [b, m₁, m₂, ..., mₙ]<br>
+                            • <strong>X</strong> = matrice de design (chaque ligne = [1, x₁, x₂, ..., xₙ])<br>
+                            • <strong>y</strong> = vecteur des valeurs cibles<br>
+                            • <strong>X<sup>T</sup></strong> = transposée de X<br>
+                            • <strong>(X<sup>T</sup>X)<sup>-1</sup></strong> = inverse de la matrice X<sup>T</sup>X
+                        </p>
+                    </div>
+
+                    <div style="background: #e3f2fd; padding: 12px; border-radius: 6px; margin-top: 15px;">
+                        <p style="font-size: 0.9em; color: #1565c0; line-height: 1.6;">
+                            <strong>💡 Note:</strong> Ces formules donnent la solution <strong>optimale exacte</strong> pour MSE en une seule étape (pas d'itérations nécessaires).
+                            La descente de gradient utilisée dans cette application converge progressivement vers cette même solution.
+                        </p>
+                    </div>
+                </div>
+
                 <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
                     <p style="margin-bottom: 10px;"><strong style="color: #667eea;">MSE (Mean Squared Error)</strong></p>
                     <div class="formula" style="font-size: 0.95em; margin: 8px 0;">

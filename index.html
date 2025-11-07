@@ -27,6 +27,26 @@
             text-align: center;
             color: white;
             margin-bottom: 50px;
+            position: relative;
+        }
+
+        .view-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: white;
+            color: #667eea;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .view-toggle:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
         }
 
         h1 {
@@ -129,6 +149,11 @@
             color: white;
         }
 
+        .badge-architecture {
+            background: #34495e;
+            color: white;
+        }
+
         .btn {
             display: inline-block;
             padding: 12px 30px;
@@ -155,6 +180,7 @@
 <body>
     <div class="container">
         <header>
+            <a href="index-cards.html" class="view-toggle">🎴 Vue Cartes</a>
             <h1>🧠 Apprentissage Machine</h1>
             <p class="subtitle">Applications interactives pour comprendre le ML historique et moderne</p>
         </header>
@@ -248,6 +274,13 @@
                     <p>Identifiez les mots importants dans vos documents. Utilisé par les moteurs de recherche et systèmes de recommandation.</p>
                     <a href="apps/tfidf.html" class="btn">Essayer</a>
                 </div>
+
+                <div class="app-card" onclick="window.location.href='apps/embeddings-animation.html'">
+                    <span class="badge badge-modern">Moderne</span>
+                    <h3>Word Embeddings</h3>
+                    <p>Animation montrant l'analogie vectorielle Roi - Homme + Femme ≈ Reine. Visualisez comment les embeddings capturent les relations sémantiques.</p>
+                    <a href="apps/embeddings-animation.html" class="btn">Voir l'animation</a>
+                </div>
             </div>
         </div>
 
@@ -287,6 +320,67 @@
                     <h3>Q-Learning</h3>
                     <p>Apprentissage par renforcement. Regardez un agent apprendre à naviguer dans une grille vers son objectif en évitant les obstacles.</p>
                     <a href="apps/q-learning.html" class="btn">Essayer</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category">
+            <h2 class="category-title">🤖 IA Moderne - Architecture & Protocoles</h2>
+            <div class="apps-grid">
+                <div class="app-card" onclick="window.location.href='apps/rag-animation.html'">
+                    <span class="badge badge-architecture">Architecture</span>
+                    <h3>RAG - Retrieval Augmented Generation</h3>
+                    <p>Animation interactive montrant comment les systèmes RAG combinent recherche vectorielle et génération pour produire des réponses contextualisées.</p>
+                    <a href="apps/rag-animation.html" class="btn">Voir l'animation</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/mcp-animation.html'">
+                    <span class="badge badge-architecture">Protocole</span>
+                    <h3>MCP - Model Context Protocol</h3>
+                    <p>Animation du protocole standardisé pour connecter les modèles IA aux sources de contexte (fichiers, APIs, bases de données).</p>
+                    <a href="apps/mcp-animation.html" class="btn">Voir l'animation</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/lora-animation.html'">
+                    <span class="badge badge-architecture">Fine-tuning</span>
+                    <h3>LoRA - Low-Rank Adaptation</h3>
+                    <p>Animation montrant l'adaptation efficace des LLM via décomposition matricielle. Visualisez l'entraînement puis la distillation des poids.</p>
+                    <a href="apps/lora-animation.html" class="btn">Voir l'animation</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/deep-learning-training.html'">
+                    <span class="badge badge-architecture">Deep Learning</span>
+                    <h3>Entraînement de Réseau de Neurones</h3>
+                    <p>Animation complète d'un cycle d'entraînement : forward pass, calcul de loss, backpropagation et mise à jour des poids avec optimiseur.</p>
+                    <a href="apps/deep-learning-training.html" class="btn">Voir l'animation</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/transformers-attention.html'">
+                    <span class="badge badge-architecture">Transformers</span>
+                    <h3>Transformers & Mécanisme d'Attention</h3>
+                    <p>Animation du mécanisme d'attention avec phrase en français. Visualisez Q, K, V et les relations grammaticales détectées (adjectif→nom, verbe→sujet).</p>
+                    <a href="apps/transformers-attention.html" class="btn">Voir l'animation</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/diffusion-models.html'">
+                    <span class="badge badge-modern">Génération</span>
+                    <h3>Modèles de Diffusion</h3>
+                    <p>Animation du processus de diffusion : ajout de bruit progressif puis débruitage avec U-Net. Visualisez la génération d'images pixel par pixel.</p>
+                    <a href="apps/diffusion-models.html" class="btn">Voir l'animation</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/beam-search-temperature.html'">
+                    <span class="badge badge-architecture">Génération de Texte</span>
+                    <h3>Beam Search & Température</h3>
+                    <p>Comparez les stratégies de génération : Greedy, Beam Search (k-best), et Temperature Sampling. Ajustez la température pour contrôler la créativité.</p>
+                    <a href="apps/beam-search-temperature.html" class="btn">Essayer</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/graph-neural-networks.html'">
+                    <span class="badge badge-architecture">Graph Learning</span>
+                    <h3>Graph Neural Networks (GNN)</h3>
+                    <p>Animation du message passing dans un réseau social. Visualisez comment l'information se propage entre nœuds via agrégation (GCN, GraphSAGE, GAT).</p>
+                    <a href="apps/graph-neural-networks.html" class="btn">Voir l'animation</a>
                 </div>
             </div>
         </div>
