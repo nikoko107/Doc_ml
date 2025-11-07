@@ -208,11 +208,18 @@
                 </div>
 
                 <p style="margin-top: 15px;">
-                    Le graphique de convergence affiche <strong>simultanément les 3 métriques</strong> pour comparer leur évolution pendant l'optimisation.
-                    La fonction de perte sélectionnée détermine les gradients utilisés pour la descente de gradient.
+                    <strong>⚡ Visualisation en temps réel:</strong>
+                </p>
+                <ul style="line-height: 1.8; color: #666; margin-bottom: 10px;">
+                    <li><strong>3 droites de régression simultanées</strong> - Une pour chaque fonction de perte (MSE 🔵, MAE 🟢, RMSE 🟠)</li>
+                    <li><strong>3 courbes de convergence</strong> - Comparez l'évolution de chaque métrique en temps réel</li>
+                    <li><strong>Gradients adaptatifs</strong> - Chaque modèle utilise ses propres gradients pour converger</li>
+                </ul>
+                <p style="margin-top: 15px;">
+                    La fonction de perte sélectionnée détermine quelle droite est utilisée pour calculer les erreurs affichées et les lignes verticales.
                 </p>
                 <p>
-                    <strong>Expérience:</strong> Ajoutez des points avec outliers et observez comment les 3 courbes évoluent différemment!
+                    <strong>🔬 Expérience:</strong> Ajoutez des points avec outliers et observez comment les 3 droites et courbes évoluent différemment!
                 </p>
             </div>
 
@@ -262,8 +269,12 @@
         const convCtx = convergenceCanvas.getContext('2d');
 
         const points = [];
-        let m = 0; // slope
-        let b = 0.5; // intercept (normalized)
+
+        // Parameters for each loss function
+        let mMSE = 0, bMSE = 0.5;   // MSE parameters
+        let mMAE = 0, bMAE = 0.5;   // MAE parameters
+        let mRMSE = 0, bRMSE = 0.5; // RMSE parameters
+
         let learningRate = 0.01;
         let lossFunction = 'mse'; // Current loss function: 'mse', 'mae', or 'rmse'
 
@@ -356,8 +367,12 @@
             }
             isOptimizing = false;
             points.length = 0;
-            m = 0;
-            b = 0.5;
+
+            // Reset all parameters
+            mMSE = 0; bMSE = 0.5;
+            mMAE = 0; bMAE = 0.5;
+            mRMSE = 0; bRMSE = 0.5;
+
             mseHistory = [];
             maeHistory = [];
             rmseHistory = [];
@@ -381,8 +396,11 @@
             mseHistory = [];
             maeHistory = [];
             rmseHistory = [];
-            m = 0;
-            b = 0.5;
+
+            // Reset all parameters
+            mMSE = 0; bMSE = 0.5;
+            mMAE = 0; bMAE = 0.5;
+            mRMSE = 0; bRMSE = 0.5;
 
             document.getElementById('optimizeBtn').disabled = true;
             document.getElementById('optimizeBtn').textContent = 'Optimisation en cours...';
@@ -404,43 +422,52 @@
                 y: p.y / canvas.height
             }));
 
-            // Perform one gradient descent iteration
-            let dm = 0;
-            let db = 0;
-
-            // Calculate gradients based on the selected loss function
-            if (lossFunction === 'mse' || lossFunction === 'rmse') {
-                // MSE and RMSE gradients (same for both)
-                for (let point of normalizedPoints) {
-                    const prediction = m * point.x + b;
-                    const error = prediction - point.y;
-                    dm += error * point.x;
-                    db += error;
-                }
-                dm = dm * 2 / normalizedPoints.length;
-                db = db * 2 / normalizedPoints.length;
-
-            } else if (lossFunction === 'mae') {
-                // MAE gradient (using sign function)
-                for (let point of normalizedPoints) {
-                    const prediction = m * point.x + b;
-                    const error = prediction - point.y;
-                    const sign = error > 0 ? 1 : (error < 0 ? -1 : 0);
-                    dm += sign * point.x;
-                    db += sign;
-                }
-                dm = dm / normalizedPoints.length;
-                db = db / normalizedPoints.length;
+            // ===== UPDATE MSE MODEL =====
+            let dmMSE = 0, dbMSE = 0;
+            for (let point of normalizedPoints) {
+                const prediction = mMSE * point.x + bMSE;
+                const error = prediction - point.y;
+                dmMSE += error * point.x;
+                dbMSE += error;
             }
+            dmMSE = dmMSE * 2 / normalizedPoints.length;
+            dbMSE = dbMSE * 2 / normalizedPoints.length;
+            mMSE -= learningRate * dmMSE;
+            bMSE -= learningRate * dbMSE;
 
-            m -= learningRate * dm;
-            b -= learningRate * db;
+            // ===== UPDATE MAE MODEL =====
+            let dmMAE = 0, dbMAE = 0;
+            for (let point of normalizedPoints) {
+                const prediction = mMAE * point.x + bMAE;
+                const error = prediction - point.y;
+                const sign = error > 0 ? 1 : (error < 0 ? -1 : 0);
+                dmMAE += sign * point.x;
+                dbMAE += sign;
+            }
+            dmMAE = dmMAE / normalizedPoints.length;
+            dbMAE = dbMAE / normalizedPoints.length;
+            mMAE -= learningRate * dmMAE;
+            bMAE -= learningRate * dbMAE;
+
+            // ===== UPDATE RMSE MODEL (same gradient as MSE) =====
+            let dmRMSE = 0, dbRMSE = 0;
+            for (let point of normalizedPoints) {
+                const prediction = mRMSE * point.x + bRMSE;
+                const error = prediction - point.y;
+                dmRMSE += error * point.x;
+                dbRMSE += error;
+            }
+            dmRMSE = dmRMSE * 2 / normalizedPoints.length;
+            dbRMSE = dbRMSE * 2 / normalizedPoints.length;
+            mRMSE -= learningRate * dmRMSE;
+            bRMSE -= learningRate * dbRMSE;
 
             // Check for NaN
-            if (isNaN(m) || isNaN(b)) {
+            if (isNaN(mMSE) || isNaN(bMSE) || isNaN(mMAE) || isNaN(bMAE) || isNaN(mRMSE) || isNaN(bRMSE)) {
                 console.error('NaN detected! Resetting...');
-                m = 0;
-                b = 0.5;
+                mMSE = 0; bMSE = 0.5;
+                mMAE = 0; bMAE = 0.5;
+                mRMSE = 0; bRMSE = 0.5;
                 isOptimizing = false;
                 document.getElementById('optimizeBtn').disabled = false;
                 document.getElementById('optimizeBtn').textContent = 'Optimiser (animation)';
@@ -448,9 +475,9 @@
             }
 
             // Track all three metrics for comparison
-            const mse = calculateMetric('mse');
-            const mae = calculateMetric('mae');
-            const rmse = calculateMetric('rmse');
+            const mse = calculateMetric('mse', mMSE, bMSE);
+            const mae = calculateMetric('mae', mMAE, bMAE);
+            const rmse = calculateMetric('rmse', mRMSE, bRMSE);
             mseHistory.push(mse);
             maeHistory.push(mae);
             rmseHistory.push(rmse);
@@ -469,7 +496,7 @@
             }
         }
 
-        function calculateMetric(metric) {
+        function calculateMetric(metric, m, b) {
             if (points.length === 0) return 0;
 
             const normalizedPoints = points.map(p => ({
@@ -511,12 +538,28 @@
         }
 
         function calculateLoss() {
-            return calculateMetric(lossFunction);
+            // Return the loss for the currently selected loss function
+            if (lossFunction === 'mse') {
+                return calculateMetric('mse', mMSE, bMSE);
+            } else if (lossFunction === 'mae') {
+                return calculateMetric('mae', mMAE, bMAE);
+            } else if (lossFunction === 'rmse') {
+                return calculateMetric('rmse', mRMSE, bRMSE);
+            }
+            return 0;
         }
 
         // Keep calculateMSE for backward compatibility (used in updateInfo)
         function calculateMSE() {
             return calculateLoss();
+        }
+
+        // Get current model parameters based on selected loss function
+        function getCurrentParams() {
+            if (lossFunction === 'mse') return { m: mMSE, b: bMSE };
+            if (lossFunction === 'mae') return { m: mMAE, b: bMAE };
+            if (lossFunction === 'rmse') return { m: mRMSE, b: bRMSE };
+            return { m: mMSE, b: bMSE };
         }
 
         function draw() {
@@ -540,20 +583,28 @@
                 ctx.stroke();
             }
 
-            // Draw regression line
+            // Draw the three regression lines
             if (points.length >= 2) {
-                ctx.strokeStyle = '#667eea';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                // Use normalized coordinates: x from 0 to 1
-                const y1_norm = m * 0 + b;  // at x=0
-                const y2_norm = m * 1 + b;  // at x=1
-                // Convert back to pixel coordinates
-                const y1 = y1_norm * canvas.height;
-                const y2 = y2_norm * canvas.height;
-                ctx.moveTo(0, y1);
-                ctx.lineTo(canvas.width, y2);
-                ctx.stroke();
+                const lines = [
+                    { m: mMSE, b: bMSE, color: '#667eea', label: 'MSE', lineWidth: 2 },
+                    { m: mMAE, b: bMAE, color: '#10b981', label: 'MAE', lineWidth: 2 },
+                    { m: mRMSE, b: bRMSE, color: '#f59e0b', label: 'RMSE', lineWidth: 2 }
+                ];
+
+                for (const line of lines) {
+                    ctx.strokeStyle = line.color;
+                    ctx.lineWidth = line.lineWidth;
+                    ctx.beginPath();
+                    // Use normalized coordinates: x from 0 to 1
+                    const y1_norm = line.m * 0 + line.b;  // at x=0
+                    const y2_norm = line.m * 1 + line.b;  // at x=1
+                    // Convert back to pixel coordinates
+                    const y1 = y1_norm * canvas.height;
+                    const y2 = y2_norm * canvas.height;
+                    ctx.moveTo(0, y1);
+                    ctx.lineTo(canvas.width, y2);
+                    ctx.stroke();
+                }
             }
 
             // Draw points
@@ -563,13 +614,14 @@
                 ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Draw error line
+                // Draw error line (only for the currently selected loss function)
                 if (points.length >= 2) {
+                    const params = getCurrentParams();
                     // Normalize point coordinates
                     const x_norm = point.x / canvas.width;
                     const y_norm = point.y / canvas.height;
                     // Calculate prediction in normalized space
-                    const prediction_norm = m * x_norm + b;
+                    const prediction_norm = params.m * x_norm + params.b;
                     // Convert back to pixels
                     const prediction = prediction_norm * canvas.height;
 
@@ -595,9 +647,10 @@
             document.getElementById('iteration').textContent = currentIteration;
 
             if (points.length >= 2) {
-                document.getElementById('slope').textContent = m.toFixed(4);
-                document.getElementById('intercept').textContent = b.toFixed(4);
-                document.getElementById('equation').textContent = `y = ${m.toFixed(4)}x + ${b.toFixed(4)}`;
+                const params = getCurrentParams();
+                document.getElementById('slope').textContent = params.m.toFixed(4);
+                document.getElementById('intercept').textContent = params.b.toFixed(4);
+                document.getElementById('equation').textContent = `y = ${params.m.toFixed(4)}x + ${params.b.toFixed(4)}`;
                 const currentLoss = calculateLoss();
                 document.getElementById('error').textContent = currentLoss.toFixed(6);
 
