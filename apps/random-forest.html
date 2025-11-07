@@ -23,6 +23,51 @@
         .work-area, .controls { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .controls h3 { color: #667eea; margin-bottom: 20px; }
 
+        /* Phase badges */
+        .phase-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .phase-training {
+            background: #3498db;
+            color: white;
+        }
+
+        .phase-inference {
+            background: #e67e22;
+            color: white;
+        }
+
+        /* Section separation */
+        .phase-section {
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .phase-section.training {
+            border-color: #3498db;
+            background: #ebf5fb;
+        }
+
+        .phase-section.inference {
+            border-color: #e67e22;
+            background: #fef5e7;
+        }
+
+        .workflow-arrow {
+            text-align: center;
+            font-size: 2em;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
         .trees-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -31,7 +76,7 @@
         }
 
         .tree-box {
-            background: #f8f9fa;
+            background: white;
             border: 3px solid #e0e0e0;
             border-radius: 12px;
             padding: 15px;
@@ -60,11 +105,12 @@
             border-radius: 8px;
             margin-bottom: 10px;
             font-size: 0.85em;
+            border: 2px dashed #3498db;
         }
 
         .bootstrap-title {
             font-weight: bold;
-            color: #667eea;
+            color: #3498db;
             margin-bottom: 5px;
         }
 
@@ -121,6 +167,7 @@
         button:hover { opacity: 0.8; }
         .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
         .btn-secondary { background: #2ecc71; color: white; }
+        .btn-inference { background: #e67e22; color: white; }
 
         .info-box { background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; }
         .explanation { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
@@ -129,8 +176,8 @@
         .formula { background: #f0f0f0; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; margin: 15px 0; }
 
         .vote-section {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
+            background: white;
+            border: 2px solid #e67e22;
             border-radius: 12px;
             padding: 15px;
             margin: 20px 0;
@@ -138,7 +185,7 @@
 
         .vote-title {
             font-weight: bold;
-            color: #856404;
+            color: #e67e22;
             margin-bottom: 10px;
             font-size: 1.1em;
         }
@@ -169,92 +216,162 @@
         <header>
             <a href="../index.html" class="back-btn">← Retour</a>
             <h1>🌲 Random Forest</h1>
-            <p>Visualisation pédagogique avec 3 arbres</p>
+            <p>Entraînement et Inférence séparés</p>
         </header>
 
         <div class="main-content">
             <div class="work-area">
-                <h3 style="color: #667eea;">Dataset d'Entraînement (8 points)</h3>
-                <canvas id="dataCanvas" width="800" height="300"></canvas>
+                <!-- PHASE 1: ENTRAÎNEMENT -->
+                <div class="phase-section training">
+                    <h3 style="color: #3498db;">
+                        📚 PHASE 1 : ENTRAÎNEMENT
+                        <span class="phase-badge phase-training">TRAINING</span>
+                    </h3>
+                    <p style="color: #666; margin: 10px 0;">
+                        Construction de la forêt à partir du dataset d'entraînement
+                    </p>
 
-                <div class="vote-section">
-                    <div class="vote-title">🗳️ Vote pour le point test (étoile jaune)</div>
-                    <div id="voteDetails" style="text-align: center; margin: 10px 0;"></div>
-                    <div class="vote-result" id="voteResult"></div>
+                    <h4 style="color: #3498db; margin-top: 20px;">Dataset d'Entraînement (8 points)</h4>
+                    <canvas id="trainingCanvas" width="800" height="300"></canvas>
+
+                    <h4 style="color: #3498db; margin-top: 30px;">Les 3 Arbres Entraînés</h4>
+                    <p style="color: #666; font-size: 0.9em; margin: 5px 0;">
+                        Chaque arbre est entraîné sur un échantillon bootstrap différent
+                    </p>
+                    <div class="trees-container" id="treesContainer"></div>
                 </div>
 
-                <h3 style="color: #667eea; margin-top: 30px;">Les 3 Arbres de la Forêt</h3>
-                <div class="trees-container" id="treesContainer"></div>
+                <div class="workflow-arrow">↓</div>
+
+                <!-- PHASE 2: INFÉRENCE -->
+                <div class="phase-section inference">
+                    <h3 style="color: #e67e22;">
+                        🔮 PHASE 2 : INFÉRENCE
+                        <span class="phase-badge phase-inference">INFERENCE</span>
+                    </h3>
+                    <p style="color: #666; margin: 10px 0;">
+                        Prédiction sur un nouveau point jamais vu pendant l'entraînement
+                    </p>
+
+                    <h4 style="color: #e67e22; margin-top: 20px;">Point de Test (⭐ étoile jaune)</h4>
+                    <canvas id="inferenceCanvas" width="800" height="300"></canvas>
+
+                    <div class="vote-section">
+                        <div class="vote-title">🗳️ Vote des 3 Arbres</div>
+                        <div id="voteDetails" style="text-align: center; margin: 10px 0;"></div>
+                        <div class="vote-result" id="voteResult"></div>
+                    </div>
+                </div>
             </div>
 
             <div class="controls">
                 <h3>⚙️ Contrôles</h3>
-                <button class="btn-primary" onclick="trainForest()">🔄 Régénérer la Forêt</button>
-                <button class="btn-secondary" onclick="changeTestPoint()">⭐ Changer Point Test</button>
+
+                <div style="background: #ebf5fb; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #3498db;">
+                    <h4 style="color: #3498db; margin-bottom: 10px;">📚 Phase Entraînement</h4>
+                    <button class="btn-primary" onclick="trainForest()">🔄 Ré-entraîner la Forêt</button>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 5px;">
+                        Crée 3 nouveaux arbres avec des bootstraps différents
+                    </p>
+                </div>
+
+                <div style="background: #fef5e7; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #e67e22;">
+                    <h4 style="color: #e67e22; margin-bottom: 10px;">🔮 Phase Inférence</h4>
+                    <button class="btn-inference" onclick="changeTestPoint()">⭐ Nouveau Point Test</button>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 5px;">
+                        Déplace l'étoile jaune pour tester la prédiction
+                    </p>
+                </div>
 
                 <div class="info-box" style="margin-top: 20px;">
                     <p style="font-size: 0.9em; line-height: 1.6;">
-                        <strong>💡 Random Forest:</strong><br>
-                        • <strong>3 arbres</strong> indépendants<br>
-                        • Chaque arbre voit un <strong>échantillon bootstrap</strong> (8 points tirés aléatoirement avec remplacement)<br>
-                        • Chaque nœud a un <strong>threshold</strong> (seuil de décision)<br>
-                        • <strong>Vote majoritaire</strong> pour la prédiction finale<br>
-                        • L'arbre le plus précis est surligné en <strong style="color: #2ecc71;">vert</strong>
+                        <strong>💡 Workflow:</strong><br>
+                        <strong style="color: #3498db;">1. ENTRAÎNEMENT</strong><br>
+                        • 3 arbres indépendants<br>
+                        • Bootstrap sampling (8 points)<br>
+                        • Construction des thresholds<br><br>
+                        <strong style="color: #e67e22;">2. INFÉRENCE</strong><br>
+                        • Nouveau point jamais vu<br>
+                        • Vote des 3 arbres<br>
+                        • Prédiction finale
                     </p>
                 </div>
             </div>
         </div>
 
         <div class="explanation">
-            <h3>🎓 Comment fonctionne Random Forest ?</h3>
+            <h3>🎓 Entraînement vs Inférence</h3>
             <p>
-                <strong>Random Forest</strong> est un algorithme d'ensemble qui combine plusieurs arbres de décision pour créer un modèle robuste.
+                <strong>Random Forest</strong> fonctionne en deux phases distinctes, comme tous les algorithmes de Machine Learning.
             </p>
 
             <div class="formula">
-<strong>Étape 1: Bootstrap Sampling (Échantillonnage avec remplacement)</strong>
-Pour chaque arbre:
-  • Tirer aléatoirement 8 points depuis le dataset original
-  • Un point peut être tiré plusieurs fois (cercles avec bordure épaisse)
-  • Certains points peuvent ne jamais être tirés
+<strong style="color: #3498db;">📚 PHASE 1 : ENTRAÎNEMENT (TRAINING)</strong>
 
-<strong>Étape 2: Construction de l'Arbre</strong>
-Pour chaque nœud:
-  • Choisir une feature aléatoire (X ou Y)
-  • Trouver le meilleur threshold (seuil)
-  • Exemple: "X < 0.45" → diviser en 2 branches
-  • Continuer jusqu'à atteindre les feuilles (décision finale)
+Objectif : Construire le modèle à partir des données connues
 
-<strong>Étape 3: Vote Majoritaire</strong>
-Pour prédire un nouveau point:
-  • Chaque arbre vote (Classe A ou Classe B)
-  • La classe avec le plus de votes gagne
-  • Exemple: [B, B, A] → Prédiction finale = B
+Étape 1: Bootstrap Sampling
+  • Pour chaque arbre, tirer 8 points aléatoirement AVEC remplacement
+  • Un point peut être sélectionné 0, 1, 2 ou 3 fois
+  • Chaque arbre voit des données différentes
+
+Étape 2: Construction de l'Arbre
+  • Pour chaque nœud, choisir une feature (X ou Y)
+  • Trouver le meilleur threshold (seuil de séparation)
+  • Diviser récursivement jusqu'aux feuilles
+  • Les feuilles contiennent la décision finale (Classe A ou B)
+
+Résultat : 3 arbres de décision entraînés et prêts à prédire
+
+─────────────────────────────────────────────────────────
+
+<strong style="color: #e67e22;">🔮 PHASE 2 : INFÉRENCE (PREDICTION)</strong>
+
+Objectif : Prédire la classe d'un nouveau point JAMAIS VU
+
+Étape 1: Parcours de chaque arbre
+  • Le point test (⭐) descend dans chaque arbre
+  • À chaque nœud : "X < 0.45" ? → gauche : droite
+  • Arrive à une feuille : vote pour une classe
+
+Étape 2: Vote Majoritaire
+  • Arbre 1 vote : Classe A
+  • Arbre 2 vote : Classe B
+  • Arbre 3 vote : Classe B
+  • → Prédiction finale : Classe B (2 votes sur 3)
+
+Résultat : Prédiction de la classe pour le nouveau point
             </div>
 
-            <h3>Pourquoi ça fonctionne ?</h3>
+            <h3>Pourquoi séparer Entraînement et Inférence ?</h3>
             <p>
-                <strong>1. Diversité:</strong> Chaque arbre voit des données différentes (bootstrap)<br>
-                <strong>2. Indépendance:</strong> Les arbres font des erreurs différentes<br>
-                <strong>3. Sagesse collective:</strong> Le vote majoritaire réduit les erreurs individuelles<br>
-                <strong>4. Robustesse:</strong> Si un arbre se trompe, les autres peuvent compenser
-            </p>
-
-            <h3>Exemple Concret</h3>
-            <p>
-                Imaginez 3 médecins (arbres) diagnostiquant un patient (point test):<br>
-                • <strong>Médecin 1:</strong> Voit uniquement les symptômes A, B, D → Diagnostic: Grippe<br>
-                • <strong>Médecin 2:</strong> Voit uniquement les symptômes A, C, D → Diagnostic: Grippe<br>
-                • <strong>Médecin 3:</strong> Voit uniquement les symptômes B, C, E → Diagnostic: Rhume<br>
-                • <strong>Vote final:</strong> 2 votes pour Grippe, 1 vote pour Rhume → <strong>Diagnostic: Grippe</strong>
+                <strong>1. Entraînement = Apprentissage:</strong><br>
+                • Temps de calcul important<br>
+                • Utilise TOUTES les données d'entraînement<br>
+                • Ne se fait qu'une seule fois (ou lors d'un ré-entraînement)<br>
+                • Produit un modèle fixé<br>
+                <br>
+                <strong>2. Inférence = Utilisation:</strong><br>
+                • Très rapide (le modèle est déjà construit)<br>
+                • Fonctionne sur UN point à la fois<br>
+                • Peut être fait des millions de fois<br>
+                • Utilise le modèle sans le modifier<br>
+                <br>
+                <strong>3. En production:</strong><br>
+                • <strong>Entraînement:</strong> 1 fois par jour/semaine sur un serveur puissant<br>
+                • <strong>Inférence:</strong> Des milliers de fois par seconde pour les utilisateurs<br>
+                <br>
+                <strong>Exemple concret:</strong><br>
+                • <strong>Entraînement:</strong> Une banque entraîne un modèle de détection de fraude sur 1 million de transactions historiques (1 fois par semaine)<br>
+                • <strong>Inférence:</strong> Le modèle analyse chaque nouvelle transaction en temps réel (10,000 fois par seconde)
             </p>
 
             <h3>Applications Entreprise</h3>
             <p>
-                • <strong>Banque:</strong> Détection de fraude, scoring de crédit<br>
-                • <strong>E-commerce:</strong> Prédiction de churn, recommandations<br>
-                • <strong>Santé:</strong> Diagnostic médical assisté par IA<br>
-                • <strong>Industrie:</strong> Maintenance prédictive des machines
+                • <strong>Banque:</strong> Détection de fraude en temps réel<br>
+                • <strong>E-commerce:</strong> Recommandations produits<br>
+                • <strong>Santé:</strong> Diagnostic médical assisté<br>
+                • <strong>Industrie:</strong> Maintenance prédictive
             </p>
         </div>
     </div>
@@ -381,13 +498,14 @@ Pour prédire un nouveau point:
         }
 
         function visualize() {
-            drawData();
+            drawTrainingData();
+            drawInferenceData();
             drawTrees();
             showVote();
         }
 
-        function drawData() {
-            const canvas = document.getElementById('dataCanvas');
+        function drawTrainingData() {
+            const canvas = document.getElementById('trainingCanvas');
             const ctx = canvas.getContext('2d');
 
             ctx.fillStyle = '#f9f9f9';
@@ -413,25 +531,15 @@ Pour prédire un nouveau point:
             originalData.forEach(point => {
                 ctx.fillStyle = point.label === 0 ? '#ff6b6b' : '#4ecdc4';
                 ctx.beginPath();
-                ctx.arc(point.x * canvas.width, point.y * canvas.height, 8, 0, Math.PI * 2);
+                ctx.arc(point.x * canvas.width, point.y * canvas.height, 10, 0, Math.PI * 2);
                 ctx.fill();
 
                 ctx.strokeStyle = '#333';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.arc(point.x * canvas.width, point.y * canvas.height, 8, 0, Math.PI * 2);
+                ctx.arc(point.x * canvas.width, point.y * canvas.height, 10, 0, Math.PI * 2);
                 ctx.stroke();
             });
-
-            // Draw test point (star)
-            ctx.save();
-            ctx.fillStyle = '#ffc107';
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 3;
-            drawStar(ctx, testPoint.x * canvas.width, testPoint.y * canvas.height, 5, 15, 7);
-            ctx.fill();
-            ctx.stroke();
-            ctx.restore();
 
             // Legend
             ctx.font = 'bold 14px Arial';
@@ -448,11 +556,77 @@ Pour prédire un nouveau point:
             ctx.fillStyle = '#333';
             ctx.fillText('Classe B (Bleu)', 50, 65);
 
+            // Training label
+            ctx.fillStyle = '#3498db';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('DONNÉES D\'ENTRAÎNEMENT', canvas.width - 250, 35);
+        }
+
+        function drawInferenceData() {
+            const canvas = document.getElementById('inferenceCanvas');
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#f9f9f9';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < canvas.height; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+
+            // Draw decision regions (from trained forest)
+            if (forest.length > 0) {
+                const resolution = 15;
+                for (let i = 0; i < canvas.width; i += resolution) {
+                    for (let j = 0; j < canvas.height; j += resolution) {
+                        const x = i / canvas.width;
+                        const y = j / canvas.height;
+
+                        // Vote from all trees
+                        const votes = forest.map(f => predict(f.tree, {x, y}));
+                        const vote1 = votes.filter(v => v === 1).length;
+                        const pred = vote1 > forest.length / 2 ? 1 : 0;
+
+                        ctx.fillStyle = pred === 1 ? 'rgba(78, 205, 196, 0.15)' : 'rgba(255, 107, 107, 0.15)';
+                        ctx.fillRect(i, j, resolution, resolution);
+                    }
+                }
+            }
+
+            // Draw test point (star)
+            ctx.save();
             ctx.fillStyle = '#ffc107';
-            drawStar(ctx, 30, 95, 5, 10, 5);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 3;
+            drawStar(ctx, testPoint.x * canvas.width, testPoint.y * canvas.height, 5, 20, 10);
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+
+            // Legend
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = '#ffc107';
+            drawStar(ctx, 30, 95, 5, 12, 6);
             ctx.fill();
             ctx.fillStyle = '#333';
-            ctx.fillText('Point Test', 50, 100);
+            ctx.fillText('Point Test (nouveau, jamais vu)', 50, 100);
+
+            // Inference label
+            ctx.fillStyle = '#e67e22';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'right';
+            ctx.fillText('INFÉRENCE SUR NOUVEAU POINT', canvas.width - 20, 35);
         }
 
         function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
@@ -589,9 +763,9 @@ Pour prédire un nouveau point:
             const finalPrediction = vote1 > vote0 ? 1 : 0;
 
             document.getElementById('voteDetails').innerHTML = `
-                Arbre 1 vote: <strong>${votes[0] === 0 ? 'Classe A' : 'Classe B'}</strong> |
-                Arbre 2 vote: <strong>${votes[1] === 0 ? 'Classe A' : 'Classe B'}</strong> |
-                Arbre 3 vote: <strong>${votes[2] === 0 ? 'Classe A' : 'Classe B'}</strong>
+                Arbre 1 vote: <strong style="color: ${votes[0] === 0 ? '#ff6b6b' : '#4ecdc4'}">${votes[0] === 0 ? 'Classe A' : 'Classe B'}</strong> |
+                Arbre 2 vote: <strong style="color: ${votes[1] === 0 ? '#ff6b6b' : '#4ecdc4'}">${votes[1] === 0 ? 'Classe A' : 'Classe B'}</strong> |
+                Arbre 3 vote: <strong style="color: ${votes[2] === 0 ? '#ff6b6b' : '#4ecdc4'}">${votes[2] === 0 ? 'Classe A' : 'Classe B'}</strong>
             `;
 
             document.getElementById('voteResult').innerHTML = `
