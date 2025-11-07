@@ -199,20 +199,13 @@
                     <p style="font-size: 0.9em; color: #666;">Robuste aux outliers, traite toutes les erreurs de manière égale (valeur absolue)</p>
                 </div>
 
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                    <p style="margin-bottom: 10px;"><strong style="color: #f59e0b;">RMSE (Root Mean Squared Error)</strong></p>
-                    <div class="formula" style="font-size: 0.95em; margin: 8px 0;">
-                        RMSE = √[(1/n) Σ (yᵢ - ŷᵢ)²]
-                    </div>
-                    <p style="font-size: 0.9em; color: #666;">Sensible aux outliers comme MSE, mais dans la même unité que les données</p>
-                </div>
-
                 <p style="margin-top: 15px;">
                     <strong>⚡ Visualisation en temps réel:</strong>
                 </p>
                 <ul style="line-height: 1.8; color: #666; margin-bottom: 10px;">
                     <li><strong>2 droites de régression simultanées</strong> - MSE (ligne bleue 🔵), MAE (ligne verte 🟢)</li>
-                    <li><strong>3 courbes de convergence</strong> - Comparez l'évolution des 3 métriques (MSE, MAE, RMSE) en temps réel</li>
+                    <li><strong>2 courbes de convergence</strong> - Comparez l'évolution des 2 métriques (MSE, MAE) en temps réel</li>
+                    <li><strong>Double échelle</strong> - Chaque métrique a sa propre échelle pour une meilleure visualisation</li>
                     <li><strong>Gradients adaptatifs</strong> - Chaque modèle utilise ses propres gradients pour converger indépendamment</li>
                 </ul>
                 <p>
@@ -266,7 +259,6 @@
         // Tracking convergence metrics
         let mseHistory = [];
         let maeHistory = [];
-        let rmseHistory = [];
         let currentIteration = 0;
         let isOptimizing = false;
         let animationId = null;
@@ -341,7 +333,6 @@
 
             mseHistory = [];
             maeHistory = [];
-            rmseHistory = [];
             currentIteration = 0;
             draw();
             drawConvergenceGraph();
@@ -361,7 +352,6 @@
             currentIteration = 0;
             mseHistory = [];
             maeHistory = [];
-            rmseHistory = [];
 
             // Reset all parameters
             mMSE = 0; bMSE = 0.5;
@@ -425,13 +415,11 @@
                 return;
             }
 
-            // Track all three metrics for comparison
+            // Track both metrics for comparison
             const mse = calculateMetric('mse', mMSE, bMSE);
             const mae = calculateMetric('mae', mMAE, bMAE);
-            const rmse = Math.sqrt(mse); // RMSE is just the square root of MSE
             mseHistory.push(mse);
             maeHistory.push(mae);
-            rmseHistory.push(rmse);
             currentIteration++;
 
             // Update display
@@ -597,11 +585,10 @@
             convCtx.textAlign = 'center';
             convCtx.fillText('Comparaison des fonctions de perte (double échelle)', convergenceCanvas.width / 2, 20);
 
-            // === DUAL SCALE: Left for MSE/RMSE, Right for MAE ===
-            // Left scale (MSE/RMSE)
-            const mseRmseValues = [...mseHistory, ...rmseHistory];
-            const maxLeftScale = Math.max(...mseRmseValues);
-            const minLeftScale = Math.min(...mseRmseValues);
+            // === DUAL SCALE: Left for MSE, Right for MAE ===
+            // Left scale (MSE)
+            const maxLeftScale = Math.max(...mseHistory);
+            const minLeftScale = Math.min(...mseHistory);
             const leftRange = maxLeftScale - minLeftScale;
 
             // Right scale (MAE)
@@ -637,7 +624,7 @@
                 convCtx.lineTo(convergenceCanvas.width - padding, y);
                 convCtx.stroke();
 
-                // Left axis label (MSE/RMSE) in blue/orange
+                // Left axis label (MSE) in blue
                 convCtx.fillStyle = '#667eea';
                 convCtx.textAlign = 'right';
                 convCtx.fillText(leftValue.toFixed(4), padding - 5, y + 3);
@@ -655,7 +642,7 @@
             convCtx.textAlign = 'center';
             convCtx.translate(padding - 50, padding + 40 + graphHeight / 2);
             convCtx.rotate(-Math.PI / 2);
-            convCtx.fillText('MSE / RMSE', 0, 0);
+            convCtx.fillText('MSE', 0, 0);
             convCtx.restore();
 
             // Label for right Y-axis
@@ -698,36 +685,6 @@
                 convCtx.fill();
             }
 
-            // Draw RMSE curve (left scale)
-            if (rmseHistory.length >= 2) {
-                convCtx.strokeStyle = '#f59e0b';
-                convCtx.lineWidth = 2;
-                convCtx.beginPath();
-
-                for (let i = 0; i < rmseHistory.length; i++) {
-                    const x = padding + (graphWidth * i / Math.max(1, rmseHistory.length - 1));
-                    const normalizedValue = leftRange > 0 ? (maxLeftScale - rmseHistory[i]) / leftRange : 0.5;
-                    const y = padding + 40 + normalizedValue * graphHeight;
-
-                    if (i === 0) {
-                        convCtx.moveTo(x, y);
-                    } else {
-                        convCtx.lineTo(x, y);
-                    }
-                }
-                convCtx.stroke();
-
-                // Draw last point marker
-                const lastIdx = rmseHistory.length - 1;
-                const x = padding + (graphWidth * lastIdx / Math.max(1, rmseHistory.length - 1));
-                const normalizedValue = leftRange > 0 ? (maxLeftScale - rmseHistory[lastIdx]) / leftRange : 0.5;
-                const y = padding + 40 + normalizedValue * graphHeight;
-                convCtx.fillStyle = '#f59e0b';
-                convCtx.beginPath();
-                convCtx.arc(x, y, 4, 0, Math.PI * 2);
-                convCtx.fill();
-            }
-
             // Draw MAE curve (right scale)
             if (maeHistory.length >= 2) {
                 convCtx.strokeStyle = '#10b981';
@@ -765,14 +722,13 @@
             convCtx.fillText('Itérations', convergenceCanvas.width / 2, convergenceCanvas.height - 25);
 
             // Draw legend
-            const legendX = convergenceCanvas.width / 2 - 150;
+            const legendX = convergenceCanvas.width / 2 - 100;
             const legendY = padding + 50;
             convCtx.font = '12px Arial';
             convCtx.textAlign = 'left';
 
             const curves = [
                 { history: mseHistory, color: '#667eea', label: 'MSE' },
-                { history: rmseHistory, color: '#f59e0b', label: 'RMSE' },
                 { history: maeHistory, color: '#10b981', label: 'MAE' }
             ];
 
