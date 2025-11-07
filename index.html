@@ -27,6 +27,26 @@
             text-align: center;
             color: white;
             margin-bottom: 50px;
+            position: relative;
+        }
+
+        .view-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: white;
+            color: #667eea;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .view-toggle:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
         }
 
         h1 {
@@ -160,6 +180,7 @@
 <body>
     <div class="container">
         <header>
+            <a href="index-cards.html" class="view-toggle">🎴 Vue Cartes</a>
             <h1>🧠 Apprentissage Machine</h1>
             <p class="subtitle">Applications interactives pour comprendre le ML historique et moderne</p>
         </header>
