@@ -202,6 +202,127 @@
         .pulse {
             animation: pulse 1.5s ease-in-out;
         }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .dual-view {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .info-panel {
+                min-width: 90%;
+                padding: 12px 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .back-link {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+
+            .animation-container {
+                padding: 20px 15px;
+                min-height: auto;
+            }
+
+            .dual-view {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .timestep-display {
+                position: static;
+                margin: 0 auto 20px;
+                width: fit-content;
+            }
+
+            canvas {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .info-panel {
+                position: static;
+                transform: none;
+                margin: 20px auto 0;
+                min-width: auto;
+                width: 100%;
+            }
+
+            .info-panel h4 {
+                font-size: 1em;
+            }
+
+            .info-panel p {
+                font-size: 0.85em;
+            }
+
+            .formula-box {
+                padding: 12px 15px;
+                max-width: 100%;
+            }
+
+            .formula {
+                font-size: 0.85em;
+            }
+
+            .direction-indicator {
+                font-size: 2em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .subtitle {
+                font-size: 0.9em;
+            }
+
+            .animation-container {
+                padding: 15px 10px;
+            }
+
+            .canvas-wrapper h3 {
+                font-size: 1em;
+            }
+
+            .timestep-value {
+                font-size: 1.4em;
+            }
+
+            .formula {
+                font-size: 0.75em;
+            }
+
+            .noise-bar {
+                width: 30px;
+                height: 120px;
+            }
+
+            .direction-indicator {
+                font-size: 1.5em;
+            }
+        }
     </style>
 </head>
 <body>

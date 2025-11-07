@@ -203,6 +203,159 @@
             color: #999;
             font-weight: bold;
         }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .canvas-wrapper {
+                width: 90%;
+                height: 450px;
+            }
+
+            canvas {
+                width: 100%;
+                height: 100%;
+            }
+
+            .vector-info {
+                left: 20px;
+                bottom: 80px;
+            }
+
+            .similarity-box {
+                right: 20px;
+                bottom: 80px;
+            }
+
+            .info-panel {
+                min-width: 90%;
+                padding: 12px 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .back-link {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+
+            .animation-container {
+                padding: 20px 15px;
+                height: auto;
+                min-height: 600px;
+            }
+
+            .canvas-wrapper {
+                width: 100%;
+                height: 400px;
+                margin: 0;
+            }
+
+            canvas {
+                width: 100%;
+                height: 100%;
+            }
+
+            .operation-display {
+                font-size: 1em;
+                padding: 12px 20px;
+                top: 15px;
+            }
+
+            .vector-info {
+                position: static;
+                margin: 15px auto;
+                width: fit-content;
+            }
+
+            .similarity-box {
+                position: static;
+                margin: 15px auto;
+                width: fit-content;
+            }
+
+            .info-panel {
+                position: static;
+                transform: none;
+                margin: 15px auto 0;
+                min-width: auto;
+                width: 100%;
+            }
+
+            .info-panel h4 {
+                font-size: 1em;
+            }
+
+            .info-panel p {
+                font-size: 0.85em;
+            }
+
+            .word-label {
+                font-size: 0.8em;
+                padding: 6px 10px;
+            }
+
+            .axis-label {
+                font-size: 0.7em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .subtitle {
+                font-size: 0.9em;
+            }
+
+            .animation-container {
+                padding: 15px 10px;
+                min-height: 550px;
+            }
+
+            .canvas-wrapper {
+                height: 350px;
+            }
+
+            .operation-display {
+                font-size: 0.9em;
+                padding: 10px 15px;
+            }
+
+            .word-label {
+                font-size: 0.7em;
+                padding: 5px 8px;
+            }
+
+            .vector-info h4,
+            .similarity-box h4 {
+                font-size: 0.85em;
+            }
+
+            .vector-info p {
+                font-size: 0.75em;
+            }
+
+            .similarity-value {
+                font-size: 1.1em;
+            }
+        }
     </style>
 </head>
 <body>

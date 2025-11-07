@@ -255,6 +255,159 @@
         .pulse {
             animation: pulse 1.5s ease-in-out;
         }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .qkv-display {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .info-panel {
+                min-width: 90%;
+                padding: 12px 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .back-link {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+
+            .animation-container {
+                padding: 20px 15px;
+                min-height: auto;
+            }
+
+            .sentence-display {
+                gap: 10px;
+                margin: 20px 0 30px 0;
+            }
+
+            .word-token {
+                padding: 10px 15px;
+                font-size: 1em;
+            }
+
+            .word-label {
+                font-size: 0.65em;
+                bottom: -20px;
+            }
+
+            .qkv-display {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .matrix-cell {
+                width: 50px;
+                height: 45px;
+                font-size: 0.75em;
+            }
+
+            .matrix-label {
+                width: 50px;
+                height: 45px;
+                font-size: 0.7em;
+            }
+
+            .attention-matrix {
+                overflow-x: auto;
+            }
+
+            .info-panel {
+                position: static;
+                transform: none;
+                margin: 20px auto 0;
+                min-width: auto;
+                width: 100%;
+            }
+
+            .info-panel h4 {
+                font-size: 1em;
+            }
+
+            .info-panel p {
+                font-size: 0.85em;
+            }
+
+            .grammar-explanation {
+                position: static;
+                transform: none;
+                margin: 15px auto;
+                max-width: 100%;
+                font-size: 0.9em;
+            }
+
+            .formula-box {
+                padding: 12px 15px;
+                max-width: 100%;
+            }
+
+            .formula {
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .subtitle {
+                font-size: 0.9em;
+            }
+
+            .animation-container {
+                padding: 15px 10px;
+            }
+
+            .word-token {
+                padding: 8px 12px;
+                font-size: 0.9em;
+            }
+
+            .matrix-cell {
+                width: 40px;
+                height: 35px;
+                font-size: 0.65em;
+            }
+
+            .matrix-label {
+                width: 40px;
+                height: 35px;
+                font-size: 0.6em;
+            }
+
+            .qkv-box h4 {
+                font-size: 0.9em;
+            }
+
+            .qkv-box p {
+                font-size: 0.8em;
+            }
+
+            .formula {
+                font-size: 0.8em;
+            }
+        }
     </style>
 </head>
 <body>

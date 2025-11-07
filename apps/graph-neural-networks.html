@@ -180,6 +180,146 @@
             color: #555;
             font-size: 0.9em;
         }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .canvas-wrapper {
+                width: 90%;
+                height: 450px;
+            }
+
+            canvas {
+                width: 100%;
+                height: 100%;
+            }
+
+            .info-panel {
+                min-width: 90%;
+                padding: 12px 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .back-link {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+
+            .animation-container {
+                padding: 20px 15px;
+                min-height: auto;
+            }
+
+            .layer-indicator {
+                position: static;
+                margin: 0 auto 20px;
+                width: fit-content;
+            }
+
+            .canvas-wrapper {
+                width: 100%;
+                height: 400px;
+                margin: 0;
+            }
+
+            canvas {
+                width: 100%;
+                height: 100%;
+            }
+
+            .node {
+                width: 50px;
+                height: 50px;
+                font-size: 0.9em;
+            }
+
+            .formula-box {
+                padding: 12px 15px;
+                max-width: 100%;
+            }
+
+            .formula {
+                font-size: 0.85em;
+            }
+
+            .info-panel {
+                position: static;
+                transform: none;
+                margin: 20px auto 0;
+                min-width: auto;
+                width: 100%;
+            }
+
+            .info-panel h4 {
+                font-size: 1em;
+            }
+
+            .info-panel p {
+                font-size: 0.85em;
+            }
+
+            .message {
+                width: 16px;
+                height: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .subtitle {
+                font-size: 0.9em;
+            }
+
+            .animation-container {
+                padding: 15px 10px;
+            }
+
+            .canvas-wrapper {
+                height: 350px;
+            }
+
+            .layer-indicator {
+                padding: 10px 15px;
+            }
+
+            .layer-value {
+                font-size: 1.2em;
+            }
+
+            .node {
+                width: 40px;
+                height: 40px;
+                font-size: 0.8em;
+            }
+
+            .formula {
+                font-size: 0.75em;
+            }
+
+            .message {
+                width: 14px;
+                height: 14px;
+            }
+        }
     </style>
 </head>
 <body>
