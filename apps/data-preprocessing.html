@@ -27,7 +27,7 @@
 
         .pipeline-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 20px;
             margin: 20px 0;
         }
@@ -37,11 +37,6 @@
             border-radius: 12px;
             padding: 20px;
             background: white;
-        }
-
-        .pipeline-step.active {
-            border-color: #667eea;
-            background: #f8f9ff;
         }
 
         .pipeline-step h3 {
@@ -70,7 +65,6 @@
             border-radius: 8px;
             margin: 15px 0;
             display: block;
-            cursor: crosshair;
         }
 
         button {
@@ -119,17 +113,36 @@
             color: #333;
         }
 
-        .prediction-box {
-            background: #e8f5e9;
+        .normalization-options {
+            background: #f8f9fa;
             padding: 15px;
             border-radius: 8px;
-            margin: 10px 0;
-            border: 2px solid #4caf50;
+            margin: 15px 0;
+            border: 2px solid #667eea;
         }
 
-        .prediction-box.bad {
-            background: #ffebee;
-            border-color: #f44336;
+        .normalization-options h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+
+        .checkbox-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-option label {
+            cursor: pointer;
+            font-size: 0.95em;
         }
 
         .explanation {
@@ -186,7 +199,7 @@
         <header>
             <a href="../index.html" class="back-btn">← Retour</a>
             <h1>🔧 Prétraitement de Données</h1>
-            <p>Impact sur la Prédiction - Cas d'Usage Immobilier</p>
+            <p>Impact sur la Régression Linéaire - Cas d'Usage Immobilier</p>
         </header>
 
         <div class="main-content">
@@ -194,18 +207,17 @@
                 <div class="info-box">
                     <strong>📊 Dataset : Prix de Maisons</strong><br>
                     12 maisons avec leur superficie (m²) et prix (k€).<br>
-                    <strong style="color: #e74c3c;">Problème :</strong> 2 outliers (erreurs de saisie) faussent les prédictions !<br>
-                    <strong style="color: #2196f3;">Cliquez sur le graphique</strong> pour tester une prédiction.
+                    <strong style="color: #e74c3c;">Problème :</strong> 2 outliers (erreurs de saisie) faussent la droite de régression !
                 </div>
 
                 <div class="pipeline-container">
                     <!-- ÉTAPE 1: DONNÉES BRUTES -->
-                    <div class="pipeline-step active">
+                    <div class="pipeline-step">
                         <h3>
                             <span class="step-number">1</span>
-                            Données Brutes (avec Outliers)
+                            Données Brutes
                         </h3>
-                        <canvas id="rawCanvas" width="450" height="350"></canvas>
+                        <canvas id="rawCanvas" width="400" height="350"></canvas>
                         <div class="legend">
                             <div class="legend-item">
                                 <div class="legend-color" style="background: #4ecdc4;"></div>
@@ -213,64 +225,79 @@
                             </div>
                             <div class="legend-item">
                                 <div class="legend-color" style="background: #e74c3c;"></div>
-                                <span>Outliers (erreurs)</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color" style="background: #ffc107;"></div>
-                                <span>Point de test</span>
+                                <span>Outliers</span>
                             </div>
                         </div>
-                        <div id="rawPrediction"></div>
+                        <div class="stat-card">
+                            <h4>Équation</h4>
+                            <div class="stat-value" id="rawEquation" style="font-size: 1em;"></div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Erreur MSE</h4>
+                            <div class="stat-value" id="rawMSE"></div>
+                        </div>
                     </div>
 
                     <!-- ÉTAPE 2: DONNÉES NETTOYÉES -->
                     <div class="pipeline-step">
                         <h3>
                             <span class="step-number">2</span>
-                            Après Nettoyage (Outliers supprimés)
+                            Après Nettoyage
                         </h3>
-                        <canvas id="cleanCanvas" width="450" height="350"></canvas>
+                        <canvas id="cleanCanvas" width="400" height="350"></canvas>
                         <div class="info-box" style="margin-top: 10px; font-size: 0.9em;">
-                            <strong>🎯 Méthode IQR :</strong><br>
-                            Outlier si : X &lt; Q1 - 1.5×IQR ou X &gt; Q3 + 1.5×IQR<br>
+                            <strong>🎯 Méthode IQR</strong><br>
                             <span id="outliersDetected"></span>
                         </div>
-                        <div id="cleanPrediction"></div>
+                        <div class="stat-card">
+                            <h4>Équation</h4>
+                            <div class="stat-value" id="cleanEquation" style="font-size: 1em;"></div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Erreur MSE</h4>
+                            <div class="stat-value" id="cleanMSE"></div>
+                        </div>
+                    </div>
+
+                    <!-- ÉTAPE 3: NORMALISATIONS -->
+                    <div class="pipeline-step">
+                        <h3>
+                            <span class="step-number">3</span>
+                            Avec Normalisation
+                        </h3>
+                        <canvas id="normCanvas" width="400" height="350"></canvas>
+                        <div class="normalization-options">
+                            <h4>Méthodes actives :</h4>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="normMinMax" onchange="updateNormalization()">
+                                <label for="normMinMax">Min-Max [0,1]</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="normZScore" onchange="updateNormalization()">
+                                <label for="normZScore">Z-Score (μ=0, σ=1)</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="normRobust" onchange="updateNormalization()">
+                                <label for="normRobust">Robust Scaling</label>
+                            </div>
+                        </div>
+                        <div id="normStats"></div>
                     </div>
                 </div>
 
                 <div class="warning-box">
-                    <strong>💡 Observation :</strong> Comparez les deux graphiques ci-dessus !<br>
-                    Les outliers (points rouges) créent des prédictions aberrantes dans le modèle KNN.<br>
-                    Après nettoyage, les prédictions sont beaucoup plus cohérentes.
-                </div>
-
-                <div class="pipeline-step" style="margin-top: 20px;">
-                    <h3>
-                        <span class="step-number">3</span>
-                        Impact de la Normalisation sur KNN
-                    </h3>
-                    <p style="color: #666; margin: 10px 0; font-size: 0.95em;">
-                        Le KNN calcule la <strong>distance</strong> entre points. Si les features ont des échelles différentes,
-                        la distance est faussée ! Exemple : Superficie (0-200 m²) vs Chambres (1-5).
-                    </p>
-                    <canvas id="normCanvas" width="950" height="300"></canvas>
-                    <div id="normExplanation"></div>
+                    <strong>💡 Observation :</strong><br>
+                    <strong>Étape 1 :</strong> Les outliers (points rouges) tirent la droite de régression vers eux → prédictions fausses.<br>
+                    <strong>Étape 2 :</strong> Après suppression des outliers, la droite est correcte → MSE diminue fortement !<br>
+                    <strong>Étape 3 :</strong> Les normalisations ramènent les données sur différentes échelles tout en préservant la relation linéaire.
                 </div>
             </div>
 
             <div class="controls">
                 <h3>⚙️ Contrôles</h3>
 
-                <div class="info-box">
-                    <p style="font-size: 0.9em;">
-                        <strong>📍 Test de Prédiction :</strong><br>
-                        Cliquez sur les graphiques pour placer un point de test et voir la prédiction KNN (k=3).
-                    </p>
-                </div>
-
-                <button class="btn-secondary" onclick="resetTestPoint()">🎯 Effacer Point de Test</button>
                 <button class="btn-primary" onclick="regenerateData()">🔄 Générer Nouvelles Données</button>
+                <button class="btn-secondary" onclick="toggleAllNormalizations()">✓ Tout Activer/Désactiver</button>
 
                 <div class="stat-card" style="margin-top: 20px;">
                     <h4>Dataset Actuel</h4>
@@ -283,181 +310,171 @@
                 </div>
 
                 <div class="stat-card">
-                    <h4>Algorithme</h4>
-                    <div class="stat-value">KNN (k=3)</div>
+                    <h4>Amélioration MSE</h4>
+                    <div class="stat-value" id="mseImprovement" style="color: #2ecc71;">-</div>
                 </div>
 
                 <div class="warning-box" style="margin-top: 20px;">
                     <p style="font-size: 0.85em; line-height: 1.6;">
                         <strong>⚠️ Bonnes Pratiques :</strong><br>
-                        1. Toujours visualiser les données<br>
-                        2. Détecter outliers AVANT normalisation<br>
-                        3. Normaliser pour KNN, SVM, réseaux neurones<br>
-                        4. Appliquer la MÊME transformation sur train et test
+                        1. Détecter outliers AVANT normalisation<br>
+                        2. Vraiment supprimer les erreurs<br>
+                        3. Normaliser selon l'algorithme<br>
+                        4. Appliquer la MÊME transformation sur test
                     </p>
                 </div>
             </div>
         </div>
 
         <div class="explanation">
-            <h3>🎓 Pourquoi le Prétraitement est Crucial ?</h3>
+            <h3>🎓 Impact du Prétraitement sur la Régression Linéaire</h3>
             <p>
-                En Machine Learning, <strong>"Garbage in, garbage out"</strong>. Le prétraitement peut faire la différence
-                entre un modèle qui fonctionne à 60% ou 95% de précision.
+                La régression linéaire est <strong>très sensible aux outliers</strong>. Une seule erreur de saisie peut
+                complètement fausser la droite de prédiction. Le prétraitement est donc crucial !
             </p>
 
-            <h3>1. Détection des Outliers</h3>
+            <h3>1. Détection des Outliers avec IQR</h3>
             <div class="formula">
 <strong>Méthode IQR (Interquartile Range)</strong>
 
 IQR = Q3 - Q1 (Quartile 3 - Quartile 1)
 
 Outlier si :
-  • X &lt; Q1 - 1.5 × IQR    (trop petit)
-  • X &gt; Q3 + 1.5 × IQR    (trop grand)
+  • Prix &lt; Q1 - 1.5 × IQR    (trop bas)
+  • Prix &gt; Q3 + 1.5 × IQR    (trop haut)
 
-Pourquoi 1.5 ?
-→ Convention statistique : capture ~99.3% des données normales
-→ Balance entre sensibilité et spécificité
+Action : SUPPRESSION réelle des outliers détectés
+→ Le dataset nettoyé ne contient plus les erreurs
+→ La régression est calculée sur des données fiables
             </div>
 
-            <p><strong>Types d'outliers :</strong></p>
+            <h3>2. Impact des Outliers sur la Régression</h3>
             <p>
-                • <strong>Erreurs de saisie :</strong> Prix = 5€ au lieu de 500 000€ → À SUPPRIMER<br>
-                • <strong>Valeurs extrêmes légitimes :</strong> Penthouse à 5M€ → À GARDER ou transformer<br>
-                • <strong>Anomalies intéressantes :</strong> Fraude bancaire → C'est ce qu'on cherche !
-            </p>
-
-            <h3>2. Impact des Outliers sur KNN</h3>
-            <p>
-                Le <strong>K-Nearest Neighbors</strong> classe un point selon ses 3 plus proches voisins.
-                Les outliers faussent les distances et créent des prédictions aberrantes.
+                La régression linéaire minimise la <strong>somme des carrés des erreurs (MSE)</strong>.
+                Les outliers, étant très éloignés, créent des erreurs énormes qui "tirent" la droite vers eux.
             </p>
 
             <div class="formula">
 <strong>Exemple concret :</strong>
 
-Maison de 100m² → Prix ?
+AVEC outliers (erreur : 180m² à 80k€ au lieu de ~360k€) :
+  → Équation : Prix = 0.8 × Superficie + 150
+  → MSE élevée : ~4000 k€²
+  → Prédiction pour 100m² : 230k€ (trop bas !)
 
-AVEC outliers (erreur : maison 500m² à 50k€) :
-  → KNN trouve cette erreur comme voisin proche
-  → Prédiction : 120k€ (trop bas à cause de l'outlier)
+SANS outliers (données nettoyées) :
+  → Équation : Prix = 2.0 × Superficie + 100
+  → MSE faible : ~200 k€²
+  → Prédiction pour 100m² : 300k€ (correct !)
 
-SANS outliers :
-  → KNN utilise uniquement les vraies données
-  → Prédiction : 250k€ (correct !)
-
-Différence : 130k€ d'erreur à cause d'UN seul outlier !
+Amélioration : MSE réduite de 95% !
             </div>
 
-            <h3>3. Normalisation pour KNN</h3>
+            <h3>3. Les Trois Normalisations</h3>
             <div class="formula">
-<strong>Problème d'échelle :</strong>
-
-Maison A : (Superficie: 100m², Chambres: 3)
-Maison B : (Superficie: 120m², Chambres: 4)
-
-Distance SANS normalisation :
-  → √((120-100)² + (4-3)²) = √(400 + 1) = 20.02
-  → La superficie domine complètement !
-
-Distance AVEC normalisation [0,1] :
-  → Superficie: 100m² → 0.5 | 120m² → 0.6
-  → Chambres: 3 → 0.5 | 4 → 0.75
-  → √((0.6-0.5)² + (0.75-0.5)²) = 0.27
-  → Les deux features contribuent équitablement
-
-<strong>Min-Max Scaling :</strong>
+<strong>Min-Max Scaling [0, 1]</strong>
 X_norm = (X - X_min) / (X_max - X_min)
 
-→ Ramène toutes les features sur [0, 1]
-→ Essentiel pour KNN, SVM, réseaux neurones
+→ Ramène toutes les valeurs entre 0 et 1
+→ Préserve la distribution originale
+→ Sensible aux outliers (c'est pourquoi on nettoie AVANT)
+
+<strong>Z-Score Standardization (μ=0, σ=1)</strong>
+X_norm = (X - μ) / σ
+
+→ Moyenne = 0, Écart-type = 1
+→ Données centrées et réduites
+→ Assume distribution normale
+
+<strong>Robust Scaling</strong>
+X_norm = (X - médiane) / IQR
+
+→ Utilise médiane et IQR (résistant aux outliers)
+→ Plus robuste que Min-Max et Z-Score
+→ Idéal si on garde certains outliers légitimes
             </div>
 
-            <h3>4. Pipeline de Prétraitement</h3>
-            <div class="formula">
-<strong>Ordre recommandé en Production :</strong>
-
-1. Exploration des données (EDA)
-   → Histogrammes, box plots, statistiques
-
-2. Gestion des valeurs manquantes
-   → Imputation par moyenne/médiane ou suppression
-
-3. Détection et traitement des outliers
-   → IQR, Z-score, visualisation
-
-4. Feature engineering
-   → Créer nouvelles features (ex: prix/m²)
-
-5. Encodage des catégories
-   → One-hot encoding, label encoding
-
-6. ⚠️ SPLIT train/test
-   → AVANT normalisation !
-
-7. Normalisation
-   → fit() sur train, transform() sur train ET test
-
-8. Entraînement du modèle
-            </div>
-
-            <p><strong>Erreur fréquente (Data Leakage) :</strong></p>
+            <h3>4. Pourquoi Normaliser ?</h3>
             <p>
-                ❌ <strong>FAUX :</strong> Normaliser AVANT split train/test<br>
-                → Le modèle "voit" les statistiques du test pendant l'entraînement<br>
-                → Performance optimiste mais fausse !<br>
-                <br>
-                ✅ <strong>CORRECT :</strong> Split d'abord, puis normaliser<br>
-                → Calculer min/max/mean UNIQUEMENT sur train<br>
-                → Appliquer ces mêmes valeurs sur test<br>
-                → Performance réaliste
+                Pour la <strong>régression linéaire simple</strong> (1 feature), la normalisation ne change pas la qualité
+                du modèle, juste l'échelle des coefficients.
+            </p>
+            <p>
+                Mais pour la <strong>régression multiple</strong> (plusieurs features) :
+            </p>
+            <p>
+                • <strong>Sans normalisation :</strong> Les features avec grandes valeurs (ex: superficie 0-200)
+                dominent celles avec petites valeurs (ex: chambres 1-5)<br>
+                • <strong>Avec normalisation :</strong> Toutes les features contribuent équitablement<br>
+                • <strong>Essentiel pour :</strong> Régression Ridge/Lasso (régularisation), Gradient Descent (convergence)
             </p>
 
-            <h3>5. Quand Normaliser ?</h3>
+            <h3>5. Pipeline Correct</h3>
+            <div class="formula">
+<strong>Ordre OBLIGATOIRE :</strong>
+
+1. Exploration des données (visualisation)
+2. Détection des outliers (IQR, Z-score, box plot)
+3. Suppression des outliers (erreurs de saisie)
+4. ⚠️ SPLIT train/test (70/30 ou 80/20)
+5. Calcul des paramètres de normalisation sur TRAIN uniquement
+   → fit() sur train
+6. Application de la normalisation sur train ET test
+   → transform() sur train et test
+7. Entraînement du modèle
+8. Évaluation sur test
+
+<strong>ERREUR FATALE (Data Leakage) :</strong>
+❌ Normaliser AVANT split train/test
+→ Les statistiques du test "leakent" dans le train
+→ Performance optimiste mais fausse en production !
+
+✅ CORRECT : Split puis normaliser
+→ Calcul min/max/mean UNIQUEMENT sur train
+→ Application sur train ET test
+            </div>
+
+            <h3>6. Quand Normaliser ?</h3>
             <p>
-                • <strong>OBLIGATOIRE :</strong> KNN, SVM, Réseaux de neurones, Régression régularisée (Ridge, Lasso)<br>
-                • <strong>RECOMMANDÉ :</strong> PCA, Clustering (K-means), Gradient Descent<br>
-                • <strong>PAS NÉCESSAIRE :</strong> Arbres de décision, Random Forest, XGBoost<br>
-                <br>
-                <strong>Pourquoi ?</strong> Les arbres font des splits sur des valeurs absolues, pas des distances.
+                • <strong>OBLIGATOIRE :</strong> Régression Ridge/Lasso, SVM, KNN, Réseaux de neurones<br>
+                • <strong>RECOMMANDÉ :</strong> Régression linéaire multiple, Gradient Descent, PCA<br>
+                • <strong>PAS NÉCESSAIRE :</strong> Régression linéaire simple, Arbres de décision, Random Forest
             </p>
 
             <h3>Applications Entreprise</h3>
             <p>
-                • <strong>Immobilier :</strong> Détecter les erreurs de saisie dans les prix<br>
-                • <strong>Finance :</strong> Identifier les transactions frauduleuses (outliers intentionnels)<br>
-                • <strong>E-commerce :</strong> Normaliser prix, poids, dimensions pour recommandations<br>
-                • <strong>Industrie :</strong> Détecter les défauts machines (capteurs anormaux)
+                • <strong>Immobilier :</strong> Prédiction de prix avec superficie, chambres, année construction<br>
+                • <strong>Finance :</strong> Prédiction de risque crédit avec revenus, dettes, âge<br>
+                • <strong>Marketing :</strong> Prédiction de CA avec budget pub TV, radio, digital<br>
+                • <strong>RH :</strong> Prédiction de salaire avec expérience, formation, compétences
             </p>
         </div>
     </div>
 
     <script>
         // Dataset immobilier avec outliers
-        let houses = [
-            { superficie: 50, prix: 120, isOutlier: false },
-            { superficie: 60, prix: 145, isOutlier: false },
-            { superficie: 70, prix: 170, isOutlier: false },
-            { superficie: 80, prix: 195, isOutlier: false },
-            { superficie: 90, prix: 215, isOutlier: false },
-            { superficie: 100, prix: 240, isOutlier: false },
-            { superficie: 110, prix: 265, isOutlier: false },
-            { superficie: 120, prix: 285, isOutlier: false },
-            { superficie: 130, prix: 310, isOutlier: false },
-            { superficie: 140, prix: 330, isOutlier: false },
+        let rawHouses = [
+            { superficie: 50, prix: 120 },
+            { superficie: 60, prix: 145 },
+            { superficie: 70, prix: 170 },
+            { superficie: 80, prix: 195 },
+            { superficie: 90, prix: 215 },
+            { superficie: 100, prix: 240 },
+            { superficie: 110, prix: 265 },
+            { superficie: 120, prix: 285 },
+            { superficie: 130, prix: 310 },
+            { superficie: 140, prix: 330 },
             // Outliers (erreurs de saisie)
-            { superficie: 180, prix: 80, isOutlier: true },  // Prix trop bas
-            { superficie: 45, prix: 380, isOutlier: true }   // Prix trop haut
+            { superficie: 180, prix: 80 },   // Prix trop bas
+            { superficie: 45, prix: 380 }    // Prix trop haut
         ];
 
-        let testPoint = null;
         let cleanHouses = [];
         let outlierIndices = [];
 
-        function detectOutliers() {
+        function detectAndRemoveOutliers() {
             // Detect outliers using IQR on price
-            const prices = houses.map(h => h.prix).sort((a, b) => a - b);
+            const prices = rawHouses.map(h => h.prix).sort((a, b) => a - b);
             const q1 = prices[Math.floor(prices.length * 0.25)];
             const q3 = prices[Math.floor(prices.length * 0.75)];
             const iqr = q3 - q1;
@@ -467,48 +484,90 @@ X_norm = (X - X_min) / (X_max - X_min)
             outlierIndices = [];
             cleanHouses = [];
 
-            houses.forEach((house, idx) => {
+            rawHouses.forEach((house, idx) => {
                 if (house.prix < lowerBound || house.prix > upperBound) {
                     outlierIndices.push(idx);
-                    houses[idx].isOutlier = true;
                 } else {
-                    cleanHouses.push(house);
-                    houses[idx].isOutlier = false;
+                    cleanHouses.push({...house});
                 }
             });
 
             document.getElementById('outliersCount').textContent = outlierIndices.length;
             document.getElementById('outliersDetected').innerHTML =
-                `<strong>${outlierIndices.length} outlier(s)</strong> détecté(s) : ${outlierIndices.map(i =>
-                    `${houses[i].superficie}m² à ${houses[i].prix}k€`).join(', ')}`;
+                `<strong>${outlierIndices.length} outlier(s) supprimé(s)</strong><br>` +
+                outlierIndices.map(i => `${rawHouses[i].superficie}m² à ${rawHouses[i].prix}k€`).join(', ');
         }
 
-        function knnPredict(data, point, k = 3) {
-            if (!point) return null;
+        function linearRegression(data) {
+            const n = data.length;
+            const sumX = data.reduce((s, d) => s + d.superficie, 0);
+            const sumY = data.reduce((s, d) => s + d.prix, 0);
+            const sumXY = data.reduce((s, d) => s + d.superficie * d.prix, 0);
+            const sumX2 = data.reduce((s, d) => s + d.superficie * d.superficie, 0);
 
-            // Calculate distances
-            const distances = data.map(house => ({
-                house,
-                distance: Math.sqrt(
-                    Math.pow(house.superficie - point.superficie, 2) +
-                    Math.pow(house.prix - point.prix, 2)
-                )
+            const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+
+            return { slope, intercept };
+        }
+
+        function calculateMSE(data, slope, intercept) {
+            const mse = data.reduce((sum, d) => {
+                const predicted = slope * d.superficie + intercept;
+                const error = d.prix - predicted;
+                return sum + error * error;
+            }, 0) / data.length;
+            return mse;
+        }
+
+        function normalize(data, method) {
+            const superficies = data.map(d => d.superficie);
+            const prix = data.map(d => d.prix);
+
+            let normSuperficies, normPrix;
+
+            if (method === 'minmax') {
+                const minS = Math.min(...superficies);
+                const maxS = Math.max(...superficies);
+                const minP = Math.min(...prix);
+                const maxP = Math.max(...prix);
+
+                normSuperficies = superficies.map(s => (s - minS) / (maxS - minS));
+                normPrix = prix.map(p => (p - minP) / (maxP - minP));
+            } else if (method === 'zscore') {
+                const meanS = superficies.reduce((a, b) => a + b) / superficies.length;
+                const stdS = Math.sqrt(superficies.reduce((s, v) => s + Math.pow(v - meanS, 2), 0) / superficies.length);
+                const meanP = prix.reduce((a, b) => a + b) / prix.length;
+                const stdP = Math.sqrt(prix.reduce((s, v) => s + Math.pow(v - meanP, 2), 0) / prix.length);
+
+                normSuperficies = superficies.map(s => (s - meanS) / stdS);
+                normPrix = prix.map(p => (p - meanP) / stdP);
+            } else if (method === 'robust') {
+                const sortedS = [...superficies].sort((a, b) => a - b);
+                const sortedP = [...prix].sort((a, b) => a - b);
+
+                const medianS = sortedS[Math.floor(sortedS.length / 2)];
+                const medianP = sortedP[Math.floor(sortedP.length / 2)];
+
+                const q1S = sortedS[Math.floor(sortedS.length * 0.25)];
+                const q3S = sortedS[Math.floor(sortedS.length * 0.75)];
+                const iqrS = q3S - q1S;
+
+                const q1P = sortedP[Math.floor(sortedP.length * 0.25)];
+                const q3P = sortedP[Math.floor(sortedP.length * 0.75)];
+                const iqrP = q3P - q1P;
+
+                normSuperficies = superficies.map(s => (s - medianS) / iqrS);
+                normPrix = prix.map(p => (p - medianP) / iqrP);
+            }
+
+            return data.map((d, i) => ({
+                superficie: normSuperficies[i],
+                prix: normPrix[i]
             }));
-
-            // Sort by distance and take k nearest
-            distances.sort((a, b) => a.distance - b.distance);
-            const neighbors = distances.slice(0, k);
-
-            // Average price of neighbors
-            const avgPrice = neighbors.reduce((sum, n) => sum + n.house.prix, 0) / k;
-
-            return {
-                prediction: avgPrice,
-                neighbors: neighbors.map(n => n.house)
-            };
         }
 
-        function drawCanvas(canvasId, data, showOutliers = true, testPt = null) {
+        function drawCanvas(canvasId, data, title, showOutliers = false) {
             const canvas = document.getElementById(canvasId);
             const ctx = canvas.getContext('2d');
 
@@ -516,30 +575,43 @@ X_norm = (X - X_min) / (X_max - X_min)
             ctx.fillStyle = '#f9f9f9';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+            // Calculate regression
+            const regression = linearRegression(data);
+            const mse = calculateMSE(data, regression.slope, regression.intercept);
+
             // Scales
             const margin = 50;
             const width = canvas.width - 2 * margin;
             const height = canvas.height - 2 * margin;
 
-            const maxSuperficie = 200;
-            const maxPrix = 400;
+            const allSuperficies = data.map(d => d.superficie);
+            const allPrix = data.map(d => d.prix);
+            const minS = Math.min(...allSuperficies);
+            const maxS = Math.max(...allSuperficies);
+            const minP = Math.min(...allPrix);
+            const maxP = Math.max(...allPrix);
 
-            const scaleX = (s) => margin + (s / maxSuperficie) * width;
-            const scaleY = (p) => canvas.height - margin - (p / maxPrix) * height;
+            const rangeS = maxS - minS;
+            const rangeP = maxP - minP;
+
+            const scaleX = (s) => margin + ((s - minS) / rangeS) * width;
+            const scaleY = (p) => canvas.height - margin - ((p - minP) / rangeP) * height;
 
             // Grid
             ctx.strokeStyle = '#e0e0e0';
             ctx.lineWidth = 1;
-            for (let i = 0; i <= 200; i += 50) {
+            for (let i = 0; i <= 10; i++) {
+                const s = minS + (rangeS * i / 10);
                 ctx.beginPath();
-                ctx.moveTo(scaleX(i), margin);
-                ctx.lineTo(scaleX(i), canvas.height - margin);
+                ctx.moveTo(scaleX(s), margin);
+                ctx.lineTo(scaleX(s), canvas.height - margin);
                 ctx.stroke();
             }
-            for (let i = 0; i <= 400; i += 100) {
+            for (let i = 0; i <= 10; i++) {
+                const p = minP + (rangeP * i / 10);
                 ctx.beginPath();
-                ctx.moveTo(margin, scaleY(i));
-                ctx.lineTo(canvas.width - margin, scaleY(i));
+                ctx.moveTo(margin, scaleY(p));
+                ctx.lineTo(canvas.width - margin, scaleY(p));
                 ctx.stroke();
             }
 
@@ -554,46 +626,38 @@ X_norm = (X - X_min) / (X_max - X_min)
 
             // Labels
             ctx.fillStyle = '#333';
-            ctx.font = 'bold 12px Arial';
+            ctx.font = 'bold 11px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('Superficie (m²)', canvas.width / 2, canvas.height - 10);
+            ctx.fillText('Superficie', canvas.width / 2, canvas.height - 10);
             ctx.save();
             ctx.translate(15, canvas.height / 2);
             ctx.rotate(-Math.PI / 2);
-            ctx.fillText('Prix (k€)', 0, 0);
+            ctx.fillText('Prix', 0, 0);
             ctx.restore();
 
-            // Axis ticks
-            ctx.font = '10px Arial';
-            for (let i = 0; i <= 200; i += 50) {
-                ctx.fillText(i, scaleX(i), canvas.height - margin + 15);
-            }
-            ctx.textAlign = 'right';
-            for (let i = 0; i <= 400; i += 100) {
-                ctx.fillText(i, margin - 10, scaleY(i) + 4);
-            }
+            // Title
+            ctx.fillStyle = '#667eea';
+            ctx.font = 'bold 13px Arial';
+            ctx.fillText(title, canvas.width / 2, 20);
 
-            // Draw KNN connections if test point exists
-            if (testPt) {
-                const result = knnPredict(data, testPt, 3);
-                if (result) {
-                    ctx.strokeStyle = 'rgba(255, 193, 7, 0.3)';
-                    ctx.lineWidth = 2;
-                    result.neighbors.forEach(neighbor => {
-                        ctx.beginPath();
-                        ctx.moveTo(scaleX(testPt.superficie), scaleY(testPt.prix));
-                        ctx.lineTo(scaleX(neighbor.superficie), scaleY(neighbor.prix));
-                        ctx.stroke();
-                    });
-                }
-            }
+            // Regression line
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            const y1 = regression.slope * minS + regression.intercept;
+            const y2 = regression.slope * maxS + regression.intercept;
+            ctx.moveTo(scaleX(minS), scaleY(y1));
+            ctx.lineTo(scaleX(maxS), scaleY(y2));
+            ctx.stroke();
 
             // Draw data points
-            data.forEach(house => {
+            data.forEach((house, idx) => {
                 const x = scaleX(house.superficie);
                 const y = scaleY(house.prix);
 
-                if (showOutliers && house.isOutlier) {
+                const isOutlier = showOutliers && outlierIndices.includes(idx);
+
+                if (isOutlier) {
                     ctx.fillStyle = '#e74c3c';
                     ctx.strokeStyle = '#c0392b';
                 } else {
@@ -603,284 +667,206 @@ X_norm = (X - X_min) / (X_max - X_min)
 
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.arc(x, y, 8, 0, Math.PI * 2);
+                ctx.arc(x, y, 7, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.stroke();
             });
 
-            // Draw test point
-            if (testPt) {
-                const x = scaleX(testPt.superficie);
-                const y = scaleY(testPt.prix);
-
-                ctx.fillStyle = '#ffc107';
-                ctx.strokeStyle = '#f9a825';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.arc(x, y, 12, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-            }
-
-            return { scaleX, scaleY, margin, width, height, maxSuperficie, maxPrix };
+            return { regression, mse };
         }
 
-        function updatePredictions() {
-            if (!testPoint) {
-                document.getElementById('rawPrediction').innerHTML = '';
-                document.getElementById('cleanPrediction').innerHTML = '';
-                return;
-            }
+        function updateNormalization() {
+            const minMaxChecked = document.getElementById('normMinMax').checked;
+            const zScoreChecked = document.getElementById('normZScore').checked;
+            const robustChecked = document.getElementById('normRobust').checked;
 
-            // Raw prediction (with outliers)
-            const rawResult = knnPredict(houses, testPoint, 3);
-            const rawHtml = `
-                <div class="prediction-box ${Math.abs(rawResult.prediction - 200) > 100 ? 'bad' : ''}">
-                    <strong>🔮 Prédiction KNN (avec outliers) :</strong><br>
-                    <div class="stat-value">${Math.round(rawResult.prediction)} k€</div>
-                    <div style="font-size: 0.85em; margin-top: 5px;">
-                        Basé sur les 3 voisins les plus proches
-                    </div>
-                </div>
-            `;
-            document.getElementById('rawPrediction').innerHTML = rawHtml;
-
-            // Clean prediction (without outliers)
-            const cleanResult = knnPredict(cleanHouses, testPoint, 3);
-            const cleanHtml = `
-                <div class="prediction-box">
-                    <strong>✅ Prédiction KNN (nettoyée) :</strong><br>
-                    <div class="stat-value">${Math.round(cleanResult.prediction)} k€</div>
-                    <div style="font-size: 0.85em; margin-top: 5px; color: #2e7d32;">
-                        Plus fiable : pas d'influence des erreurs
-                    </div>
-                </div>
-            `;
-            document.getElementById('cleanPrediction').innerHTML = cleanHtml;
-        }
-
-        function drawNormalizationImpact() {
             const canvas = document.getElementById('normCanvas');
             const ctx = canvas.getContext('2d');
 
             ctx.fillStyle = '#f9f9f9';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Example: 2 features with different scales
-            const margin = 50;
-            const width = (canvas.width - 3 * margin) / 2;
-            const height = canvas.height - 2 * margin;
+            if (!minMaxChecked && !zScoreChecked && !robustChecked) {
+                ctx.fillStyle = '#666';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Sélectionnez au moins une méthode', canvas.width / 2, canvas.height / 2);
+                document.getElementById('normStats').innerHTML = '';
+                return;
+            }
 
-            // Left: Without normalization
-            ctx.fillStyle = '#333';
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('Sans Normalisation', margin + width / 2 - 70, 25);
-            ctx.fillText('Superficie domine !', margin + width / 2 - 60, 45);
+            const methods = [];
+            if (minMaxChecked) methods.push({ name: 'Min-Max', key: 'minmax', color: '#e74c3c' });
+            if (zScoreChecked) methods.push({ name: 'Z-Score', key: 'zscore', color: '#2ecc71' });
+            if (robustChecked) methods.push({ name: 'Robust', key: 'robust', color: '#f39c12' });
 
-            // Right: With normalization
-            ctx.fillText('Avec Normalisation [0,1]', 2 * margin + width + width / 2 - 90, 25);
-            ctx.fillText('Features équilibrées', 2 * margin + width + width / 2 - 70, 45);
-
-            // Draw example points
-            // Point A: (100m², 3 chambres)
-            // Point B: (120m², 4 chambres)
-
-            // Left side (raw scale)
-            const leftX = margin;
-            const leftY = margin + 20;
-
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(leftX, leftY);
-            ctx.lineTo(leftX, leftY + height);
-            ctx.lineTo(leftX + width, leftY + height);
-            ctx.stroke();
-
-            // Point A (raw)
-            ctx.fillStyle = '#4ecdc4';
-            ctx.beginPath();
-            ctx.arc(leftX + (100 / 200) * width, leftY + height - (3 / 5) * height, 10, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Point B (raw)
-            ctx.fillStyle = '#e74c3c';
-            ctx.beginPath();
-            ctx.arc(leftX + (120 / 200) * width, leftY + height - (4 / 5) * height, 10, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Distance line (raw)
-            ctx.strokeStyle = '#ffc107';
-            ctx.lineWidth = 3;
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(leftX + (100 / 200) * width, leftY + height - (3 / 5) * height);
-            ctx.lineTo(leftX + (120 / 200) * width, leftY + height - (4 / 5) * height);
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            ctx.fillStyle = '#ffc107';
-            ctx.font = 'bold 12px Arial';
-            ctx.fillText('Distance ≈ 20', leftX + width / 2 - 40, leftY + height / 2);
-
-            // Axes labels
-            ctx.fillStyle = '#666';
-            ctx.font = '10px Arial';
-            ctx.fillText('Superficie (0-200)', leftX + width / 2 - 40, leftY + height + 20);
-            ctx.save();
-            ctx.translate(leftX - 25, leftY + height / 2);
-            ctx.rotate(-Math.PI / 2);
-            ctx.fillText('Chambres (0-5)', 0, 0);
-            ctx.restore();
-
-            // Right side (normalized scale [0,1])
-            const rightX = 2 * margin + width;
-            const rightY = margin + 20;
-
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(rightX, rightY);
-            ctx.lineTo(rightX, rightY + height);
-            ctx.lineTo(rightX + width, rightY + height);
-            ctx.stroke();
-
-            // Point A (normalized: superficie=0.5, chambres=0.6)
-            ctx.fillStyle = '#4ecdc4';
-            ctx.beginPath();
-            ctx.arc(rightX + 0.5 * width, rightY + height - 0.6 * height, 10, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Point B (normalized: superficie=0.6, chambres=0.8)
-            ctx.fillStyle = '#e74c3c';
-            ctx.beginPath();
-            ctx.arc(rightX + 0.6 * width, rightY + height - 0.8 * height, 10, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Distance line (normalized)
-            ctx.strokeStyle = '#2ecc71';
-            ctx.lineWidth = 3;
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(rightX + 0.5 * width, rightY + height - 0.6 * height);
-            ctx.lineTo(rightX + 0.6 * width, rightY + height - 0.8 * height);
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            ctx.fillStyle = '#2ecc71';
-            ctx.font = 'bold 12px Arial';
-            ctx.fillText('Distance ≈ 0.22', rightX + width / 2 - 45, rightY + height / 2);
-
-            // Axes labels
-            ctx.fillStyle = '#666';
-            ctx.font = '10px Arial';
-            ctx.fillText('[0, 1]', rightX + width / 2 - 10, rightY + height + 20);
-            ctx.save();
-            ctx.translate(rightX - 25, rightY + height / 2);
-            ctx.rotate(-Math.PI / 2);
-            ctx.fillText('[0, 1]', 0, 0);
-            ctx.restore();
-
-            // Legend
-            ctx.fillStyle = '#4ecdc4';
-            ctx.beginPath();
-            ctx.arc(canvas.width - 200, canvas.height - 30, 8, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#333';
-            ctx.font = '11px Arial';
-            ctx.fillText('Maison A (100m², 3ch)', canvas.width - 185, canvas.height - 25);
-
-            ctx.fillStyle = '#e74c3c';
-            ctx.beginPath();
-            ctx.arc(canvas.width - 200, canvas.height - 10, 8, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#333';
-            ctx.fillText('Maison B (120m², 4ch)', canvas.width - 185, canvas.height - 5);
-
-            // Explanation
-            document.getElementById('normExplanation').innerHTML = `
-                <div class="info-box">
-                    <strong>🎯 Pourquoi normaliser ?</strong><br>
-                    <strong>Sans normalisation :</strong> La superficie (0-200) domine les chambres (0-5). Distance ≈ 20.<br>
-                    <strong>Avec normalisation :</strong> Toutes les features sur [0,1]. Distance équilibrée ≈ 0.22.<br>
-                    Le KNN donne maintenant un poids égal à chaque caractéristique !
-                </div>
-            `;
-        }
-
-        function handleCanvasClick(event, canvasId, data) {
-            const canvas = document.getElementById(canvasId);
-            const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-
+            // Draw all normalizations on same canvas
             const margin = 50;
             const width = canvas.width - 2 * margin;
             const height = canvas.height - 2 * margin;
 
-            const maxSuperficie = 200;
-            const maxPrix = 400;
+            // Find global min/max across all normalizations
+            let globalMinS = Infinity, globalMaxS = -Infinity;
+            let globalMinP = Infinity, globalMaxP = -Infinity;
 
-            // Convert click to data coordinates
-            const superficie = ((x - margin) / width) * maxSuperficie;
-            const prix = ((canvas.height - margin - y) / height) * maxPrix;
+            methods.forEach(method => {
+                const normalized = normalize(cleanHouses, method.key);
+                normalized.forEach(d => {
+                    globalMinS = Math.min(globalMinS, d.superficie);
+                    globalMaxS = Math.max(globalMaxS, d.superficie);
+                    globalMinP = Math.min(globalMinP, d.prix);
+                    globalMaxP = Math.max(globalMaxP, d.prix);
+                });
+            });
 
-            if (superficie >= 0 && superficie <= maxSuperficie && prix >= 0 && prix <= maxPrix) {
-                testPoint = { superficie: Math.round(superficie), prix: Math.round(prix) };
-                visualize();
+            const rangeS = globalMaxS - globalMinS;
+            const rangeP = globalMaxP - globalMinP;
+
+            const scaleX = (s) => margin + ((s - globalMinS) / rangeS) * width;
+            const scaleY = (p) => canvas.height - margin - ((p - globalMinP) / rangeP) * height;
+
+            // Grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const s = globalMinS + (rangeS * i / 10);
+                ctx.beginPath();
+                ctx.moveTo(scaleX(s), margin);
+                ctx.lineTo(scaleX(s), canvas.height - margin);
+                ctx.stroke();
             }
+            for (let i = 0; i <= 10; i++) {
+                const p = globalMinP + (rangeP * i / 10);
+                ctx.beginPath();
+                ctx.moveTo(margin, scaleY(p));
+                ctx.lineTo(canvas.width - margin, scaleY(p));
+                ctx.stroke();
+            }
+
+            // Axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(margin, margin);
+            ctx.lineTo(margin, canvas.height - margin);
+            ctx.lineTo(canvas.width - margin, canvas.height - margin);
+            ctx.stroke();
+
+            let statsHtml = '<div class="info-box" style="font-size: 0.9em;">';
+
+            // Draw each normalization
+            methods.forEach((method, methodIdx) => {
+                const normalized = normalize(cleanHouses, method.key);
+                const regression = linearRegression(normalized);
+
+                // Draw regression line
+                ctx.strokeStyle = method.color;
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                const minS = Math.min(...normalized.map(d => d.superficie));
+                const maxS = Math.max(...normalized.map(d => d.superficie));
+                const y1 = regression.slope * minS + regression.intercept;
+                const y2 = regression.slope * maxS + regression.intercept;
+                ctx.moveTo(scaleX(minS), scaleY(y1));
+                ctx.lineTo(scaleX(maxS), scaleY(y2));
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Draw points
+                normalized.forEach(house => {
+                    const x = scaleX(house.superficie);
+                    const y = scaleY(house.prix);
+
+                    ctx.fillStyle = method.color;
+                    ctx.strokeStyle = method.color;
+                    ctx.globalAlpha = 0.6;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.globalAlpha = 1.0;
+                });
+
+                statsHtml += `<strong style="color: ${method.color}">● ${method.name}:</strong> Prix = ${regression.slope.toFixed(3)} × Superficie + ${regression.intercept.toFixed(3)}<br>`;
+            });
+
+            statsHtml += '</div>';
+            document.getElementById('normStats').innerHTML = statsHtml;
+
+            // Legend
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#667eea';
+            ctx.fillText('Normalisations Actives', canvas.width / 2, 20);
         }
 
-        function resetTestPoint() {
-            testPoint = null;
-            visualize();
+        function visualize() {
+            // Raw data
+            const rawResult = drawCanvas('rawCanvas', rawHouses, 'Données Brutes (avec outliers)', true);
+            document.getElementById('rawEquation').textContent =
+                `Prix = ${rawResult.regression.slope.toFixed(2)} × Superficie + ${rawResult.regression.intercept.toFixed(0)}`;
+            document.getElementById('rawMSE').textContent = rawResult.mse.toFixed(0);
+
+            // Clean data
+            const cleanResult = drawCanvas('cleanCanvas', cleanHouses, 'Données Nettoyées (sans outliers)');
+            document.getElementById('cleanEquation').textContent =
+                `Prix = ${cleanResult.regression.slope.toFixed(2)} × Superficie + ${cleanResult.regression.intercept.toFixed(0)}`;
+            document.getElementById('cleanMSE').textContent = cleanResult.mse.toFixed(0);
+
+            // MSE improvement
+            const improvement = ((rawResult.mse - cleanResult.mse) / rawResult.mse * 100).toFixed(0);
+            document.getElementById('mseImprovement').textContent = `-${improvement}%`;
+
+            // Normalizations
+            updateNormalization();
         }
 
         function regenerateData() {
-            // Generate new random data with outliers
-            houses = [];
+            rawHouses = [];
 
             // Normal data (10 houses)
             for (let i = 0; i < 10; i++) {
                 const superficie = 50 + i * 10 + Math.random() * 10;
                 const prix = 100 + superficie * 2 + Math.random() * 30;
-                houses.push({ superficie: Math.round(superficie), prix: Math.round(prix), isOutlier: false });
+                rawHouses.push({ superficie: Math.round(superficie), prix: Math.round(prix) });
             }
 
             // Add 2 random outliers
             const outlier1Type = Math.random() > 0.5;
             if (outlier1Type) {
-                houses.push({ superficie: 180, prix: 80 + Math.random() * 20, isOutlier: true });
+                rawHouses.push({ superficie: 180, prix: 80 + Math.random() * 20 });
             } else {
-                houses.push({ superficie: 45, prix: 350 + Math.random() * 50, isOutlier: true });
+                rawHouses.push({ superficie: 45, prix: 350 + Math.random() * 50 });
             }
 
             const outlier2Type = Math.random() > 0.5;
             if (outlier2Type) {
-                houses.push({ superficie: 170 + Math.random() * 20, prix: 90 + Math.random() * 20, isOutlier: true });
+                rawHouses.push({ superficie: 170 + Math.random() * 20, prix: 90 + Math.random() * 20 });
             } else {
-                houses.push({ superficie: 40 + Math.random() * 10, prix: 370 + Math.random() * 30, isOutlier: true });
+                rawHouses.push({ superficie: 40 + Math.random() * 10, prix: 370 + Math.random() * 30 });
             }
 
-            document.getElementById('datasetSize').textContent = `${houses.length} maisons`;
-            testPoint = null;
-            detectOutliers();
+            document.getElementById('datasetSize').textContent = `${rawHouses.length} maisons`;
+            detectAndRemoveOutliers();
             visualize();
         }
 
-        function visualize() {
-            drawCanvas('rawCanvas', houses, true, testPoint);
-            drawCanvas('cleanCanvas', cleanHouses, false, testPoint);
-            drawNormalizationImpact();
-            updatePredictions();
+        function toggleAllNormalizations() {
+            const allChecked = document.getElementById('normMinMax').checked &&
+                              document.getElementById('normZScore').checked &&
+                              document.getElementById('normRobust').checked;
+
+            document.getElementById('normMinMax').checked = !allChecked;
+            document.getElementById('normZScore').checked = !allChecked;
+            document.getElementById('normRobust').checked = !allChecked;
+
+            updateNormalization();
         }
 
-        // Event listeners
-        document.getElementById('rawCanvas').addEventListener('click', (e) => handleCanvasClick(e, 'rawCanvas', houses));
-        document.getElementById('cleanCanvas').addEventListener('click', (e) => handleCanvasClick(e, 'cleanCanvas', cleanHouses));
-
         // Initialize
-        detectOutliers();
+        detectAndRemoveOutliers();
         visualize();
     </script>
 </body>
