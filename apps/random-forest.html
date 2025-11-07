@@ -141,10 +141,24 @@
             max-width: 120px;
         }
 
+        .node.traversed {
+            border-color: #ffc107;
+            background: #fff9e6;
+            border-width: 3px;
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+        }
+
         .leaf {
             border-color: #2ecc71;
             background: #e8f8f5;
             font-weight: bold;
+        }
+
+        .leaf.traversed {
+            border-color: #ffc107;
+            background: #fffacd;
+            border-width: 4px;
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.7);
         }
 
         .accuracy {
@@ -221,40 +235,26 @@
 
         <div class="main-content">
             <div class="work-area">
-                <!-- PHASE 1: ENTRAÎNEMENT -->
-                <div class="phase-section training">
-                    <h3 style="color: #3498db;">
-                        📚 PHASE 1 : ENTRAÎNEMENT
-                        <span class="phase-badge phase-training">TRAINING</span>
+                <!-- VISUALISATION COMMUNE -->
+                <div class="phase-section" style="border-color: #667eea; background: white;">
+                    <h3 style="color: #667eea; text-align: center;">
+                        🌲 Random Forest - Entraînement et Inférence
                     </h3>
-                    <p style="color: #666; margin: 10px 0;">
-                        Construction de la forêt à partir du dataset d'entraînement
+                    <p style="color: #666; margin: 10px 0; text-align: center;">
+                        <span style="color: #3498db; font-weight: bold;">8 points d'entraînement</span> +
+                        <span style="color: #e67e22; font-weight: bold;">1 point de test (⭐)</span>
                     </p>
 
-                    <h4 style="color: #3498db; margin-top: 20px;">Dataset d'Entraînement (8 points)</h4>
-                    <canvas id="trainingCanvas" width="800" height="300"></canvas>
+                    <canvas id="mainCanvas" width="900" height="400"></canvas>
 
-                    <h4 style="color: #3498db; margin-top: 30px;">Les 3 Arbres Entraînés</h4>
-                    <p style="color: #666; font-size: 0.9em; margin: 5px 0;">
-                        Chaque arbre est entraîné sur un échantillon bootstrap différent
-                    </p>
+                    <div style="margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                        <h4 style="color: #3498db; margin-bottom: 10px;">📚 Les 3 Arbres Entraînés</h4>
+                        <p style="color: #666; font-size: 0.9em; margin: 5px 0;">
+                            Chaque arbre est entraîné sur un échantillon bootstrap différent.
+                            Le <strong style="color: #e67e22;">parcours du point test (⭐)</strong> est surligné en jaune.
+                        </p>
+                    </div>
                     <div class="trees-container" id="treesContainer"></div>
-                </div>
-
-                <div class="workflow-arrow">↓</div>
-
-                <!-- PHASE 2: INFÉRENCE -->
-                <div class="phase-section inference">
-                    <h3 style="color: #e67e22;">
-                        🔮 PHASE 2 : INFÉRENCE
-                        <span class="phase-badge phase-inference">INFERENCE</span>
-                    </h3>
-                    <p style="color: #666; margin: 10px 0;">
-                        Prédiction sur un nouveau point jamais vu pendant l'entraînement
-                    </p>
-
-                    <h4 style="color: #e67e22; margin-top: 20px;">Point de Test (⭐ étoile jaune)</h4>
-                    <canvas id="inferenceCanvas" width="800" height="300"></canvas>
 
                     <div class="vote-section">
                         <div class="vote-title">🗳️ Vote des 3 Arbres</div>
@@ -268,7 +268,7 @@
                 <h3>⚙️ Contrôles</h3>
 
                 <div style="background: #ebf5fb; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #3498db;">
-                    <h4 style="color: #3498db; margin-bottom: 10px;">📚 Phase Entraînement</h4>
+                    <h4 style="color: #3498db; margin-bottom: 10px;">📚 Entraînement</h4>
                     <button class="btn-primary" onclick="trainForest()">🔄 Ré-entraîner la Forêt</button>
                     <p style="font-size: 0.85em; color: #666; margin-top: 5px;">
                         Crée 3 nouveaux arbres avec des bootstraps différents
@@ -276,24 +276,20 @@
                 </div>
 
                 <div style="background: #fef5e7; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #e67e22;">
-                    <h4 style="color: #e67e22; margin-bottom: 10px;">🔮 Phase Inférence</h4>
+                    <h4 style="color: #e67e22; margin-bottom: 10px;">🔮 Inférence</h4>
                     <button class="btn-inference" onclick="changeTestPoint()">⭐ Nouveau Point Test</button>
                     <p style="font-size: 0.85em; color: #666; margin-top: 5px;">
-                        Déplace l'étoile jaune pour tester la prédiction
+                        Déplace l'étoile jaune et observe le parcours dans chaque arbre
                     </p>
                 </div>
 
                 <div class="info-box" style="margin-top: 20px;">
                     <p style="font-size: 0.9em; line-height: 1.6;">
-                        <strong>💡 Workflow:</strong><br>
-                        <strong style="color: #3498db;">1. ENTRAÎNEMENT</strong><br>
-                        • 3 arbres indépendants<br>
-                        • Bootstrap sampling (8 points)<br>
-                        • Construction des thresholds<br><br>
-                        <strong style="color: #e67e22;">2. INFÉRENCE</strong><br>
-                        • Nouveau point jamais vu<br>
-                        • Vote des 3 arbres<br>
-                        • Prédiction finale
+                        <strong>💡 Visualisation:</strong><br>
+                        <strong style="color: #3498db;">• Points rouges/bleus:</strong> Données d'entraînement<br>
+                        <strong style="color: #e67e22;">• Étoile jaune (⭐):</strong> Point de test<br>
+                        <strong style="color: #667eea;">• Zones colorées:</strong> Régions de décision<br>
+                        <strong style="color: #ffc107;">• Nœuds jaunes:</strong> Parcours du point test dans l'arbre
                     </p>
                 </div>
             </div>
@@ -462,6 +458,19 @@ Résultat : Prédiction de la classe pour le nouveau point
             }
         }
 
+        function getTreePath(tree, point, path = []) {
+            // Returns array of nodes traversed to reach prediction for this point
+            path.push(tree);
+
+            if (tree.type === 'leaf') return path;
+
+            if (point[tree.feature] < tree.threshold) {
+                return getTreePath(tree.left, point, path);
+            } else {
+                return getTreePath(tree.right, point, path);
+            }
+        }
+
         function calculateAccuracy(tree, data) {
             let correct = 0;
             data.forEach(point => {
@@ -498,72 +507,13 @@ Résultat : Prédiction de la classe pour le nouveau point
         }
 
         function visualize() {
-            drawTrainingData();
-            drawInferenceData();
+            drawMainCanvas();
             drawTrees();
             showVote();
         }
 
-        function drawTrainingData() {
-            const canvas = document.getElementById('trainingCanvas');
-            const ctx = canvas.getContext('2d');
-
-            ctx.fillStyle = '#f9f9f9';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw grid
-            ctx.strokeStyle = '#e0e0e0';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < canvas.width; i += 50) {
-                ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, canvas.height);
-                ctx.stroke();
-            }
-            for (let i = 0; i < canvas.height; i += 50) {
-                ctx.beginPath();
-                ctx.moveTo(0, i);
-                ctx.lineTo(canvas.width, i);
-                ctx.stroke();
-            }
-
-            // Draw data points
-            originalData.forEach(point => {
-                ctx.fillStyle = point.label === 0 ? '#ff6b6b' : '#4ecdc4';
-                ctx.beginPath();
-                ctx.arc(point.x * canvas.width, point.y * canvas.height, 10, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.strokeStyle = '#333';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(point.x * canvas.width, point.y * canvas.height, 10, 0, Math.PI * 2);
-                ctx.stroke();
-            });
-
-            // Legend
-            ctx.font = 'bold 14px Arial';
-            ctx.fillStyle = '#333';
-            ctx.textAlign = 'left';
-
-            ctx.fillStyle = '#ff6b6b';
-            ctx.fillRect(20, 20, 20, 20);
-            ctx.fillStyle = '#333';
-            ctx.fillText('Classe A (Rouge)', 50, 35);
-
-            ctx.fillStyle = '#4ecdc4';
-            ctx.fillRect(20, 50, 20, 20);
-            ctx.fillStyle = '#333';
-            ctx.fillText('Classe B (Bleu)', 50, 65);
-
-            // Training label
-            ctx.fillStyle = '#3498db';
-            ctx.font = 'bold 16px Arial';
-            ctx.fillText('DONNÉES D\'ENTRAÎNEMENT', canvas.width - 250, 35);
-        }
-
-        function drawInferenceData() {
-            const canvas = document.getElementById('inferenceCanvas');
+        function drawMainCanvas() {
+            const canvas = document.getElementById('mainCanvas');
             const ctx = canvas.getContext('2d');
 
             ctx.fillStyle = '#f9f9f9';
@@ -604,29 +554,50 @@ Résultat : Prédiction de la classe pour le nouveau point
                 }
             }
 
+            // Draw training data points
+            originalData.forEach(point => {
+                ctx.fillStyle = point.label === 0 ? '#ff6b6b' : '#4ecdc4';
+                ctx.beginPath();
+                ctx.arc(point.x * canvas.width, point.y * canvas.height, 12, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(point.x * canvas.width, point.y * canvas.height, 12, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+
             // Draw test point (star)
             ctx.save();
             ctx.fillStyle = '#ffc107';
             ctx.strokeStyle = '#333';
             ctx.lineWidth = 3;
-            drawStar(ctx, testPoint.x * canvas.width, testPoint.y * canvas.height, 5, 20, 10);
+            drawStar(ctx, testPoint.x * canvas.width, testPoint.y * canvas.height, 5, 25, 12);
             ctx.fill();
             ctx.stroke();
             ctx.restore();
 
             // Legend
             ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'left';
+
+            ctx.fillStyle = '#ff6b6b';
+            ctx.fillRect(20, 20, 20, 20);
+            ctx.fillStyle = '#333';
+            ctx.fillText('Classe A (Rouge)', 50, 35);
+
+            ctx.fillStyle = '#4ecdc4';
+            ctx.fillRect(20, 50, 20, 20);
+            ctx.fillStyle = '#333';
+            ctx.fillText('Classe B (Bleu)', 50, 65);
+
             ctx.fillStyle = '#ffc107';
             drawStar(ctx, 30, 95, 5, 12, 6);
             ctx.fill();
             ctx.fillStyle = '#333';
-            ctx.fillText('Point Test (nouveau, jamais vu)', 50, 100);
-
-            // Inference label
-            ctx.fillStyle = '#e67e22';
-            ctx.font = 'bold 16px Arial';
-            ctx.textAlign = 'right';
-            ctx.fillText('INFÉRENCE SUR NOUVEAU POINT', canvas.width - 20, 35);
+            ctx.fillText('Point Test (⭐)', 50, 100);
         }
 
         function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
@@ -665,6 +636,9 @@ Résultat : Prédiction de la classe pour le nouveau point
                 const treeDiv = document.createElement('div');
                 treeDiv.className = 'tree-box' + (isWinner ? ' winner' : '');
 
+                // Get path for test point in this tree
+                const treePath = getTreePath(forestItem.tree, testPoint, []);
+
                 // Header
                 const header = document.createElement('div');
                 header.className = 'tree-header';
@@ -695,10 +669,10 @@ Résultat : Prédiction de la classe pour le nouveau point
                 bootstrapDiv.appendChild(pointsDiv);
                 treeDiv.appendChild(bootstrapDiv);
 
-                // Tree visualization
+                // Tree visualization with path
                 const treeViz = document.createElement('div');
                 treeViz.className = 'tree-viz';
-                treeViz.appendChild(renderTree(forestItem.tree, 0));
+                treeViz.appendChild(renderTree(forestItem.tree, 0, treePath));
                 treeDiv.appendChild(treeViz);
 
                 // Accuracy
@@ -711,26 +685,43 @@ Résultat : Prédiction de la classe pour le nouveau point
             });
         }
 
-        function renderTree(node, depth) {
+        function renderTree(node, depth, treePath = []) {
             const div = document.createElement('div');
             div.style.marginLeft = (depth * 10) + 'px';
 
+            // Check if this node is in the path
+            const isInPath = treePath.some(n => n === node);
+
             if (node.type === 'leaf') {
                 const nodeDiv = document.createElement('div');
-                nodeDiv.className = 'node leaf';
+                nodeDiv.className = 'node leaf' + (isInPath ? ' traversed' : '');
                 const className = node.label === 0 ? 'Classe A' : 'Classe B';
                 const color = node.label === 0 ? '#ff6b6b' : '#4ecdc4';
                 nodeDiv.innerHTML = `
                     <div style="color: ${color}; font-weight: bold;">${className}</div>
                     <div style="font-size: 0.9em;">(${node.class0} rouge, ${node.class1} bleu)</div>
+                    ${isInPath ? '<div style="color: #ffc107; font-size: 0.85em; margin-top: 3px;">⭐ Arrivée</div>' : ''}
                 `;
                 div.appendChild(nodeDiv);
             } else {
                 const nodeDiv = document.createElement('div');
-                nodeDiv.className = 'node';
+                nodeDiv.className = 'node' + (isInPath ? ' traversed' : '');
                 const featureName = node.feature === 'x' ? 'X' : 'Y';
+
+                // Determine which branch is followed
+                let branchInfo = '';
+                if (isInPath) {
+                    const nextInPath = treePath[treePath.indexOf(node) + 1];
+                    if (nextInPath === node.left) {
+                        branchInfo = '<div style="color: #ffc107; font-size: 0.85em; margin-top: 3px;">→ gauche</div>';
+                    } else if (nextInPath === node.right) {
+                        branchInfo = '<div style="color: #ffc107; font-size: 0.85em; margin-top: 3px;">→ droite</div>';
+                    }
+                }
+
                 nodeDiv.innerHTML = `
                     <div><strong>${featureName} < ${node.threshold}</strong></div>
+                    ${branchInfo}
                 `;
                 div.appendChild(nodeDiv);
 
@@ -742,11 +733,11 @@ Résultat : Prédiction de la classe pour le nouveau point
 
                 const leftBranch = document.createElement('div');
                 leftBranch.style.flex = '1';
-                leftBranch.appendChild(renderTree(node.left, depth + 1));
+                leftBranch.appendChild(renderTree(node.left, depth + 1, treePath));
 
                 const rightBranch = document.createElement('div');
                 rightBranch.style.flex = '1';
-                rightBranch.appendChild(renderTree(node.right, depth + 1));
+                rightBranch.appendChild(renderTree(node.right, depth + 1, treePath));
 
                 branchesDiv.appendChild(leftBranch);
                 branchesDiv.appendChild(rightBranch);
