@@ -180,20 +180,18 @@
                 <h3>🎓 Comment ça marche ?</h3>
                 <p>
                     La <strong>régression linéaire</strong> utilise la <strong>descente de gradient</strong> pour optimiser les paramètres m (pente) et b (ordonnée).
-                    L'algorithme ajuste progressivement ces valeurs pour minimiser l'erreur quadratique moyenne (MSE).
+                    Vous pouvez choisir différentes fonctions de perte:
                 </p>
-                <div class="formula">
-                    MSE = (1/n) Σ (y_réel - y_prédit)²
-                </div>
-                <p>
-                    Le graphique de convergence à droite montre:
-                </p>
-                <ul style="line-height: 1.8; color: #666;">
-                    <li><strong>MSE</strong>: L'évolution de l'erreur au fil des itérations</li>
-                    <li><strong>Taux de réduction</strong>: Le pourcentage de réduction de l'erreur entre chaque itération</li>
+                <ul style="line-height: 1.8; color: #666; margin-bottom: 10px;">
+                    <li><strong>MSE</strong> (Mean Squared Error): Sensible aux outliers, pénalise fortement les grandes erreurs</li>
+                    <li><strong>MAE</strong> (Mean Absolute Error): Robuste aux outliers, traite toutes les erreurs de manière égale</li>
+                    <li><strong>RMSE</strong> (Root Mean Squared Error): Similaire au MSE mais dans la même unité que les données</li>
                 </ul>
+                <p style="margin-top: 15px;">
+                    Le graphique de convergence montre l'évolution de l'erreur et le taux de réduction à chaque itération.
+                </p>
                 <p>
-                    <strong>Conseil:</strong> Ajustez la vitesse d'apprentissage pour voir son impact sur la convergence!
+                    <strong>Expérience:</strong> Ajoutez des points avec outliers et comparez les résultats avec différentes fonctions de perte!
                 </p>
             </div>
 
@@ -206,13 +204,26 @@
                     <p id="equation">y = mx + b</p>
                     <p><strong>Pente (m):</strong> <span id="slope">-</span></p>
                     <p><strong>Ordonnée (b):</strong> <span id="intercept">-</span></p>
-                    <p><strong>Erreur (MSE):</strong> <span id="error">-</span></p>
+                    <p><strong>Erreur (<span id="errorLabel">MSE</span>):</strong> <span id="error">-</span></p>
                     <p><strong>Réduction:</strong> <span id="reduction">-</span></p>
                 </div>
 
                 <button class="btn-primary" onclick="addRandomPoints()">Ajouter 10 points aléatoires</button>
+                <button class="btn-primary" onclick="addRandomPointsWithOutliers()">Ajouter points + outliers</button>
                 <button class="btn-primary" onclick="startOptimization()" id="optimizeBtn">Optimiser (animation)</button>
                 <button class="btn-secondary" onclick="clearPoints()">Effacer tous les points</button>
+
+                <div style="margin-top: 20px;">
+                    <label><strong>Fonction de perte:</strong></label>
+                    <select id="lossFunction" style="width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                        <option value="mse">MSE - Mean Squared Error</option>
+                        <option value="mae">MAE - Mean Absolute Error</option>
+                        <option value="rmse">RMSE - Root Mean Squared Error</option>
+                    </select>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 5px;" id="lossDescription">
+                        MSE est sensible aux outliers (valeurs aberrantes)
+                    </p>
+                </div>
 
                 <div style="margin-top: 20px;">
                     <label><strong>Vitesse d'apprentissage:</strong></label>
@@ -233,9 +244,10 @@
         let m = 0; // slope
         let b = 0.5; // intercept (normalized)
         let learningRate = 0.01;
+        let lossFunction = 'mse'; // Current loss function: 'mse', 'mae', or 'rmse'
 
         // Tracking convergence metrics
-        let mseHistory = [];
+        let lossHistory = [];
         let currentIteration = 0;
         let isOptimizing = false;
         let animationId = null;
@@ -243,6 +255,24 @@
         document.getElementById('learningRate').addEventListener('input', (e) => {
             learningRate = parseFloat(e.target.value);
             document.getElementById('lrValue').textContent = learningRate.toFixed(4);
+        });
+
+        document.getElementById('lossFunction').addEventListener('change', (e) => {
+            lossFunction = e.target.value;
+            document.getElementById('errorLabel').textContent = lossFunction.toUpperCase();
+
+            // Update description
+            const descriptions = {
+                'mse': 'MSE est sensible aux outliers (valeurs aberrantes)',
+                'mae': 'MAE est robuste aux outliers (moins sensible)',
+                'rmse': 'RMSE est sensible aux outliers comme MSE'
+            };
+            document.getElementById('lossDescription').textContent = descriptions[lossFunction];
+
+            // Update info if points exist
+            if (points.length >= 2) {
+                updateInfo();
+            }
         });
 
         // Update learning rate display
@@ -270,6 +300,32 @@
             updateInfo();
         }
 
+        function addRandomPointsWithOutliers() {
+            if (isOptimizing) return; // Don't add points during optimization
+
+            // Add 8 points on a rough line
+            const slope = (Math.random() - 0.5) * 0.5; // Random slope
+            const intercept = canvas.height / 2;
+
+            for (let i = 0; i < 8; i++) {
+                const x = (i / 8) * canvas.width + Math.random() * 50;
+                const y = slope * x + intercept + (Math.random() - 0.5) * 80;
+                points.push({x, y});
+            }
+
+            // Add 2-3 outliers (far from the line)
+            const numOutliers = 2 + Math.floor(Math.random() * 2);
+            for (let i = 0; i < numOutliers; i++) {
+                const x = Math.random() * canvas.width;
+                // Place outliers far from the center
+                const y = Math.random() < 0.5 ? Math.random() * 100 : canvas.height - Math.random() * 100;
+                points.push({x, y, isOutlier: true}); // Mark as outlier for potential visualization
+            }
+
+            draw();
+            updateInfo();
+        }
+
         function clearPoints() {
             if (animationId) {
                 cancelAnimationFrame(animationId);
@@ -279,7 +335,7 @@
             points.length = 0;
             m = 0;
             b = 0.5;
-            mseHistory = [];
+            lossHistory = [];
             currentIteration = 0;
             draw();
             drawConvergenceGraph();
@@ -297,7 +353,7 @@
 
             isOptimizing = true;
             currentIteration = 0;
-            mseHistory = [];
+            lossHistory = [];
             m = 0;
             b = 0.5;
 
@@ -325,15 +381,30 @@
             let dm = 0;
             let db = 0;
 
-            for (let point of normalizedPoints) {
-                const prediction = m * point.x + b;
-                const error = prediction - point.y;
-                dm += error * point.x;
-                db += error;
-            }
+            // Calculate gradients based on the selected loss function
+            if (lossFunction === 'mse' || lossFunction === 'rmse') {
+                // MSE and RMSE gradients (same for both)
+                for (let point of normalizedPoints) {
+                    const prediction = m * point.x + b;
+                    const error = prediction - point.y;
+                    dm += error * point.x;
+                    db += error;
+                }
+                dm = dm * 2 / normalizedPoints.length;
+                db = db * 2 / normalizedPoints.length;
 
-            dm = dm * 2 / normalizedPoints.length;
-            db = db * 2 / normalizedPoints.length;
+            } else if (lossFunction === 'mae') {
+                // MAE gradient (using sign function)
+                for (let point of normalizedPoints) {
+                    const prediction = m * point.x + b;
+                    const error = prediction - point.y;
+                    const sign = error > 0 ? 1 : (error < 0 ? -1 : 0);
+                    dm += sign * point.x;
+                    db += sign;
+                }
+                dm = dm / normalizedPoints.length;
+                db = db / normalizedPoints.length;
+            }
 
             m -= learningRate * dm;
             b -= learningRate * db;
@@ -349,9 +420,9 @@
                 return;
             }
 
-            // Track MSE
-            const mse = calculateMSE();
-            mseHistory.push(mse);
+            // Track loss
+            const loss = calculateLoss();
+            lossHistory.push(loss);
             currentIteration++;
 
             // Update display
@@ -367,19 +438,50 @@
             }
         }
 
-        function calculateMSE() {
+        function calculateLoss() {
             if (points.length === 0) return 0;
-            let sum = 0;
+
             const normalizedPoints = points.map(p => ({
                 x: p.x / canvas.width,
                 y: p.y / canvas.height
             }));
-            for (let point of normalizedPoints) {
-                const prediction = m * point.x + b;
-                const error = prediction - point.y;
-                sum += error * error;
+
+            let sum = 0;
+
+            if (lossFunction === 'mse') {
+                // Mean Squared Error
+                for (let point of normalizedPoints) {
+                    const prediction = m * point.x + b;
+                    const error = prediction - point.y;
+                    sum += error * error;
+                }
+                return sum / normalizedPoints.length;
+
+            } else if (lossFunction === 'mae') {
+                // Mean Absolute Error
+                for (let point of normalizedPoints) {
+                    const prediction = m * point.x + b;
+                    const error = Math.abs(prediction - point.y);
+                    sum += error;
+                }
+                return sum / normalizedPoints.length;
+
+            } else if (lossFunction === 'rmse') {
+                // Root Mean Squared Error
+                for (let point of normalizedPoints) {
+                    const prediction = m * point.x + b;
+                    const error = prediction - point.y;
+                    sum += error * error;
+                }
+                return Math.sqrt(sum / normalizedPoints.length);
             }
-            return sum / normalizedPoints.length;
+
+            return 0;
+        }
+
+        // Keep calculateMSE for backward compatibility (used in updateInfo)
+        function calculateMSE() {
+            return calculateLoss();
         }
 
         function draw() {
@@ -454,13 +556,13 @@
                 document.getElementById('slope').textContent = m.toFixed(4);
                 document.getElementById('intercept').textContent = b.toFixed(4);
                 document.getElementById('equation').textContent = `y = ${m.toFixed(4)}x + ${b.toFixed(4)}`;
-                const currentMSE = calculateMSE();
-                document.getElementById('error').textContent = currentMSE.toFixed(6);
+                const currentLoss = calculateLoss();
+                document.getElementById('error').textContent = currentLoss.toFixed(6);
 
                 // Calculate reduction percentage
-                if (mseHistory.length > 1) {
-                    const prevMSE = mseHistory[mseHistory.length - 2];
-                    const reduction = ((prevMSE - currentMSE) / prevMSE * 100).toFixed(2);
+                if (lossHistory.length > 1) {
+                    const prevLoss = lossHistory[lossHistory.length - 2];
+                    const reduction = ((prevLoss - currentLoss) / prevLoss * 100).toFixed(2);
                     document.getElementById('reduction').textContent = reduction + '%';
                 } else {
                     document.getElementById('reduction').textContent = '-';
@@ -479,7 +581,7 @@
             convCtx.fillStyle = '#f9f9f9';
             convCtx.fillRect(0, 0, convergenceCanvas.width, convergenceCanvas.height);
 
-            if (mseHistory.length < 2) {
+            if (lossHistory.length < 2) {
                 // Show placeholder text
                 convCtx.fillStyle = '#999';
                 convCtx.font = '18px Arial';
@@ -495,30 +597,36 @@
 
             // Calculate percentage changes
             const percentageChanges = [];
-            for (let i = 1; i < mseHistory.length; i++) {
-                const change = ((mseHistory[i-1] - mseHistory[i]) / mseHistory[i-1]) * 100;
+            for (let i = 1; i < lossHistory.length; i++) {
+                const change = ((lossHistory[i-1] - lossHistory[i]) / lossHistory[i-1]) * 100;
                 percentageChanges.push(change);
             }
 
-            // === FIRST GRAPH: MSE Values ===
+            // === FIRST GRAPH: Loss Values ===
+            const lossLabels = {
+                'mse': 'Erreur Quadratique Moyenne (MSE)',
+                'mae': 'Erreur Absolue Moyenne (MAE)',
+                'rmse': 'Racine de l\'Erreur Quadratique Moyenne (RMSE)'
+            };
+
             convCtx.fillStyle = '#333';
             convCtx.font = 'bold 14px Arial';
             convCtx.textAlign = 'center';
-            convCtx.fillText('Erreur Quadratique Moyenne (MSE)', convergenceCanvas.width / 2, 20);
+            convCtx.fillText(lossLabels[lossFunction] || 'Erreur', convergenceCanvas.width / 2, 20);
 
-            // Find max and min MSE for scaling
-            let displayMSE = [...mseHistory];
+            // Find max and min loss for scaling
+            let displayLoss = [...lossHistory];
             let startIndex = 0;
 
             // If first value is more than 3x the second, start from iteration 1
-            if (mseHistory.length > 1 && mseHistory[0] > mseHistory[1] * 3) {
-                displayMSE = mseHistory.slice(1);
+            if (lossHistory.length > 1 && lossHistory[0] > lossHistory[1] * 3) {
+                displayLoss = lossHistory.slice(1);
                 startIndex = 1;
             }
 
-            const maxMSE = Math.max(...displayMSE);
-            const minMSE = Math.min(...displayMSE);
-            const mseRange = maxMSE - minMSE;
+            const maxLoss = Math.max(...displayLoss);
+            const minLoss = Math.min(...displayLoss);
+            const lossRange = maxLoss - minLoss;
 
             // Draw axes for first graph
             convCtx.strokeStyle = '#333';
@@ -538,7 +646,7 @@
 
             for (let i = 0; i <= 4; i++) {
                 const y = padding + 30 + (graphHeight * i / 4);
-                const value = maxMSE - (mseRange * i / 4);
+                const value = maxLoss - (lossRange * i / 4);
 
                 convCtx.beginPath();
                 convCtx.moveTo(padding, y);
@@ -548,14 +656,14 @@
                 convCtx.fillText(value.toFixed(4), padding - 5, y + 4);
             }
 
-            // Draw MSE line
+            // Draw loss line
             convCtx.strokeStyle = '#667eea';
             convCtx.lineWidth = 3;
             convCtx.beginPath();
 
-            for (let i = 0; i < displayMSE.length; i++) {
-                const x = padding + (graphWidth * i / Math.max(1, displayMSE.length - 1));
-                const normalizedValue = mseRange > 0 ? (maxMSE - displayMSE[i]) / mseRange : 0.5;
+            for (let i = 0; i < displayLoss.length; i++) {
+                const x = padding + (graphWidth * i / Math.max(1, displayLoss.length - 1));
+                const normalizedValue = lossRange > 0 ? (maxLoss - displayLoss[i]) / lossRange : 0.5;
                 const y = padding + 30 + normalizedValue * graphHeight;
 
                 if (i === 0) {
@@ -566,13 +674,13 @@
             }
             convCtx.stroke();
 
-            // Draw points on the MSE line
-            for (let i = 0; i < displayMSE.length; i++) {
-                const x = padding + (graphWidth * i / Math.max(1, displayMSE.length - 1));
-                const normalizedValue = mseRange > 0 ? (maxMSE - displayMSE[i]) / mseRange : 0.5;
+            // Draw points on the loss line
+            for (let i = 0; i < displayLoss.length; i++) {
+                const x = padding + (graphWidth * i / Math.max(1, displayLoss.length - 1));
+                const normalizedValue = lossRange > 0 ? (maxLoss - displayLoss[i]) / lossRange : 0.5;
                 const y = padding + 30 + normalizedValue * graphHeight;
 
-                convCtx.fillStyle = i === displayMSE.length - 1 ? '#ff6b6b' : '#667eea';
+                convCtx.fillStyle = i === displayLoss.length - 1 ? '#ff6b6b' : '#667eea';
                 convCtx.beginPath();
                 convCtx.arc(x, y, 4, 0, Math.PI * 2);
                 convCtx.fill();
