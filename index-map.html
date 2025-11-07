@@ -256,18 +256,113 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px 10px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+                padding: 0 10px;
+            }
+
             .view-toggles {
                 position: static;
                 justify-content: center;
                 margin-top: 15px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .view-toggle {
+                padding: 8px 15px;
+                font-size: 0.85em;
             }
 
             .legend, .compass {
                 display: none;
             }
 
+            .map-container {
+                padding: 0 5px;
+                margin: 20px auto;
+            }
+
+            .city-label {
+                font-size: 9px;
+            }
+
+            .continent-label {
+                font-size: 20px;
+            }
+
+            .tooltip {
+                max-width: 250px;
+                padding: 10px 15px;
+                font-size: 0.85em;
+            }
+
+            .tooltip h3 {
+                font-size: 1em;
+            }
+
+            footer {
+                padding: 20px 10px;
+                font-size: 0.85em;
+            }
+        }
+
+        @media (max-width: 480px) {
             .header h1 {
-                font-size: 1.8em;
+                font-size: 1.3em;
+            }
+
+            .subtitle {
+                font-size: 0.85em;
+            }
+
+            .view-toggle {
+                padding: 6px 12px;
+                font-size: 0.75em;
+            }
+
+            .city-label {
+                font-size: 8px;
+            }
+
+            .continent-label {
+                font-size: 16px;
+            }
+
+            .tooltip {
+                max-width: 200px;
+                padding: 8px 12px;
+                font-size: 0.8em;
+            }
+
+            .tooltip h3 {
+                font-size: 0.9em;
+            }
+
+            .tooltip p {
+                font-size: 0.85em;
+            }
+
+            .tooltip .badge {
+                font-size: 0.7em;
+                padding: 3px 8px;
+            }
+
+            footer p {
+                font-size: 0.8em;
+                margin-bottom: 5px;
             }
         }
     </style>

@@ -181,6 +181,79 @@
             padding: 20px;
             opacity: 0.8;
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            header {
+                margin-bottom: 30px;
+                padding-top: 60px;
+            }
+
+            .view-toggles {
+                position: static;
+                justify-content: center;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+            }
+
+            .view-toggle {
+                padding: 8px 15px;
+                font-size: 0.85em;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+                padding: 0 10px;
+            }
+
+            .category-title {
+                font-size: 1.5em;
+            }
+
+            .apps-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .app-card {
+                padding: 20px;
+            }
+
+            .app-card h3 {
+                font-size: 1.3em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .subtitle {
+                font-size: 0.9em;
+            }
+
+            .category-title {
+                font-size: 1.3em;
+            }
+
+            .app-card {
+                padding: 15px;
+            }
+
+            .view-toggle {
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+        }
     </style>
 </head>
 <body>

@@ -85,11 +85,12 @@
 
         .canvas-container {
             position: relative;
-            height: 550px;
+            height: 650px;
             border: 2px solid #ddd;
             border-radius: 10px;
             background: linear-gradient(to bottom, #fafafa 0%, #f0f0f0 100%);
-            overflow: hidden;
+            overflow-x: auto;
+            overflow-y: hidden;
             margin-bottom: 20px;
         }
 
@@ -160,6 +161,20 @@
             height: 100%;
             pointer-events: none;
             z-index: 1;
+            min-width: 800px;
+        }
+
+        .level-label {
+            position: absolute;
+            left: 10px;
+            font-size: 0.85em;
+            font-weight: bold;
+            color: #667eea;
+            background: rgba(255,255,255,0.95);
+            padding: 4px 10px;
+            border-radius: 5px;
+            border: 1px solid #667eea;
+            z-index: 10;
         }
 
         .tree-line {
@@ -331,6 +346,216 @@
         .control-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .animation-container {
+                padding: 30px 20px;
+            }
+
+            .canvas-container {
+                height: 450px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .animation-container {
+                padding: 20px 15px;
+                min-height: auto;
+            }
+
+            .mode-selector {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .mode-btn {
+                width: 100%;
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+
+            .step-indicator {
+                font-size: 1em;
+            }
+
+            .generated-text {
+                padding: 15px;
+                min-height: 60px;
+            }
+
+            .text-output {
+                font-size: 1.1em;
+            }
+
+            .temperature-slider {
+                padding: 15px;
+            }
+
+            .legend {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            .canvas-container {
+                height: 400px;
+            }
+
+            .tree-node {
+                min-width: 70px;
+                padding: 6px 12px;
+                font-size: 0.85em;
+            }
+
+            .prob-label {
+                font-size: 0.7em;
+            }
+
+            .formula-box {
+                padding: 12px 20px;
+            }
+
+            .formula {
+                font-size: 0.95em;
+            }
+
+            .controls {
+                margin: 15px 0;
+            }
+
+            .control-btn {
+                padding: 8px 20px;
+                margin: 5px;
+                font-size: 0.9em;
+            }
+
+            .info-panel {
+                padding: 15px 20px;
+            }
+
+            .info-panel h4 {
+                font-size: 1em;
+            }
+
+            .info-panel p {
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .subtitle {
+                font-size: 0.9em;
+            }
+
+            .back-link {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+
+            .animation-container {
+                padding: 15px 10px;
+            }
+
+            .mode-btn {
+                padding: 8px 15px;
+                font-size: 0.85em;
+            }
+
+            .step-indicator {
+                font-size: 0.9em;
+            }
+
+            .generated-text {
+                padding: 12px;
+            }
+
+            .text-output {
+                font-size: 1em;
+            }
+
+            .token {
+                padding: 3px 8px;
+                font-size: 0.9em;
+            }
+
+            .temperature-slider {
+                padding: 12px;
+            }
+
+            .temperature-display {
+                font-size: 1.1em;
+            }
+
+            .legend {
+                gap: 8px;
+            }
+
+            .legend-item {
+                font-size: 0.8em;
+            }
+
+            .legend-box {
+                width: 20px;
+                height: 20px;
+            }
+
+            .canvas-container {
+                height: 350px;
+            }
+
+            .tree-node {
+                min-width: 60px;
+                padding: 5px 10px;
+                font-size: 0.8em;
+            }
+
+            .formula-box {
+                padding: 10px 15px;
+            }
+
+            .formula {
+                font-size: 0.85em;
+            }
+
+            .control-btn {
+                padding: 8px 15px;
+                font-size: 0.85em;
+                margin: 3px;
+            }
+
+            .info-panel {
+                padding: 12px 15px;
+            }
+
+            .info-panel h4 {
+                font-size: 0.95em;
+            }
+
+            .info-panel p {
+                font-size: 0.85em;
+            }
         }
     </style>
 </head>
@@ -692,21 +917,23 @@
         }
 
         function renderStep() {
-            const step = sequenceData[currentStep];
             const container = document.getElementById('canvasContainer');
             const svg = document.getElementById('treeSvg');
 
             // Clear previous content
             container.querySelectorAll('.tree-node').forEach(n => n.remove());
+            container.querySelectorAll('.level-label').forEach(l => l.remove());
             svg.innerHTML = '';
+
+            const currentStepData = sequenceData[currentStep];
 
             // Update step indicator
             document.getElementById('stepIndicator').textContent =
-                `Étape ${currentStep + 1}/5 : Choix du mot après "${step.context}"`;
+                `Étape ${currentStep + 1}/5 : Choix du mot après "${currentStepData.context}"`;
 
             // Update generated text
             const textOutput = document.getElementById('textOutput');
-            const words = step.context.split(' ');
+            const words = currentStepData.context.split(' ');
             textOutput.innerHTML = words.map((w, i) =>
                 `<span class="token" style="background: ${i === 0 ? '#d1c4e9' : '#e3f2fd'};">${w}</span>`
             ).join('');
@@ -715,81 +942,147 @@
             document.getElementById('prevBtn').disabled = currentStep === 0;
             document.getElementById('nextBtn').disabled = currentStep === sequenceData.length - 1;
 
-            // Apply temperature if in temperature mode
-            let displayProbs = step.candidates.map(c => c.prob);
-            if (currentMode === 'temperature') {
-                displayProbs = applyTemperature(displayProbs, temperature);
+            // Calculate layout dimensions
+            const containerHeight = container.offsetHeight;
+            const levelHeight = 120;
+            const startY = 50;
+
+            // Track selected paths for beam/greedy
+            const selectedPaths = [];
+            if (currentMode === 'greedy') {
+                selectedPaths.push(0); // Always first candidate
+            } else if (currentMode === 'beam') {
+                selectedPaths.push(0, 1, 2); // Top 3
             }
 
-            // Calculate positions
-            const containerWidth = container.offsetWidth;
-            const containerHeight = container.offsetHeight;
-            const numCandidates = step.candidates.length;
-            const spacing = Math.min(150, (containerWidth - 100) / numCandidates);
-            const startX = (containerWidth - (numCandidates - 1) * spacing) / 2;
-            const yPos = containerHeight / 2;
+            // Render all levels from 0 to currentStep
+            for (let stepIdx = 0; stepIdx <= currentStep; stepIdx++) {
+                const step = sequenceData[stepIdx];
+                const yPos = startY + stepIdx * levelHeight;
 
-            // Render candidates
-            step.candidates.forEach((candidate, idx) => {
-                const x = startX + idx * spacing;
-                const y = yPos;
+                // Add level label
+                const levelLabel = document.createElement('div');
+                levelLabel.className = 'level-label';
+                levelLabel.style.top = (yPos + 10) + 'px';
+                levelLabel.textContent = `Niveau ${stepIdx + 1}`;
+                container.appendChild(levelLabel);
 
-                const node = document.createElement('div');
-                node.className = 'tree-node';
-                node.style.left = x + 'px';
-                node.style.top = y + 'px';
-                node.innerHTML = `
-                    <div>${candidate.word}</div>
-                    <span class="prob-label">${Math.round(displayProbs[idx] * 100)}%</span>
-                `;
+                // Apply temperature if in temperature mode
+                let displayProbs = step.candidates.map(c => c.prob);
+                if (currentMode === 'temperature') {
+                    displayProbs = applyTemperature(displayProbs, temperature);
+                }
 
-                // Apply styling based on mode
+                // Calculate horizontal positions
+                const numCandidates = step.candidates.length;
+                const nodeWidth = 100;
+                const spacing = nodeWidth + 30;
+                const totalWidth = numCandidates * spacing;
+                const startX = Math.max(50, (container.offsetWidth - totalWidth) / 2);
+
+                // Determine which nodes to highlight based on mode
+                let highlightedIndices = [];
                 if (currentMode === 'greedy') {
-                    if (idx === 0) {
-                        node.classList.add('selected');
-                    }
+                    highlightedIndices = [0];
                 } else if (currentMode === 'beam') {
-                    if (idx < 3) {
-                        node.classList.add('beam');
-                    } else {
-                        node.classList.add('pruned');
-                    }
+                    highlightedIndices = [0, 1, 2];
                 } else if (currentMode === 'temperature') {
-                    // Randomly select one based on probabilities
-                    const randomChoice = Math.random() < 0.7 ? 0 : Math.floor(Math.random() * Math.min(3, numCandidates));
-                    if (idx === randomChoice) {
-                        node.classList.add('sampled');
-                    } else if (idx < 3) {
+                    // For temperature, show all top 3 with one slightly more highlighted
+                    highlightedIndices = [0, 1, 2];
+                }
+
+                // Render candidates for this level
+                step.candidates.forEach((candidate, idx) => {
+                    const x = startX + idx * spacing;
+                    const y = yPos;
+
+                    const node = document.createElement('div');
+                    node.className = 'tree-node';
+                    node.style.left = x + 'px';
+                    node.style.top = y + 'px';
+                    node.style.transform = 'translateX(-40px)';
+                    node.innerHTML = `
+                        <div>${candidate.word}</div>
+                        <span class="prob-label">${Math.round(displayProbs[idx] * 100)}%</span>
+                    `;
+
+                    // Apply styling based on mode and whether node is in path
+                    if (stepIdx < currentStep) {
+                        // Past nodes - dim them
                         node.style.opacity = '0.5';
-                    } else {
-                        node.classList.add('pruned');
-                    }
-                }
-
-                container.appendChild(node);
-                setTimeout(() => node.classList.add('show'), idx * 100);
-
-                // Draw line from previous step
-                if (currentStep > 0) {
-                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                    const prevY = 100;
-                    const prevX = containerWidth / 2;
-
-                    line.setAttribute('d', `M ${prevX} ${prevY} Q ${(prevX + x) / 2} ${(prevY + y) / 2} ${x + 40} ${y}`);
-                    line.setAttribute('class', 'tree-line');
-
-                    if (currentMode === 'greedy' && idx === 0) {
-                        line.classList.add('selected');
-                    } else if (currentMode === 'beam' && idx < 3) {
-                        line.classList.add('beam');
-                    } else if (currentMode === 'temperature' && idx === Math.floor(Math.random() * 3)) {
-                        line.classList.add('sampled');
                     }
 
-                    svg.appendChild(line);
-                    setTimeout(() => line.classList.add('show'), idx * 100);
-                }
-            });
+                    if (currentMode === 'greedy') {
+                        if (idx === 0) {
+                            node.classList.add('selected');
+                        } else {
+                            node.style.opacity = '0.3';
+                        }
+                    } else if (currentMode === 'beam') {
+                        if (idx < 3) {
+                            node.classList.add('beam');
+                        } else {
+                            node.classList.add('pruned');
+                        }
+                    } else if (currentMode === 'temperature') {
+                        if (idx === 0 && stepIdx === currentStep) {
+                            node.classList.add('sampled');
+                        } else if (idx < 3) {
+                            node.style.opacity = stepIdx === currentStep ? '0.7' : '0.4';
+                        } else {
+                            node.classList.add('pruned');
+                        }
+                    }
+
+                    container.appendChild(node);
+                    setTimeout(() => node.classList.add('show'), stepIdx * 50 + idx * 30);
+
+                    // Draw lines from previous level
+                    if (stepIdx > 0) {
+                        const prevStep = sequenceData[stepIdx - 1];
+                        const prevYPos = startY + (stepIdx - 1) * levelHeight;
+
+                        // Determine which previous nodes to connect from
+                        let prevIndices = [];
+                        if (currentMode === 'greedy') {
+                            prevIndices = [0]; // Only from selected node
+                        } else if (currentMode === 'beam') {
+                            prevIndices = idx < 3 ? [0, 1, 2] : []; // Beam nodes connect to all beam nodes
+                        } else if (currentMode === 'temperature') {
+                            prevIndices = idx < 3 ? [0, 1, 2] : [];
+                        }
+
+                        prevIndices.forEach(prevIdx => {
+                            const prevX = startX + prevIdx * spacing;
+                            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+
+                            line.setAttribute('x1', prevX);
+                            line.setAttribute('y1', prevYPos + 35);
+                            line.setAttribute('x2', x);
+                            line.setAttribute('y2', y);
+                            line.setAttribute('class', 'tree-line');
+                            line.setAttribute('stroke', '#ccc');
+                            line.setAttribute('stroke-width', '2');
+
+                            // Highlight main path
+                            if (currentMode === 'greedy' && idx === 0 && prevIdx === 0) {
+                                line.setAttribute('stroke', '#2ecc71');
+                                line.setAttribute('stroke-width', '3');
+                            } else if (currentMode === 'beam' && idx < 3 && prevIdx < 3) {
+                                line.setAttribute('stroke', '#3498db');
+                                line.setAttribute('stroke-width', '2');
+                            } else if (currentMode === 'temperature' && idx < 3 && prevIdx < 3) {
+                                line.setAttribute('stroke', '#9b59b6');
+                                line.setAttribute('stroke-width', '2');
+                                line.setAttribute('opacity', '0.5');
+                            }
+
+                            svg.appendChild(line);
+                            setTimeout(() => line.classList.add('show'), stepIdx * 50 + idx * 30);
+                        });
+                    }
+                });
+            }
         }
 
         // Initialize

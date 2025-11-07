@@ -243,6 +243,111 @@
             left: 50%;
             transform: translateX(-50%);
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .back-link {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+
+            .animation-container {
+                padding: 20px 15px;
+                min-height: 500px;
+            }
+
+            .stage-title {
+                font-size: 1.2em;
+            }
+
+            .canvas {
+                height: 400px;
+            }
+
+            .box {
+                width: 100px;
+                padding: 15px;
+                font-size: 0.85em;
+            }
+
+            .component {
+                width: 70px;
+                height: 70px;
+                font-size: 0.7em;
+            }
+
+            .component-label {
+                font-size: 0.7em;
+            }
+
+            .json-display {
+                width: 180px;
+                padding: 10px;
+                font-size: 0.7em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .subtitle {
+                font-size: 0.9em;
+            }
+
+            .animation-container {
+                padding: 15px 10px;
+                min-height: 450px;
+            }
+
+            .stage-title {
+                font-size: 1em;
+            }
+
+            .canvas {
+                height: 350px;
+            }
+
+            .box {
+                width: 90px;
+                padding: 12px;
+                font-size: 0.8em;
+            }
+
+            .component {
+                width: 60px;
+                height: 60px;
+                font-size: 0.65em;
+            }
+
+            .component-label {
+                font-size: 0.65em;
+                max-width: 70px;
+            }
+
+            .json-display {
+                width: 160px;
+                padding: 8px;
+                font-size: 0.65em;
+            }
+        }
     </style>
 </head>
 <body>
