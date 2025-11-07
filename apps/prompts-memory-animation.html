@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompts & Mémoire - Architecture LLM</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 20px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .back-link:hover { background: rgba(255,255,255,0.3); }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .animation-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            min-height: 700px;
+        }
+
+        .stage-title {
+            text-align: center;
+            font-size: 1.5em;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-weight: bold;
+            min-height: 40px;
+        }
+
+        .visualization {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            min-height: 500px;
+            position: relative;
+        }
+
+        .component {
+            position: relative;
+            padding: 25px;
+            border-radius: 15px;
+            width: 280px;
+            min-height: 200px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.5s;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .component.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .component.active {
+            transform: translateY(0) scale(1.05);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .system-prompt {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .memory {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .user-prompt {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+        }
+
+        .llm-model {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+            width: 350px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .component-header {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .component-icon {
+            font-size: 1.5em;
+        }
+
+        .component-content {
+            font-size: 0.9em;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+
+        .message-item {
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.4s;
+        }
+
+        .message-item.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .message-label {
+            font-weight: bold;
+            font-size: 0.75em;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+
+        .data-flow {
+            position: absolute;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(to right, transparent, #667eea, transparent);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .data-flow.show {
+            opacity: 1;
+            animation: flow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes flow {
+            0%, 100% { transform: translateX(-20px); opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .data-packet {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .data-packet.show {
+            opacity: 1;
+        }
+
+        .response-box {
+            background: rgba(155, 89, 182, 0.1);
+            border: 2px solid #9b59b6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .response-box.show {
+            opacity: 1;
+            animation: typing 2s steps(40);
+        }
+
+        @keyframes typing {
+            from { max-height: 0; overflow: hidden; }
+            to { max-height: 200px; }
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            width: 0;
+            transition: width 0.3s linear;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .center-model {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .token-count {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">← Retour au menu</a>
+
+        <h1>💬 Prompts & Mémoire</h1>
+        <p class="subtitle">Architecture de contexte dans les LLMs (ChatGPT, Claude, Gemini)</p>
+
+        <div class="animation-container">
+            <div class="stage-title" id="stageTitle">Initialisation...</div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div style="margin-top: 40px;">
+                <div class="grid-layout">
+                    <!-- System Prompt -->
+                    <div class="component system-prompt" id="systemPrompt">
+                        <div class="component-header">
+                            <span class="component-icon">⚙️</span>
+                            <span>Prompt Système</span>
+                        </div>
+                        <div class="component-content">
+                            <p style="font-weight: bold; margin-bottom: 10px;">Instructions de base :</p>
+                            <p>"Tu es un assistant IA serviable, honnête et inoffensif. Réponds en français de manière claire et concise."</p>
+                            <div class="token-count">~50 tokens</div>
+                        </div>
+                    </div>
+
+                    <!-- Memory / History -->
+                    <div class="component memory" id="memory">
+                        <div class="component-header">
+                            <span class="component-icon">📚</span>
+                            <span>Mémoire (Historique)</span>
+                        </div>
+                        <div class="component-content">
+                            <div class="message-item" id="msg1">
+                                <div class="message-label">👤 USER</div>
+                                <div>Quelle est la capitale de la France ?</div>
+                            </div>
+                            <div class="message-item" id="msg2">
+                                <div class="message-label">🤖 ASSISTANT</div>
+                                <div>La capitale de la France est Paris.</div>
+                            </div>
+                            <div class="message-item" id="msg3">
+                                <div class="message-label">👤 USER</div>
+                                <div>Combien d'habitants ?</div>
+                            </div>
+                            <div class="token-count">~120 tokens</div>
+                        </div>
+                    </div>
+
+                    <!-- User Prompt -->
+                    <div class="component user-prompt" id="userPrompt">
+                        <div class="component-header">
+                            <span class="component-icon">👤</span>
+                            <span>Prompt Utilisateur</span>
+                        </div>
+                        <div class="component-content">
+                            <p style="font-weight: bold; margin-bottom: 10px;">Nouveau message :</p>
+                            <p>"Et quelle est sa superficie ?"</p>
+                            <div class="token-count">~10 tokens</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LLM Model Center -->
+                <div class="center-model">
+                    <div class="component llm-model" id="llmModel">
+                        <div class="component-header" style="justify-content: center;">
+                            <span class="component-icon">🧠</span>
+                            <span>LLM (Large Language Model)</span>
+                        </div>
+                        <div class="component-content" style="text-align: center;">
+                            <p style="font-size: 1.1em; margin-bottom: 15px;">Traitement du contexte complet</p>
+                            <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; margin: 15px 0;">
+                                <p style="font-size: 0.85em; opacity: 0.9;">
+                                    📊 Contexte total : ~180 tokens<br>
+                                    ⚙️ Système : 50 tokens<br>
+                                    📚 Mémoire : 120 tokens<br>
+                                    👤 Question : 10 tokens
+                                </p>
+                            </div>
+                            <div class="response-box" id="responseBox">
+                                <div style="font-weight: bold; margin-bottom: 8px;">🤖 Réponse générée :</div>
+                                <div>"Paris a une superficie d'environ 105 km² pour la ville intra-muros, et environ 814 km² pour la métropole du Grand Paris."</div>
+                                <div style="margin-top: 10px; font-size: 0.8em; opacity: 0.8;">~40 tokens générés</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h3>💡 Comment ça fonctionne ?</h3>
+                <p id="infoText">Le LLM combine les 3 sources d'information pour générer une réponse contextuelle et pertinente.</p>
+            </div>
+        </div>
+
+        <!-- Documentation -->
+        <div style="margin-top: 30px; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <h2 style="color: #667eea; margin-bottom: 20px;">📖 Architecture de Contexte dans les LLMs</h2>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #f39c12;">
+                <h3 style="color: #e65100; margin-bottom: 15px;">⚙️ 1. Prompt Système (System Prompt)</h3>
+                <p style="margin-bottom: 10px;">Instructions permanentes qui définissent le comportement de base de l'IA.</p>
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h4 style="color: #f39c12; margin-bottom: 10px;">Caractéristiques :</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>Invisible pour l'utilisateur :</strong> Défini par les développeurs</li>
+                        <li><strong>Priorité maximale :</strong> Guide tout le comportement du modèle</li>
+                        <li><strong>Exemples d'usage :</strong>
+                            <ul style="margin-left: 20px; margin-top: 5px;">
+                                <li>Définir le rôle : "Tu es un expert en programmation Python"</li>
+                                <li>Contraintes : "Ne jamais donner de conseils médicaux"</li>
+                                <li>Style : "Réponds toujours de manière concise et professionnelle"</li>
+                                <li>Format : "Utilise toujours des puces et des exemples"</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <div style="background: #fef5e7; padding: 12px; border-radius: 6px; margin-top: 10px;">
+                    <p style="font-size: 0.9em; color: #e65100;">
+                        <strong>💡 Astuce :</strong> Le prompt système est fixe pour toute la session. C'est la "personnalité" de base de l'IA.
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+                <h3 style="color: #1565c0; margin-bottom: 15px;">📚 2. Mémoire / Historique (Conversation History)</h3>
+                <p style="margin-bottom: 10px;">Liste chronologique de tous les échanges précédents dans la conversation.</p>
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h4 style="color: #2196f3; margin-bottom: 10px;">Fonctionnement :</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>Structure :</strong> Alternance de messages USER et ASSISTANT</li>
+                        <li><strong>Contexte cumulatif :</strong> Chaque nouveau message s'ajoute à l'historique</li>
+                        <li><strong>Limitation :</strong> Fenêtre de contexte limitée (4k-128k tokens selon le modèle)
+                            <ul style="margin-left: 20px; margin-top: 5px;">
+                                <li>GPT-3.5 : 4k tokens (~3k mots)</li>
+                                <li>GPT-4 : 8k-32k tokens</li>
+                                <li>Claude 3 : 200k tokens</li>
+                                <li>Gemini 1.5 : jusqu'à 1M tokens</li>
+                            </ul>
+                        </li>
+                        <li><strong>Gestion :</strong> Quand la limite est atteinte, les messages les plus anciens sont supprimés (ou résumés)</li>
+                    </ul>
+                </div>
+                <div style="background: #e1f5fe; padding: 12px; border-radius: 6px; margin-top: 10px;">
+                    <p style="font-size: 0.9em; color: #1565c0;">
+                        <strong>💡 Astuce :</strong> La mémoire permet au LLM de comprendre le contexte ("Combien d'habitants ?" → Il sait qu'on parle de Paris grâce à l'historique).
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 15px;">👤 3. Prompt Utilisateur (User Prompt)</h3>
+                <p style="margin-bottom: 10px;">Le message actuel de l'utilisateur qui déclenche la génération d'une réponse.</p>
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h4 style="color: #4caf50; margin-bottom: 10px;">Techniques de Prompt Engineering :</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>Clarté :</strong> Soyez précis et spécifique dans vos demandes</li>
+                        <li><strong>Contexte :</strong> Fournissez les informations pertinentes</li>
+                        <li><strong>Format :</strong> Spécifiez le format de réponse souhaité
+                            <ul style="margin-left: 20px; margin-top: 5px;">
+                                <li>"Liste à puces de 5 points"</li>
+                                <li>"Tableau comparatif"</li>
+                                <li>"Code Python avec commentaires"</li>
+                            </ul>
+                        </li>
+                        <li><strong>Few-shot learning :</strong> Donnez des exemples
+                            <ul style="margin-left: 20px; margin-top: 5px;">
+                                <li>"Traduis comme dans ces exemples : dog→chien, cat→chat, bird→?"</li>
+                            </ul>
+                        </li>
+                        <li><strong>Chain-of-thought :</strong> "Explique ton raisonnement étape par étape"</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #9c27b0;">
+                <h3 style="color: #6a1b9a; margin-bottom: 15px;">🧠 4. Le LLM - Traitement et Génération</h3>
+                <p style="margin-bottom: 10px;">Le modèle combine les 3 sources pour générer une réponse cohérente.</p>
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h4 style="color: #9c27b0; margin-bottom: 10px;">Processus de génération :</h4>
+                    <ol style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>Tokenization :</strong> Découpe le texte en tokens (morceaux de mots)</li>
+                        <li><strong>Embeddings :</strong> Convertit les tokens en vecteurs numériques</li>
+                        <li><strong>Attention mechanism :</strong> Le modèle "fait attention" aux parties pertinentes du contexte
+                            <ul style="margin-left: 20px; margin-top: 5px;">
+                                <li>Prompt système → instructions permanentes</li>
+                                <li>Historique → contexte de la conversation</li>
+                                <li>Question actuelle → ce qu'il faut répondre</li>
+                            </ul>
+                        </li>
+                        <li><strong>Génération autoregressive :</strong> Produit la réponse token par token</li>
+                        <li><strong>Sampling :</strong> Utilise beam search ou temperature pour choisir les tokens</li>
+                    </ol>
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <h4 style="color: #9c27b0; margin-bottom: 10px;">🔢 Gestion du contexte :</h4>
+                    <div style="font-family: monospace; font-size: 0.9em; background: #f5f5f5; padding: 10px; border-radius: 5px; margin: 8px 0;">
+                        Contexte_Total = System_Prompt + Σ(Messages_Historique) + User_Prompt
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        Exemple : 50 (système) + 120 (historique) + 10 (question) = 180 tokens en entrée<br>
+                        Limite max : variable selon le modèle (4k à 1M tokens)<br>
+                        Réponse générée : ~40 tokens qui seront ajoutés à l'historique pour le prochain tour
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #e91e63;">
+                <h3 style="color: #c2185b; margin-bottom: 15px;">💡 Cas d'Usage Pratiques</h3>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #e91e63; margin-bottom: 10px;">🤖 ChatGPT / Assistant conversationnel</h4>
+                    <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
+                        <strong>Système :</strong> "Tu es ChatGPT, un assistant IA créé par OpenAI..."<br>
+                        <strong>Mémoire :</strong> Les 10-20 derniers échanges de la conversation<br>
+                        <strong>User :</strong> Question actuelle de l'utilisateur<br>
+                        <strong>Résultat :</strong> Réponse contextuelle qui tient compte de toute la conversation
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #e91e63; margin-bottom: 10px;">📝 Rédaction d'article</h4>
+                    <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
+                        <strong>Système :</strong> "Tu es un rédacteur professionnel. Style journalistique, factuel."<br>
+                        <strong>Mémoire :</strong> Plan de l'article, sections déjà rédigées<br>
+                        <strong>User :</strong> "Rédige la section 3 sur les causes du changement climatique"<br>
+                        <strong>Résultat :</strong> Section cohérente avec le reste de l'article
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #e91e63; margin-bottom: 10px;">💻 Copilot de Code</h4>
+                    <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
+                        <strong>Système :</strong> "Tu es un expert en programmation. Commente ton code."<br>
+                        <strong>Mémoire :</strong> Fichier actuel, imports, fonctions déjà définies<br>
+                        <strong>User :</strong> "# Fonction pour calculer la moyenne" (commentaire → complétion)<br>
+                        <strong>Résultat :</strong> Code cohérent avec le contexte du fichier
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #fff9e6; padding: 20px; border-radius: 10px; border-left: 4px solid #ff9800;">
+                <h3 style="color: #e65100; margin-bottom: 15px;">⚠️ Limites et Considérations</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Fenêtre de contexte limitée :</strong> Au-delà de la limite, les anciens messages sont perdus</li>
+                    <li><strong>Coût proportionnel :</strong> Plus de contexte = plus de tokens = coût plus élevé ($)</li>
+                    <li><strong>Latence :</strong> Plus de contexte = génération plus lente</li>
+                    <li><strong>Prompt injection :</strong> Risque de sécurité si l'utilisateur essaie de "hacker" le prompt système</li>
+                    <li><strong>Hallucinations :</strong> Le LLM peut inventer des informations s'il manque de contexte</li>
+                    <li><strong>Pas de vraie mémoire :</strong> Le modèle ne "se souvient" pas entre sessions (sauf si historique sauvegardé)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CYCLE_DURATION = 18000; // 18 seconds
+        let currentPhase = 0;
+
+        const phases = [
+            {
+                title: "Étape 1 : Chargement du Prompt Système ⚙️",
+                info: "Le prompt système définit les instructions de base et le comportement général de l'IA. Il est invisible pour l'utilisateur.",
+                duration: 3000,
+                actions: () => {
+                    document.getElementById('systemPrompt').classList.add('show', 'active');
+                }
+            },
+            {
+                title: "Étape 2 : Chargement de la Mémoire (Historique) 📚",
+                info: "La mémoire contient tous les échanges précédents. Cela permet au modèle de comprendre le contexte de la conversation.",
+                duration: 4500,
+                actions: () => {
+                    document.getElementById('systemPrompt').classList.remove('active');
+                    document.getElementById('memory').classList.add('show', 'active');
+
+                    setTimeout(() => document.getElementById('msg1').classList.add('show'), 300);
+                    setTimeout(() => document.getElementById('msg2').classList.add('show'), 600);
+                    setTimeout(() => document.getElementById('msg3').classList.add('show'), 900);
+                }
+            },
+            {
+                title: "Étape 3 : Réception du Prompt Utilisateur 👤",
+                info: "Le nouveau message de l'utilisateur arrive. C'est la question ou demande actuelle qui nécessite une réponse.",
+                duration: 3000,
+                actions: () => {
+                    document.getElementById('memory').classList.remove('active');
+                    document.getElementById('userPrompt').classList.add('show', 'active');
+                }
+            },
+            {
+                title: "Étape 4 : Traitement par le LLM 🧠",
+                info: "Le modèle combine les 3 sources (système + mémoire + question) pour générer une réponse contextuelle et pertinente.",
+                duration: 5000,
+                actions: () => {
+                    document.getElementById('userPrompt').classList.remove('active');
+                    document.getElementById('llmModel').classList.add('show', 'active');
+
+                    setTimeout(() => {
+                        document.getElementById('responseBox').classList.add('show');
+                    }, 1500);
+                }
+            },
+            {
+                title: "✅ Réponse générée et ajoutée à l'historique",
+                info: "La réponse est envoyée à l'utilisateur et ajoutée à la mémoire pour les prochains échanges. Le cycle continue...",
+                duration: 2500,
+                actions: () => {
+                    // All components visible
+                }
+            }
+        ];
+
+        function runPhase(phaseIndex) {
+            if (phaseIndex >= phases.length) {
+                // Reset
+                setTimeout(() => {
+                    resetAnimation();
+                }, 1000);
+                return;
+            }
+
+            const phase = phases[phaseIndex];
+            document.getElementById('stageTitle').textContent = phase.title;
+            document.getElementById('infoText').textContent = phase.info;
+
+            // Update progress bar
+            const progress = ((phaseIndex + 1) / phases.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            phase.actions();
+
+            setTimeout(() => {
+                runPhase(phaseIndex + 1);
+            }, phase.duration);
+        }
+
+        function resetAnimation() {
+            // Reset all components
+            document.querySelectorAll('.component').forEach(el => {
+                el.classList.remove('show', 'active');
+            });
+            document.querySelectorAll('.message-item').forEach(el => {
+                el.classList.remove('show');
+            });
+            document.getElementById('responseBox').classList.remove('show');
+            document.getElementById('progressFill').style.width = '0%';
+
+            // Restart
+            setTimeout(() => runPhase(0), 500);
+        }
+
+        // Start animation
+        runPhase(0);
+    </script>
+</body>
+</html>
