@@ -332,6 +332,216 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .animation-container {
+                padding: 30px 20px;
+            }
+
+            .canvas-container {
+                height: 450px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .animation-container {
+                padding: 20px 15px;
+                min-height: auto;
+            }
+
+            .mode-selector {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .mode-btn {
+                width: 100%;
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+
+            .step-indicator {
+                font-size: 1em;
+            }
+
+            .generated-text {
+                padding: 15px;
+                min-height: 60px;
+            }
+
+            .text-output {
+                font-size: 1.1em;
+            }
+
+            .temperature-slider {
+                padding: 15px;
+            }
+
+            .legend {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            .canvas-container {
+                height: 400px;
+            }
+
+            .tree-node {
+                min-width: 70px;
+                padding: 6px 12px;
+                font-size: 0.85em;
+            }
+
+            .prob-label {
+                font-size: 0.7em;
+            }
+
+            .formula-box {
+                padding: 12px 20px;
+            }
+
+            .formula {
+                font-size: 0.95em;
+            }
+
+            .controls {
+                margin: 15px 0;
+            }
+
+            .control-btn {
+                padding: 8px 20px;
+                margin: 5px;
+                font-size: 0.9em;
+            }
+
+            .info-panel {
+                padding: 15px 20px;
+            }
+
+            .info-panel h4 {
+                font-size: 1em;
+            }
+
+            .info-panel p {
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .subtitle {
+                font-size: 0.9em;
+            }
+
+            .back-link {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+
+            .animation-container {
+                padding: 15px 10px;
+            }
+
+            .mode-btn {
+                padding: 8px 15px;
+                font-size: 0.85em;
+            }
+
+            .step-indicator {
+                font-size: 0.9em;
+            }
+
+            .generated-text {
+                padding: 12px;
+            }
+
+            .text-output {
+                font-size: 1em;
+            }
+
+            .token {
+                padding: 3px 8px;
+                font-size: 0.9em;
+            }
+
+            .temperature-slider {
+                padding: 12px;
+            }
+
+            .temperature-display {
+                font-size: 1.1em;
+            }
+
+            .legend {
+                gap: 8px;
+            }
+
+            .legend-item {
+                font-size: 0.8em;
+            }
+
+            .legend-box {
+                width: 20px;
+                height: 20px;
+            }
+
+            .canvas-container {
+                height: 350px;
+            }
+
+            .tree-node {
+                min-width: 60px;
+                padding: 5px 10px;
+                font-size: 0.8em;
+            }
+
+            .formula-box {
+                padding: 10px 15px;
+            }
+
+            .formula {
+                font-size: 0.85em;
+            }
+
+            .control-btn {
+                padding: 8px 15px;
+                font-size: 0.85em;
+                margin: 3px;
+            }
+
+            .info-panel {
+                padding: 12px 15px;
+            }
+
+            .info-panel h4 {
+                font-size: 0.95em;
+            }
+
+            .info-panel p {
+                font-size: 0.85em;
+            }
+        }
     </style>
 </head>
 <body>
