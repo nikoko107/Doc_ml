@@ -34,16 +34,22 @@
             margin-bottom: 10px;
         }
 
-        .view-toggle {
+        .view-toggles {
             position: absolute;
             top: 10px;
             right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-toggle {
             background: white;
             color: #667eea;
             padding: 10px 20px;
             border-radius: 25px;
             text-decoration: none;
             font-weight: bold;
+            font-size: 0.9em;
             transition: all 0.3s;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
@@ -240,9 +246,9 @@
                 font-size: 2em;
             }
 
-            .view-toggle {
+            .view-toggles {
                 position: static;
-                display: inline-block;
+                justify-content: center;
                 margin-top: 20px;
             }
         }
@@ -250,7 +256,10 @@
 </head>
 <body>
     <div class="header">
-        <a href="index.html" class="view-toggle">📋 Vue Liste</a>
+        <div class="view-toggles">
+            <a href="index.html" class="view-toggle">📋 Vue Liste</a>
+            <a href="index-map.html" class="view-toggle">🗺️ Vue Carte</a>
+        </div>
         <h1>🧠 Apprentissage Machine</h1>
         <p class="subtitle">Vue par Cartes Thématiques</p>
     </div>

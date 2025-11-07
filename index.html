@@ -30,16 +30,22 @@
             position: relative;
         }
 
-        .view-toggle {
+        .view-toggles {
             position: absolute;
             top: 0;
             right: 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-toggle {
             background: white;
             color: #667eea;
-            padding: 12px 25px;
+            padding: 10px 20px;
             border-radius: 25px;
             text-decoration: none;
             font-weight: bold;
+            font-size: 0.9em;
             transition: all 0.3s;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
@@ -180,7 +186,10 @@
 <body>
     <div class="container">
         <header>
-            <a href="index-cards.html" class="view-toggle">🎴 Vue Cartes</a>
+            <div class="view-toggles">
+                <a href="index-cards.html" class="view-toggle">🎴 Vue Cartes</a>
+                <a href="index-map.html" class="view-toggle">🗺️ Vue Carte</a>
+            </div>
             <h1>🧠 Apprentissage Machine</h1>
             <p class="subtitle">Applications interactives pour comprendre le ML historique et moderne</p>
         </header>
