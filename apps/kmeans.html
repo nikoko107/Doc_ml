@@ -533,7 +533,7 @@
 
             // Draw Voronoi regions if centroids exist
             if (centroids.length > 0) {
-                const resolution = 20;
+                const resolution = 10; // Reduced from 20 for better precision
                 for (let i = 0; i < canvas.width; i += resolution) {
                     for (let j = 0; j < canvas.height; j += resolution) {
                         let minDist = Infinity;
@@ -547,7 +547,8 @@
                             }
                         }
 
-                        ctx.fillStyle = colors[closestCentroid] + '20';
+                        // Increased opacity from '20' to '60' for better visibility
+                        ctx.fillStyle = colors[closestCentroid % colors.length] + '60';
                         ctx.fillRect(i, j, resolution, resolution);
                     }
                 }
