@@ -48,6 +48,130 @@
         .slider-container label { font-weight: bold; color: #333; display: block; margin-bottom: 5px; }
         .slider-container input { width: 100%; }
         .slider-value { text-align: center; font-weight: bold; color: #667eea; margin-top: 3px; }
+
+        .swot-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .swot-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid;
+        }
+
+        .swot-box h4 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .swot-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .swot-box li {
+            padding: 8px 0;
+            line-height: 1.6;
+            color: #555;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .swot-box li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .swot-avantages {
+            border-left-color: #2ecc71;
+        }
+
+        .swot-avantages h4 {
+            color: #2ecc71;
+        }
+
+        .swot-limites {
+            border-left-color: #e74c3c;
+        }
+
+        .swot-limites h4 {
+            color: #e74c3c;
+        }
+
+        .swot-usages {
+            border-left-color: #3498db;
+        }
+
+        .swot-usages h4 {
+            color: #3498db;
+        }
+
+        .swot-pieges {
+            border-left-color: #f39c12;
+        }
+
+        .swot-pieges h4 {
+            color: #f39c12;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                max-width: 600px;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            canvas {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .swot-container {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .work-area, .controls, .explanation {
+                padding: 15px;
+            }
+
+            .stat-card .value {
+                font-size: 1.4em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -200,6 +324,64 @@ où:
                 • Systèmes de recommandation: Personnalisation dynamique<br>
                 • Énergie: Gestion smart grid, optimisation consommation
             </p>
+
+            <h3 style="margin-top: 30px;">📊 Analyse SWOT - Q-Learning (RL)</h3>
+            <div class="swot-container">
+                <div class="swot-box swot-avantages">
+                    <h4>✅ Avantages</h4>
+                    <ul>
+                        <li><strong>Model-free:</strong> Pas besoin de modèle de l'environnement</li>
+                        <li><strong>Off-policy:</strong> Peut apprendre à partir de données anciennes</li>
+                        <li><strong>Convergence garantie</strong> sous certaines conditions (α décroissant, exploration infinie)</li>
+                        <li>Simple à implémenter pour espaces discrets</li>
+                        <li>Pas besoin de différentiabilité (boîte noire)</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box swot-limites">
+                    <h4>⚠️ Limites</h4>
+                    <ul>
+                        <li><strong>Curse of dimensionality:</strong> Table Q explose si espace d'états grand</li>
+                        <li>Exploration très lente au début (besoin de beaucoup d'épisodes)</li>
+                        <li>Convergence très lente sur problèmes complexes</li>
+                        <li><strong>Discret uniquement:</strong> Difficile avec états/actions continus</li>
+                        <li>Pas de généralisation entre états similaires (sauf DQN)</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box swot-usages">
+                    <h4>🎯 Cas d'Usage</h4>
+                    <ul>
+                        <li><strong>Jeux:</strong> Go, Chess, Atari (avec Deep Q-Learning)</li>
+                        <li><strong>Robotique:</strong> Navigation, contrôle moteur</li>
+                        <li><strong>Trading:</strong> Décisions d'achat/vente automatisées</li>
+                        <li><strong>Optimisation ressources:</strong> Allocation dynamique</li>
+                        <li><strong>Recommandation:</strong> Personnalisation adaptative</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box swot-pieges">
+                    <h4>🚨 Pièges à Éviter</h4>
+                    <ul>
+                        <li><strong>Epsilon fixe:</strong> ε devrait décroître (ε-decay) pour converger</li>
+                        <li><strong>Learning rate constant:</strong> α devrait diminuer au fil du temps</li>
+                        <li><strong>Discount γ mal choisi:</strong> Trop haut = instable, trop bas = myope</li>
+                        <li><strong>Table Q trop grande:</strong> Utiliser binning ou Deep Q-Learning</li>
+                        <li><strong>Pas assez d'exploration:</strong> Converge vers sous-optimal</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 15px;">🚀 Évolutions Modernes de Q-Learning</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Deep Q-Network (DQN):</strong> Q-table remplacée par réseau de neurones (DeepMind 2015)</li>
+                    <li><strong>Double DQN:</strong> Réduit biais de surestimation des Q-values</li>
+                    <li><strong>Dueling DQN:</strong> Sépare value function et advantage function</li>
+                    <li><strong>Prioritized Experience Replay:</strong> Rejoue transitions importantes plus souvent</li>
+                    <li><strong>Rainbow DQN:</strong> Combine toutes les améliorations (state-of-the-art)</li>
+                </ul>
+            </div>
         </div>
     </div>
     <script>

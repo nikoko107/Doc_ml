@@ -775,6 +775,51 @@
                     </tbody>
                 </table>
             </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 15px;">✅ Avantages</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Contrôle créativité vs cohérence:</strong> Temperature = dial précis pour ajuster randomness</li>
+                    <li><strong>Beam search = traduction qualité:</strong> BLEU scores supérieurs au greedy</li>
+                    <li><strong>Temperature = génération créative:</strong> Brainstorming, storytelling, variations multiples</li>
+                    <li><strong>Combinaison possible:</strong> Top-p + temperature = meilleur des deux mondes</li>
+                    <li><strong>Pas de réentraînement:</strong> Simple hyperparamètre à ajuster</li>
+                </ul>
+            </div>
+
+            <div style="background: #ffebee; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e53935;">
+                <h3 style="color: #c62828; margin-bottom: 15px;">⚠️ Limites</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Beam search coûteux:</strong> k=5 → 5× plus lent. Pas viable pour génération longue</li>
+                    <li><strong>Repetition_penalty nécessaire:</strong> Beam tend à répéter. Ajouter penalty sur n-grams</li>
+                    <li><strong>Top_k/top_p + temperature:</strong> Interactions complexes. Tester combinaisons empiriquement</li>
+                    <li><strong>Pas de garantie qualité:</strong> T=0.8 peut générer du non-sens si contexte manque</li>
+                    <li><strong>Beam search = moins diversité:</strong> k beams convergent souvent vers solutions similaires</li>
+                </ul>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #ff9800;">
+                <h3 style="color: #e65100; margin-bottom: 15px;">💼 Cas d'Usage Production</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Traduction (beam k=4-5):</strong> Google Translate, DeepL pour qualité optimale</li>
+                    <li><strong>Chat (temperature 0.7):</strong> ChatGPT, Claude pour équilibre cohérence/créativité</li>
+                    <li><strong>Brainstorming (temp 1.2-1.5):</strong> Génération idées, variations créatives</li>
+                    <li><strong>Code (temp 0-0.2):</strong> GitHub Copilot, déterministe pour code production</li>
+                    <li><strong>Résumé (beam k=3):</strong> Abstractive summarization pour qualité</li>
+                </ul>
+            </div>
+
+            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e91e63;">
+                <h3 style="color: #c2185b; margin-bottom: 15px;">🚨 Pièges à Éviter</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Temperature 0 = déterministe mais boring:</strong> Répond toujours pareil. Ok pour facts, mauvais pour chat</li>
+                    <li><strong>Temp > 1.5 = incohérent:</strong> Phrases qui n'ont pas de sens, hallucinations massives</li>
+                    <li><strong>Beam trop large (k>10):</strong> Coût prohibitif, gains marginaux vs k=5</li>
+                    <li><strong>Oublier length_penalty (beam):</strong> Biais vers séquences courtes. Ajouter length normalization</li>
+                    <li><strong>Top-p=1.0 + temp=1.0:</strong> Configuration par défaut souvent sous-optimale. Tester top-p=0.9</li>
+                    <li><strong>Ne pas logger les params:</strong> Reproduire résultats impossible sans seed + temperature + top-p</li>
+                </ul>
+            </div>
         </div>
     </div>
 

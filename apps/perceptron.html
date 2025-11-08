@@ -30,7 +30,7 @@
         }
 
         h1 {
-            font-size: 2.5em;
+            font-size: clamp(1.8em, 5vw, 2.5em);
             margin-bottom: 10px;
         }
 
@@ -42,6 +42,10 @@
             text-decoration: none;
             border-radius: 20px;
             margin-bottom: 20px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .main-content {
@@ -63,6 +67,8 @@
             cursor: crosshair;
             display: block;
             margin: 0 auto;
+            max-width: 100%;
+            height: auto;
         }
 
         .controls {
@@ -130,10 +136,11 @@
             margin-bottom: 10px;
             border: none;
             border-radius: 8px;
-            font-size: 1em;
+            font-size: clamp(0.9em, 2vw, 1em);
             cursor: pointer;
             font-weight: bold;
             transition: opacity 0.3s;
+            min-height: 44px;
         }
 
         button:hover {
@@ -187,6 +194,174 @@
             margin-bottom: 15px;
             font-weight: bold;
         }
+
+        .help-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 14px;
+            cursor: help;
+            margin-left: 8px;
+            position: relative;
+        }
+
+        .help-icon:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            white-space: nowrap;
+            font-size: 12px;
+            z-index: 1000;
+            font-weight: normal;
+        }
+
+        .definitions {
+            background: #e8f4f8;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .definitions h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .definitions dl {
+            margin: 0;
+        }
+
+        .definitions dt {
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 12px;
+            margin-bottom: 5px;
+        }
+
+        .definitions dd {
+            margin-left: 0;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .swot-analysis {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .swot-analysis h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: clamp(1.1em, 3vw, 1.3em);
+        }
+
+        .swot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .swot-box {
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid;
+        }
+
+        .swot-box h4 {
+            margin-bottom: 15px;
+            font-size: clamp(1em, 2.5vw, 1.1em);
+        }
+
+        .swot-box ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .swot-box li {
+            margin-bottom: 8px;
+            font-size: clamp(0.9em, 2vw, 0.95em);
+        }
+
+        .advantages {
+            background: #e8f5e9;
+            border-color: #2ecc71;
+        }
+
+        .disadvantages {
+            background: #ffebee;
+            border-color: #e74c3c;
+        }
+
+        .use-cases {
+            background: #e3f2fd;
+            border-color: #3498db;
+        }
+
+        .pitfalls {
+            background: #fff3e0;
+            border-color: #f39c12;
+        }
+
+        .how-it-works {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+
+        .how-it-works h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .how-it-works ol {
+            margin: 15px 0 0 25px;
+            line-height: 2;
+        }
+
+        .how-it-works li {
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            body {
+                padding: 10px;
+            }
+
+            .controls, .canvas-container, .explanation {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 1.5em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -199,7 +374,11 @@
 
         <div class="main-content">
             <div class="canvas-container">
-                <canvas id="canvas" width="800" height="600"></canvas>
+                <h3 style="color: #667eea; margin-bottom: 15px;">
+                    Classification Interactive
+                    <span class="help-icon" data-tooltip="Cliquez pour ajouter des points de chaque classe">?</span>
+                </h3>
+                <canvas id="canvas"></canvas>
             </div>
 
             <div class="controls">
@@ -236,7 +415,42 @@
                     <input type="range" id="learningRate" min="0.01" max="1" step="0.01" value="0.1" style="width: 100%;">
                     <p style="text-align: center;" id="lrValue">0.1</p>
                 </div>
+
+                <div style="margin-top: 20px; padding: 15px; background: #e8f4f8; border-radius: 8px;">
+                    <p style="font-size: 0.9em; line-height: 1.6;">
+                        <strong>Comment ça marche:</strong><br>
+                        1. Sélectionnez une classe (Rouge ou Bleu)<br>
+                        2. Cliquez sur le canvas pour ajouter des points<br>
+                        3. Ajoutez au moins 3 points de chaque classe<br>
+                        4. Cliquez sur "Entraîner" pour voir le perceptron apprendre<br>
+                        5. La ligne bleue est la frontière de décision<br><br>
+                        <strong>Astuce:</strong> Le cercle vert = bonne classification, rouge = erreur !
+                    </p>
+                </div>
             </div>
+        </div>
+
+        <div class="definitions">
+            <h4>📚 Définitions Clés - Perceptron</h4>
+            <dl>
+                <dt>Neurone Formel</dt>
+                <dd>Modèle mathématique inspiré des neurones biologiques. Prend plusieurs entrées, les combine avec des poids, et produit une sortie via une fonction d'activation.</dd>
+
+                <dt>Poids (Weights)</dt>
+                <dd>Paramètres du modèle qui déterminent l'importance de chaque entrée. Le perceptron ajuste ces poids pendant l'apprentissage pour améliorer ses prédictions.</dd>
+
+                <dt>Biais (Bias)</dt>
+                <dd>Terme constant ajouté à la somme pondérée. Permet au perceptron de déplacer la frontière de décision sans dépendre uniquement des entrées.</dd>
+
+                <dt>Fonction d'Activation</dt>
+                <dd>Fonction qui transforme la somme pondérée en sortie finale. Pour le perceptron classique, c'est la fonction signe (positif → classe 1, négatif → classe 0).</dd>
+
+                <dt>Classification Linéaire</dt>
+                <dd>Méthode qui sépare deux classes par une ligne droite (ou un hyperplan en dimension supérieure). Le perceptron ne peut résoudre que des problèmes linéairement séparables.</dd>
+
+                <dt>Taux d'Apprentissage</dt>
+                <dd>Paramètre qui contrôle la taille des ajustements des poids à chaque erreur. Taux élevé = apprentissage rapide mais instable, taux faible = apprentissage lent mais stable.</dd>
+            </dl>
         </div>
 
         <div class="explanation">
@@ -264,11 +478,90 @@
                 (XOR problem, Minsky & Papert, 1969). C'est pourquoi les réseaux multicouches ont été développés plus tard.
             </p>
         </div>
+
+        <div class="swot-analysis">
+            <h3>📊 Analyse : Quand utiliser le perceptron ?</h3>
+
+            <div class="swot-grid">
+                <div class="swot-box advantages">
+                    <h4>✅ Avantages</h4>
+                    <ul>
+                        <li><strong>Historique fondamental</strong> : Première démonstration d'apprentissage automatique (1958)</li>
+                        <li><strong>Extrêmement simple</strong> : Quelques lignes de code, facile à comprendre et enseigner</li>
+                        <li><strong>Efficace pour classification binaire</strong> : Rapide et fiable si données linéairement séparables</li>
+                        <li><strong>Apprentissage en ligne</strong> : Peut s'entraîner point par point (streaming data)</li>
+                        <li><strong>Pas d'hyperparamètres complexes</strong> : Juste le learning rate à ajuster</li>
+                        <li><strong>Interprétabilité totale</strong> : Poids = importance de chaque feature</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box disadvantages">
+                    <h4>❌ Inconvénients & Limites</h4>
+                    <ul>
+                        <li><strong>Uniquement séparation linéaire</strong> : Ne peut pas résoudre XOR ni problèmes non-linéaires</li>
+                        <li><strong>Limitation XOR</strong> : Problème célèbre qui a freiné l'IA pendant 10 ans (1969-1980s)</li>
+                        <li><strong>Classification binaire uniquement</strong> : Une seule classe vs une autre (pas multi-classes directement)</li>
+                        <li><strong>Sensible au bruit</strong> : Outliers peuvent fortement impacter la frontière de décision</li>
+                        <li><strong>Pas de garantie de convergence</strong> : Si données non linéairement séparables, oscille indéfiniment</li>
+                        <li><strong>Obsolète en production</strong> : Remplacé par SVM, réseaux multicouches, logistic regression</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box use-cases">
+                    <h4>💡 Cas d'usage recommandés</h4>
+                    <ul>
+                        <li><strong>Enseignement</strong> : Parfait pour comprendre les concepts de neurone, poids, apprentissage</li>
+                        <li><strong>Prototypage rapide</strong> : Tester rapidement si problème linéairement séparable</li>
+                        <li><strong>Classification binaire simple</strong> : Si certitude que données linéairement séparables</li>
+                        <li><strong>Baseline historique</strong> : Comparer avec modèles plus sophistiqués</li>
+                        <li><strong>Apprentissage incrémental</strong> : Streaming data avec mise à jour en temps réel</li>
+                        <li><strong>Ressources ultra-limitées</strong> : IoT, systèmes embarqués (très peu de mémoire/calcul)</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box pitfalls">
+                    <h4>⚠️ Pièges à éviter</h4>
+                    <ul>
+                        <li><strong>Utiliser sur données non-linéaires</strong> : Vérifier d'abord si linéairement séparable (plot 2D)</li>
+                        <li><strong>Problème XOR</strong> : Ne JAMAIS attendre que le perceptron résolve XOR (impossible)</li>
+                        <li><strong>Pas de régularisation</strong> : Peut overfitter si features nombreuses vs peu de points</li>
+                        <li><strong>Learning rate mal choisi</strong> : Trop grand = instabilité, trop petit = lenteur</li>
+                        <li><strong>Entraînement sans limite</strong> : Toujours limiter nombre d'époques (convergence pas garantie)</li>
+                        <li><strong>Ignorer alternatives modernes</strong> : En production, privilégier SVM, logistic regression, ou MLP</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-top: 25px; border-left: 5px solid #f39c12;">
+                <h4 style="color: #e65100; margin-bottom: 10px;">📜 Importance Historique : Le "Winter" de l'IA</h4>
+                <p style="color: #e65100; line-height: 1.8;">
+                    <strong>1958-1969 :</strong> Euphorie - Le perceptron semble révolutionnaire<br>
+                    <strong>1969 :</strong> Minsky & Papert publient "Perceptrons" - démontrent l'impossibilité de résoudre XOR<br>
+                    <strong>1970-1986 :</strong> "AI Winter" - Financement et recherche s'effondrent<br>
+                    <strong>1986 :</strong> Renaissance avec backpropagation et réseaux multicouches (MLP)
+                </p>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 25px; border-left: 5px solid #2ecc71;">
+                <h4 style="color: #1b5e20; margin-bottom: 10px;">🎯 En 2025 : Quand utiliser ?</h4>
+                <p style="color: #2e7d32; line-height: 1.8; margin-bottom: 10px;"><strong>N'utilisez le perceptron QUE pour :</strong></p>
+                <ul style="color: #2e7d32; line-height: 1.8; margin-left: 25px;">
+                    <li>✓ Enseigner les concepts fondamentaux de ML</li>
+                    <li>✓ Tester rapidement si problème linéairement séparable</li>
+                    <li>✓ Systèmes embarqués ultra-contraints (microcontrôleurs)</li>
+                </ul>
+                <p style="color: #c62828; line-height: 1.8; margin-top: 15px; margin-bottom: 10px;"><strong>En production, préférez :</strong></p>
+                <ul style="color: #c62828; line-height: 1.8; margin-left: 25px;">
+                    <li><strong>Régression Logistique</strong> : Version probabiliste du perceptron</li>
+                    <li><strong>SVM (Support Vector Machine)</strong> : Séparation linéaire optimale avec kernel trick</li>
+                    <li><strong>MLP (Multi-Layer Perceptron)</strong> : Résout les problèmes non-linéaires</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+        let canvas, ctx, canvasWidth, canvasHeight;
         const points = [];
         let selectedClass = 0;
         let w1 = Math.random() - 0.5;
@@ -277,10 +570,36 @@
         let learningRate = 0.1;
         let epochs = 0;
 
-        document.getElementById('learningRate').addEventListener('input', (e) => {
-            learningRate = parseFloat(e.target.value);
-            document.getElementById('lrValue').textContent = learningRate.toFixed(2);
-        });
+        function initCanvas() {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Event listeners
+            canvas.addEventListener('click', handleCanvasClick);
+        }
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const containerWidth = container.clientWidth - 40;
+            canvasWidth = Math.min(containerWidth, 900);
+            canvasHeight = Math.floor(canvasWidth * 0.65);
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            canvas.style.width = canvasWidth + 'px';
+            canvas.style.height = canvasHeight + 'px';
+            draw();
+        }
+
+        function handleCanvasClick(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / canvas.width;
+            const y = (e.clientY - rect.top) / canvas.height;
+            points.push({x, y, class: selectedClass});
+            draw();
+            updateInfo();
+        }
 
         function selectClass(classIndex) {
             selectedClass = classIndex;
@@ -288,15 +607,6 @@
                 btn.classList.toggle('active', idx === classIndex);
             });
         }
-
-        canvas.addEventListener('click', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / canvas.width;
-            const y = (e.clientY - rect.top) / canvas.height;
-            points.push({x, y, class: selectedClass});
-            draw();
-            updateInfo();
-        });
 
         function train() {
             if (points.length === 0) return;
@@ -424,8 +734,14 @@
             document.getElementById('epochs').textContent = epochs;
         }
 
-        // Initial draw
-        draw();
+        // Initialize
+        initCanvas();
+
+        document.getElementById('learningRate').addEventListener('input', (e) => {
+            learningRate = parseFloat(e.target.value);
+            document.getElementById('lrValue').textContent = learningRate.toFixed(2);
+        });
+
         updateInfo();
     </script>
 </body>

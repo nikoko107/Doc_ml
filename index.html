@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apprentissage Machine - Applications Interactives</title>
+    <title>Formation Machine Learning - Apprentissage Machine Interactif</title>
     <style>
         * {
             margin: 0;
@@ -15,149 +15,310 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 0;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            color: white;
-            margin-bottom: 50px;
-            position: relative;
-        }
-
-        .view-toggles {
-            position: absolute;
-            top: 0;
-            right: 0;
+        /* Header avec navigation */
+        .top-header {
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
             gap: 10px;
         }
 
-        .view-toggle {
-            background: white;
+        .nav-menu {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.9);
             color: #667eea;
             padding: 10px 20px;
             border-radius: 25px;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 0.9em;
             transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            white-space: nowrap;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: white;
         }
 
-        .view-toggle:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        .nav-btn.primary {
+            background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
+            color: white;
+            animation: pulse 2s infinite;
         }
 
-        h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+            50% { box-shadow: 0 4px 20px rgba(243, 156, 18, 0.6); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2em, 5vw, 3.5em);
+            margin-bottom: 15px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.2;
         }
 
-        .subtitle {
-            font-size: 1.2em;
+        .hero .subtitle {
+            font-size: clamp(1em, 2.5vw, 1.3em);
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto 20px;
+            line-height: 1.6;
+        }
+
+        .hero .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            border-radius: 15px;
+            min-width: 150px;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
             opacity: 0.9;
         }
 
-        .apps-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
+        /* Info Box Distinctive */
+        .info-box-main {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .info-box-main h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-box-main p {
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .info-box-main strong {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+
+        /* Categories avec design amélioré */
+        .category {
             margin-bottom: 50px;
         }
 
-        .category {
-            margin-bottom: 40px;
+        .category-header {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            border-radius: 15px 15px 0 0;
+            margin-bottom: 0;
         }
 
         .category-title {
             color: white;
-            font-size: 2em;
-            margin-bottom: 20px;
-            text-align: center;
+            font-size: clamp(1.5em, 3vw, 2em);
+            margin: 0;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .category-description {
+            color: rgba(255,255,255,0.9);
+            margin-top: 10px;
+            font-size: 1.05em;
+            line-height: 1.6;
+        }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            padding: 25px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 0 0 15px 15px;
         }
 
         .app-card {
             background: white;
             border-radius: 15px;
-            padding: 30px;
+            padding: 25px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: all 0.3s;
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
         .app-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
             box-shadow: 0 15px 40px rgba(0,0,0,0.4);
         }
 
-        .app-card h3 {
-            color: #667eea;
-            font-size: 1.5em;
-            margin-bottom: 15px;
-        }
-
-        .app-card p {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 20px;
+        .app-card:hover::before {
+            opacity: 1;
         }
 
         .app-card .badge {
             display: inline-block;
-            padding: 5px 15px;
+            padding: 6px 15px;
             border-radius: 20px;
-            font-size: 0.85em;
+            font-size: 0.8em;
             font-weight: bold;
             margin-bottom: 15px;
+            align-self: flex-start;
         }
 
         .badge-historical {
-            background: #ffd93d;
+            background: linear-gradient(135deg, #ffd93d 0%, #f9ca24 100%);
             color: #333;
         }
 
         .badge-modern {
-            background: #6bcf7f;
+            background: linear-gradient(135deg, #6bcf7f 0%, #2ecc71 100%);
             color: white;
         }
 
         .badge-fundamental {
-            background: #ff6b6b;
+            background: linear-gradient(135deg, #ff6b6b 0%, #e74c3c 100%);
             color: white;
         }
 
         .badge-advanced {
-            background: #9b59b6;
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
             color: white;
         }
 
         .badge-evaluation {
-            background: #3498db;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
             color: white;
         }
 
         .badge-ensemble {
-            background: #e67e22;
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
             color: white;
         }
 
         .badge-rl {
-            background: #1abc9c;
+            background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
             color: white;
         }
 
         .badge-architecture {
-            background: #34495e;
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
             color: white;
+        }
+
+        .app-card h3 {
+            color: #667eea;
+            font-size: 1.3em;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .app-card p {
+            color: #666;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            flex-grow: 1;
+            font-size: 0.95em;
+        }
+
+        .app-features {
+            list-style: none;
+            margin: 15px 0;
+            padding: 0;
+        }
+
+        .app-features li {
+            padding: 5px 0;
+            color: #555;
+            font-size: 0.85em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .app-features li::before {
+            content: '✓';
+            color: #2ecc71;
+            font-weight: bold;
+            font-size: 1.2em;
         }
 
         .btn {
@@ -167,316 +328,549 @@
             color: white;
             text-decoration: none;
             border-radius: 25px;
-            font-weight: bold;
-            transition: opacity 0.3s;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
         .btn:hover {
-            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
         }
 
         footer {
             text-align: center;
             color: white;
-            padding: 20px;
-            opacity: 0.8;
+            padding: 40px 20px;
+            background: rgba(0,0,0,0.2);
+            margin-top: 50px;
+        }
+
+        footer p {
+            line-height: 1.8;
+            opacity: 0.9;
         }
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
+            .top-header {
+                flex-direction: column;
+                text-align: center;
             }
 
-            header {
-                margin-bottom: 30px;
-                padding-top: 60px;
-            }
-
-            .view-toggles {
-                position: static;
+            .nav-menu {
                 justify-content: center;
-                margin-bottom: 20px;
-                flex-wrap: wrap;
+                width: 100%;
             }
 
-            .view-toggle {
-                padding: 8px 15px;
-                font-size: 0.85em;
+            .hero {
+                padding: 30px 15px;
             }
 
-            h1 {
+            .hero .stats {
+                gap: 15px;
+            }
+
+            .stat-card {
+                min-width: 120px;
+                padding: 15px 20px;
+            }
+
+            .stat-number {
                 font-size: 2em;
-            }
-
-            .subtitle {
-                font-size: 1em;
-                padding: 0 10px;
-            }
-
-            .category-title {
-                font-size: 1.5em;
             }
 
             .apps-grid {
                 grid-template-columns: 1fr;
-                gap: 20px;
+                padding: 15px;
+            }
+
+            .category-header {
+                padding: 15px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-btn {
+                padding: 8px 15px;
+                font-size: 0.85em;
+            }
+
+            .stat-card {
+                min-width: 100px;
+                padding: 12px 15px;
+            }
+
+            .stat-number {
+                font-size: 1.7em;
+            }
+
+            .stat-label {
+                font-size: 0.8em;
             }
 
             .app-card {
                 padding: 20px;
             }
+        }
 
-            .app-card h3 {
-                font-size: 1.3em;
+        /* Animation d'entrée */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 1.5em;
-            }
-
-            .subtitle {
-                font-size: 0.9em;
-            }
-
-            .category-title {
-                font-size: 1.3em;
-            }
-
-            .app-card {
-                padding: 15px;
-            }
-
-            .view-toggle {
-                padding: 6px 12px;
-                font-size: 0.8em;
-            }
+        .category {
+            animation: fadeInUp 0.6s ease-out backwards;
         }
+
+        .category:nth-child(1) { animation-delay: 0.1s; }
+        .category:nth-child(2) { animation-delay: 0.2s; }
+        .category:nth-child(3) { animation-delay: 0.3s; }
+        .category:nth-child(4) { animation-delay: 0.4s; }
+        .category:nth-child(5) { animation-delay: 0.5s; }
     </style>
 </head>
 <body>
+    <div class="top-header">
+        <div class="logo">
+            🧠 Formation Machine Learning
+        </div>
+        <nav class="nav-menu">
+            <a href="guide-formation.html" class="nav-btn primary">📚 Guide de Formation</a>
+            <a href="index-cards.html" class="nav-btn">🎴 Vue Cartes</a>
+            <a href="index-map.html" class="nav-btn">🗺️ Carte Conceptuelle</a>
+        </nav>
+    </div>
+
     <div class="container">
-        <header>
-            <div class="view-toggles">
-                <a href="index-cards.html" class="view-toggle">🎴 Vue Cartes</a>
-                <a href="index-map.html" class="view-toggle">🗺️ Vue Carte</a>
+        <div class="hero">
+            <h1>🧠 Apprentissage Machine Interactif</h1>
+            <p class="subtitle">
+                Support complet pour une formation d'une journée sur le Machine Learning<br>
+                Des fondations historiques aux architectures modernes d'IA
+            </p>
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number">26</span>
+                    <span class="stat-label">Applications</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">8</span>
+                    <span class="stat-label">Catégories</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">1</span>
+                    <span class="stat-label">Journée</span>
+                </div>
             </div>
-            <h1>🧠 Apprentissage Machine</h1>
-            <p class="subtitle">Applications interactives pour comprendre le ML historique et moderne</p>
-        </header>
+        </div>
+
+        <div class="info-box-main">
+            <h2>🎯 À propos de cette formation</h2>
+            <p>
+                <strong>Objectif :</strong> Cette collection d'applications interactives vous permet d'explorer et de comprendre
+                les concepts du Machine Learning, de la régression linéaire (1800s) jusqu'aux Transformers et modèles de diffusion modernes.
+            </p>
+            <p style="margin-top: 12px;">
+                <strong>Format :</strong> Chaque application est <strong>autonome</strong>, <strong>interactive</strong> et contient des
+                <strong>explications détaillées</strong> avec formules mathématiques et visualisations en temps réel.
+                Toutes fonctionnent localement dans votre navigateur, sans serveur requis.
+            </p>
+            <p style="margin-top: 12px;">
+                <strong>💡 Conseil :</strong> Consultez le <a href="guide-formation.html" style="color: white; font-weight: bold; text-decoration: underline;">Guide de Formation</a>
+                pour un parcours pédagogique structuré sur une journée.
+            </p>
+        </div>
 
         <div class="category">
-            <h2 class="category-title">📚 ML Historique - Les Fondations</h2>
+            <div class="category-header">
+                <h2 class="category-title">📚 Partie 1 : ML Historique - Les Fondations</h2>
+                <p class="category-description">
+                    Commencez votre apprentissage avec les algorithmes fondamentaux qui ont posé les bases du ML moderne (1800s-1990s).
+                    Ces méthodes sont toujours utilisées en production aujourd'hui pour leur simplicité et efficacité.
+                </p>
+            </div>
             <div class="apps-grid">
                 <div class="app-card" onclick="window.location.href='apps/linear-regression.html'">
-                    <span class="badge badge-historical">Historique</span>
+                    <span class="badge badge-historical">1800s - Fondation</span>
                     <h3>Régression Linéaire</h3>
-                    <p>Découvrez l'un des premiers algorithmes de ML. Dessinez des points et observez comment l'algorithme trouve la meilleure ligne pour les prédire.</p>
-                    <a href="apps/linear-regression.html" class="btn">Essayer</a>
+                    <p>Le tout premier algorithme de ML. Découvrez comment prédire une valeur à partir de données en trouvant la meilleure droite.</p>
+                    <ul class="app-features">
+                        <li>Descente de gradient animée</li>
+                        <li>Comparaison MSE vs MAE</li>
+                        <li>Formules analytiques détaillées</li>
+                        <li>Gestion des outliers</li>
+                    </ul>
+                    <a href="apps/linear-regression.html" class="btn">Découvrir →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/perceptron.html'">
-                    <span class="badge badge-historical">Historique</span>
+                    <span class="badge badge-historical">1958 - Premier neurone</span>
                     <h3>Perceptron</h3>
-                    <p>Le premier réseau de neurones (1958). Apprenez comment un neurone artificiel peut classifier des données en deux catégories.</p>
-                    <a href="apps/perceptron.html" class="btn">Essayer</a>
+                    <p>Le premier réseau de neurones artificiel de l'histoire. Comprenez comment un neurone unique peut classifier des données.</p>
+                    <ul class="app-features">
+                        <li>Classification binaire interactive</li>
+                        <li>Visualisation de la frontière de décision</li>
+                        <li>Apprentissage en temps réel</li>
+                    </ul>
+                    <a href="apps/perceptron.html" class="btn">Découvrir →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/kmeans.html'">
-                    <span class="badge badge-historical">Historique</span>
+                    <span class="badge badge-historical">1957 - Clustering</span>
                     <h3>K-Means Clustering</h3>
-                    <p>Algorithme de clustering non supervisé. Observez comment l'algorithme groupe automatiquement vos données.</p>
-                    <a href="apps/kmeans.html" class="btn">Essayer</a>
+                    <p>Apprentissage non supervisé : laissez l'algorithme découvrir automatiquement les groupes dans vos données.</p>
+                    <ul class="app-features">
+                        <li>Placement interactif des centroïdes</li>
+                        <li>Animation de convergence</li>
+                        <li>Méthode Elbow pour K optimal</li>
+                    </ul>
+                    <a href="apps/kmeans.html" class="btn">Découvrir →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/svm.html'">
-                    <span class="badge badge-historical">Historique</span>
+                    <span class="badge badge-historical">1990s - Marges</span>
                     <h3>SVM - Support Vector Machines</h3>
-                    <p>Marges maximales et kernel trick (Linéaire, RBF, Polynomial). Classification puissante pour données non-linéairement séparables.</p>
-                    <a href="apps/svm.html" class="btn">Essayer</a>
+                    <p>Classification puissante avec marges maximales. Kernels linéaire, RBF et polynomial pour données non-linéaires.</p>
+                    <ul class="app-features">
+                        <li>3 types de kernels</li>
+                        <li>Visualisation des vecteurs de support</li>
+                        <li>Marges et frontières de décision</li>
+                    </ul>
+                    <a href="apps/svm.html" class="btn">Découvrir →</a>
                 </div>
             </div>
         </div>
 
         <div class="category">
-            <h2 class="category-title">🔥 ML Moderne - Concepts Avancés</h2>
+            <div class="category-header">
+                <h2 class="category-title">🔥 Partie 2 : ML Moderne - Réseaux de Neurones</h2>
+                <p class="category-description">
+                    Plongez dans le Deep Learning avec les concepts qui ont révolutionné l'IA : réseaux de neurones,
+                    backpropagation, CNNs. Ces technologies sont au cœur de la reconnaissance d'images et du NLP moderne.
+                </p>
+            </div>
             <div class="apps-grid">
                 <div class="app-card" onclick="window.location.href='apps/neural-network.html'">
-                    <span class="badge badge-modern">Moderne</span>
-                    <h3>Réseau de Neurones</h3>
-                    <p>Visualisez un réseau de neurones multicouche en action. Ajustez les paramètres et observez l'apprentissage en temps réel.</p>
-                    <a href="apps/neural-network.html" class="btn">Essayer</a>
+                    <span class="badge badge-modern">Deep Learning</span>
+                    <h3>Réseau de Neurones Multicouche</h3>
+                    <p>Visualisez un réseau de neurones complet en action. Ajustez la structure, voyez l'apprentissage se faire en temps réel.</p>
+                    <ul class="app-features">
+                        <li>Architecture personnalisable</li>
+                        <li>Activations (ReLU, Sigmoid, Tanh)</li>
+                        <li>Visualisation des poids</li>
+                    </ul>
+                    <a href="apps/neural-network.html" class="btn">Découvrir →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/gradient-descent.html'">
                     <span class="badge badge-fundamental">Fondamental</span>
                     <h3>Descente de Gradient</h3>
-                    <p>Comprenez le coeur de l'apprentissage profond. Visualisez comment un algorithme trouve le minimum d'une fonction.</p>
-                    <a href="apps/gradient-descent.html" class="btn">Essayer</a>
+                    <p>Le cœur de tout apprentissage. Visualisez comment un algorithme trouve le minimum d'une fonction en descendant la pente.</p>
+                    <ul class="app-features">
+                        <li>4 fonctions de coût différentes</li>
+                        <li>Visualisation 3D interactive</li>
+                        <li>Contrôle du learning rate</li>
+                        <li>Affichage du chemin complet</li>
+                    </ul>
+                    <a href="apps/gradient-descent.html" class="btn">Découvrir →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/backpropagation.html'">
-                    <span class="badge badge-modern">Moderne</span>
+                    <span class="badge badge-modern">Apprentissage</span>
                     <h3>Backpropagation</h3>
-                    <p>Découvrez comment les réseaux de neurones apprennent. Visualisez la propagation des erreurs à travers le réseau.</p>
-                    <a href="apps/backpropagation.html" class="btn">Essayer</a>
+                    <p>Découvrez comment les réseaux de neurones apprennent vraiment. Suivez la propagation de l'erreur couche par couche.</p>
+                    <ul class="app-features">
+                        <li>Propagation avant (forward)</li>
+                        <li>Propagation arrière (backward)</li>
+                        <li>Mise à jour des poids</li>
+                    </ul>
+                    <a href="apps/backpropagation.html" class="btn">Découvrir →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/cnn.html'">
-                    <span class="badge badge-modern">Moderne</span>
+                    <span class="badge badge-modern">Vision</span>
                     <h3>CNN - Réseaux Convolutifs</h3>
-                    <p>Découvrez comment les CNN révolutionnent la vision par ordinateur. Dessinez et observez les filtres de convolution détecter les caractéristiques.</p>
-                    <a href="apps/cnn.html" class="btn">Essayer</a>
+                    <p>La révolution de la vision par ordinateur. Dessinez et observez les filtres de convolution extraire les caractéristiques.</p>
+                    <ul class="app-features">
+                        <li>Convolution 2D interactive</li>
+                        <li>Pooling (Max, Average)</li>
+                        <li>Détection de contours</li>
+                    </ul>
+                    <a href="apps/cnn.html" class="btn">Découvrir →</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/deep-learning-training.html'">
+                    <span class="badge badge-architecture">Cycle complet</span>
+                    <h3>Entraînement de Réseau Profond</h3>
+                    <p>Animation complète d'un cycle d'entraînement : forward pass, calcul de loss, backprop et mise à jour des poids.</p>
+                    <ul class="app-features">
+                        <li>4 étapes détaillées</li>
+                        <li>Visualisation des gradients</li>
+                        <li>Optimiseurs (SGD, Adam)</li>
+                    </ul>
+                    <a href="apps/deep-learning-training.html" class="btn">Voir l'animation →</a>
                 </div>
             </div>
         </div>
 
         <div class="category">
-            <h2 class="category-title">📝 NLP - Traitement de Texte</h2>
+            <div class="category-header">
+                <h2 class="category-title">📝 Partie 3 : NLP - Traitement du Langage</h2>
+                <p class="category-description">
+                    Du texte simple aux embeddings vectoriels : découvrez comment les ordinateurs comprennent et traitent le langage humain.
+                    De One-Hot Encoding aux Word Embeddings modernes.
+                </p>
+            </div>
             <div class="apps-grid">
                 <div class="app-card" onclick="window.location.href='apps/one-hot-encoding.html'">
-                    <span class="badge badge-historical">Historique</span>
+                    <span class="badge badge-historical">Encodage</span>
                     <h3>One-Hot Encoding</h3>
-                    <p>Transformez des mots en vecteurs binaires. La technique de base pour représenter du texte numériquement en Machine Learning.</p>
-                    <a href="apps/one-hot-encoding.html" class="btn">Essayer</a>
+                    <p>La technique de base pour transformer des mots en vecteurs binaires. Fondamental mais limité.</p>
+                    <ul class="app-features">
+                        <li>Transformation mot → vecteur</li>
+                        <li>Visualisation matricielle</li>
+                        <li>Limites expliquées</li>
+                    </ul>
+                    <a href="apps/one-hot-encoding.html" class="btn">Découvrir →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/bag-of-words.html'">
-                    <span class="badge badge-historical">Historique</span>
+                    <span class="badge badge-historical">Fréquence</span>
                     <h3>Bag of Words</h3>
-                    <p>Représentez des documents par la fréquence des mots. Une technique classique de NLP pour la classification de textes.</p>
-                    <a href="apps/bag-of-words.html" class="btn">Essayer</a>
+                    <p>Représentez des documents par la fréquence des mots. Technique classique de classification de textes.</p>
+                    <ul class="app-features">
+                        <li>Comptage de fréquences</li>
+                        <li>Vecteurs de documents</li>
+                        <li>Applications pratiques</li>
+                    </ul>
+                    <a href="apps/bag-of-words.html" class="btn">Découvrir →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/tfidf.html'">
-                    <span class="badge badge-modern">Moderne</span>
+                    <span class="badge badge-modern">Importance</span>
                     <h3>TF-IDF</h3>
-                    <p>Identifiez les mots importants dans vos documents. Utilisé par les moteurs de recherche et systèmes de recommandation.</p>
-                    <a href="apps/tfidf.html" class="btn">Essayer</a>
+                    <p>Identifiez les mots vraiment importants dans vos documents. Utilisé par Google et les systèmes de recherche.</p>
+                    <ul class="app-features">
+                        <li>Term Frequency</li>
+                        <li>Inverse Document Frequency</li>
+                        <li>Pondération intelligente</li>
+                    </ul>
+                    <a href="apps/tfidf.html" class="btn">Découvrir →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/embeddings-animation.html'">
-                    <span class="badge badge-modern">Moderne</span>
+                    <span class="badge badge-modern">Sémantique</span>
                     <h3>Word Embeddings</h3>
-                    <p>Animation montrant l'analogie vectorielle Roi - Homme + Femme ≈ Reine. Visualisez comment les embeddings capturent les relations sémantiques.</p>
-                    <a href="apps/embeddings-animation.html" class="btn">Voir l'animation</a>
+                    <p>Animation de l'analogie célèbre : Roi - Homme + Femme ≈ Reine. Les mots deviennent des vecteurs avec du sens.</p>
+                    <ul class="app-features">
+                        <li>Arithmétique vectorielle</li>
+                        <li>Espace sémantique 2D/3D</li>
+                        <li>Relations entre mots</li>
+                    </ul>
+                    <a href="apps/embeddings-animation.html" class="btn">Voir l'animation →</a>
                 </div>
             </div>
         </div>
 
         <div class="category">
-            <h2 class="category-title">🎯 Évaluation & Algorithmes Avancés</h2>
+            <div class="category-header">
+                <h2 class="category-title">🎯 Partie 4 : Évaluation & Algorithmes Avancés</h2>
+                <p class="category-description">
+                    Apprenez à évaluer correctement vos modèles et découvrez des algorithmes plus avancés :
+                    ensemble learning, algorithmes génétiques, reinforcement learning.
+                </p>
+            </div>
             <div class="apps-grid">
                 <div class="app-card" onclick="window.location.href='apps/metrics-evaluation.html'">
-                    <span class="badge badge-evaluation">Évaluation</span>
+                    <span class="badge badge-evaluation">Métrique</span>
                     <h3>Métriques & Évaluation</h3>
-                    <p>Matrice de confusion, ROC/AUC, sensibilité aux outliers, classes déséquilibrées. Comprenez comment évaluer vos modèles en entreprise.</p>
-                    <a href="apps/metrics-evaluation.html" class="btn">Essayer</a>
+                    <p>Matrice de confusion, ROC/AUC, classes déséquilibrées, outliers. Apprenez à évaluer vos modèles en production.</p>
+                    <ul class="app-features">
+                        <li>Accuracy, Precision, Recall, F1</li>
+                        <li>Courbe ROC interactive</li>
+                        <li>Cas d'usage réels</li>
+                    </ul>
+                    <a href="apps/metrics-evaluation.html" class="btn">Découvrir →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/data-preprocessing.html'">
-                    <span class="badge badge-evaluation">Prétraitement</span>
+                    <span class="badge badge-evaluation">Préparation</span>
                     <h3>Prétraitement de Données</h3>
-                    <p>Normalisation (Min-Max, Z-Score, Robust), détection d'outliers, gestion des valeurs manquantes. 80% du travail en Data Science.</p>
-                    <a href="apps/data-preprocessing.html" class="btn">Essayer</a>
+                    <p>80% du travail en Data Science ! Normalisation, détection d'outliers, valeurs manquantes.</p>
+                    <ul class="app-features">
+                        <li>Min-Max, Z-Score, Robust Scaling</li>
+                        <li>Détection d'anomalies</li>
+                        <li>Imputation de valeurs</li>
+                    </ul>
+                    <a href="apps/data-preprocessing.html" class="btn">Découvrir →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/random-forest.html'">
                     <span class="badge badge-ensemble">Ensemble</span>
                     <h3>Random Forest</h3>
-                    <p>Forêt d'arbres de décision avec bootstrap sampling. Visualisez l'importance des features et la puissance de l'ensemble learning.</p>
-                    <a href="apps/random-forest.html" class="btn">Essayer</a>
+                    <p>La puissance de l'ensemble learning : combinez plusieurs arbres de décision pour plus de robustesse.</p>
+                    <ul class="app-features">
+                        <li>Bootstrap sampling</li>
+                        <li>Importance des features</li>
+                        <li>Vote majoritaire</li>
+                    </ul>
+                    <a href="apps/random-forest.html" class="btn">Découvrir →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/genetic-algorithm.html'">
                     <span class="badge badge-advanced">Évolutionnaire</span>
                     <h3>Algorithme Génétique</h3>
-                    <p>Optimisation inspirée de l'évolution biologique. Sélection, croisement, mutation. Pas besoin de gradient !</p>
-                    <a href="apps/genetic-algorithm.html" class="btn">Essayer</a>
+                    <p>Optimisation inspirée de la nature : sélection, croisement, mutation. Pas besoin de gradient !</p>
+                    <ul class="app-features">
+                        <li>Population et générations</li>
+                        <li>Fitness et sélection</li>
+                        <li>Convergence évolutive</li>
+                    </ul>
+                    <a href="apps/genetic-algorithm.html" class="btn">Découvrir →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/q-learning.html'">
-                    <span class="badge badge-rl">Reinforcement Learning</span>
+                    <span class="badge badge-rl">RL</span>
                     <h3>Q-Learning</h3>
-                    <p>Apprentissage par renforcement. Regardez un agent apprendre à naviguer dans une grille vers son objectif en évitant les obstacles.</p>
-                    <a href="apps/q-learning.html" class="btn">Essayer</a>
+                    <p>Apprentissage par renforcement : regardez un agent apprendre à naviguer vers son objectif par essai-erreur.</p>
+                    <ul class="app-features">
+                        <li>Table Q interactive</li>
+                        <li>Exploration vs Exploitation</li>
+                        <li>Récompenses et pénalités</li>
+                    </ul>
+                    <a href="apps/q-learning.html" class="btn">Découvrir →</a>
                 </div>
             </div>
         </div>
 
         <div class="category">
-            <h2 class="category-title">🤖 IA Moderne - Architecture & Protocoles</h2>
+            <div class="category-header">
+                <h2 class="category-title">🤖 Partie 5 : IA Moderne - Transformers & LLMs</h2>
+                <p class="category-description">
+                    Les architectures qui ont révolutionné l'IA en 2017-2024 : Transformers, attention, génération de texte,
+                    et les protocoles modernes pour connecter les LLMs.
+                </p>
+            </div>
             <div class="apps-grid">
+                <div class="app-card" onclick="window.location.href='apps/transformers-attention.html'">
+                    <span class="badge badge-architecture">2017 - Révolution</span>
+                    <h3>Transformers & Attention</h3>
+                    <p>Le mécanisme qui a tout changé. Visualisez Query, Key, Value et comment l'attention détecte les relations grammaticales.</p>
+                    <ul class="app-features">
+                        <li>Mécanisme Q·K·V détaillé</li>
+                        <li>Attention scores interactifs</li>
+                        <li>Phrase en français annotée</li>
+                        <li>Multi-head attention</li>
+                    </ul>
+                    <a href="apps/transformers-attention.html" class="btn">Découvrir →</a>
+                </div>
+
+                <div class="app-card" onclick="window.location.href='apps/beam-search-temperature.html'">
+                    <span class="badge badge-architecture">Génération</span>
+                    <h3>Beam Search & Température</h3>
+                    <p>Comparez les stratégies de génération : Greedy, Beam Search, Sampling. Contrôlez la créativité du modèle.</p>
+                    <ul class="app-features">
+                        <li>3 stratégies comparées</li>
+                        <li>Température réglable</li>
+                        <li>Arbre de décision complet</li>
+                    </ul>
+                    <a href="apps/beam-search-temperature.html" class="btn">Découvrir →</a>
+                </div>
+
                 <div class="app-card" onclick="window.location.href='apps/rag-animation.html'">
                     <span class="badge badge-architecture">Architecture</span>
                     <h3>RAG - Retrieval Augmented Generation</h3>
-                    <p>Animation interactive montrant comment les systèmes RAG combinent recherche vectorielle et génération pour produire des réponses contextualisées.</p>
-                    <a href="apps/rag-animation.html" class="btn">Voir l'animation</a>
+                    <p>Comment les LLMs modernes accèdent à des connaissances externes : recherche vectorielle + génération.</p>
+                    <ul class="app-features">
+                        <li>Pipeline complet animé</li>
+                        <li>Embeddings et similarité</li>
+                        <li>Context injection</li>
+                    </ul>
+                    <a href="apps/rag-animation.html" class="btn">Voir l'animation →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/mcp-animation.html'">
                     <span class="badge badge-architecture">Protocole</span>
                     <h3>MCP - Model Context Protocol</h3>
-                    <p>Animation du protocole standardisé pour connecter les modèles IA aux sources de contexte (fichiers, APIs, bases de données).</p>
-                    <a href="apps/mcp-animation.html" class="btn">Voir l'animation</a>
+                    <p>Le standard pour connecter les LLMs aux sources de données : fichiers, APIs, bases de données.</p>
+                    <ul class="app-features">
+                        <li>Architecture client-serveur</li>
+                        <li>Tools et Resources</li>
+                        <li>Prompts dynamiques</li>
+                    </ul>
+                    <a href="apps/mcp-animation.html" class="btn">Voir l'animation →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/prompts-memory-animation.html'">
-                    <span class="badge badge-architecture">Architecture LLM</span>
+                    <span class="badge badge-architecture">LLM</span>
                     <h3>Prompts & Mémoire</h3>
-                    <p>Architecture de contexte dans les LLMs : prompt système (instructions), mémoire (historique), et prompt utilisateur. Visualisez comment tout se combine.</p>
-                    <a href="apps/prompts-memory-animation.html" class="btn">Voir l'animation</a>
+                    <p>Architecture de contexte dans les LLMs : prompt système, historique de conversation, prompt utilisateur.</p>
+                    <ul class="app-features">
+                        <li>3 composants du contexte</li>
+                        <li>Window management</li>
+                        <li>Token counting</li>
+                    </ul>
+                    <a href="apps/prompts-memory-animation.html" class="btn">Voir l'animation →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/lora-animation.html'">
                     <span class="badge badge-architecture">Fine-tuning</span>
                     <h3>LoRA - Low-Rank Adaptation</h3>
-                    <p>Animation montrant l'adaptation efficace des LLM via décomposition matricielle. Visualisez l'entraînement puis la distillation des poids.</p>
-                    <a href="apps/lora-animation.html" class="btn">Voir l'animation</a>
-                </div>
-
-                <div class="app-card" onclick="window.location.href='apps/deep-learning-training.html'">
-                    <span class="badge badge-architecture">Deep Learning</span>
-                    <h3>Entraînement de Réseau de Neurones</h3>
-                    <p>Animation complète d'un cycle d'entraînement : forward pass, calcul de loss, backpropagation et mise à jour des poids avec optimiseur.</p>
-                    <a href="apps/deep-learning-training.html" class="btn">Voir l'animation</a>
-                </div>
-
-                <div class="app-card" onclick="window.location.href='apps/transformers-attention.html'">
-                    <span class="badge badge-architecture">Transformers</span>
-                    <h3>Transformers & Mécanisme d'Attention</h3>
-                    <p>Animation du mécanisme d'attention avec phrase en français. Visualisez Q, K, V et les relations grammaticales détectées (adjectif→nom, verbe→sujet).</p>
-                    <a href="apps/transformers-attention.html" class="btn">Voir l'animation</a>
+                    <p>Adaptez efficacement les LLMs via décomposition matricielle. Visualisez l'entraînement et la distillation.</p>
+                    <ul class="app-features">
+                        <li>Matrices low-rank A et B</li>
+                        <li>Entraînement adaptatif</li>
+                        <li>Merge dans les poids</li>
+                    </ul>
+                    <a href="apps/lora-animation.html" class="btn">Voir l'animation →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/diffusion-models.html'">
                     <span class="badge badge-modern">Génération</span>
                     <h3>Modèles de Diffusion</h3>
-                    <p>Animation du processus de diffusion : ajout de bruit progressif puis débruitage avec U-Net. Visualisez la génération d'images pixel par pixel.</p>
-                    <a href="apps/diffusion-models.html" class="btn">Voir l'animation</a>
-                </div>
-
-                <div class="app-card" onclick="window.location.href='apps/beam-search-temperature.html'">
-                    <span class="badge badge-architecture">Génération de Texte</span>
-                    <h3>Beam Search & Température</h3>
-                    <p>Comparez les stratégies de génération : Greedy, Beam Search (k-best), et Temperature Sampling. Ajustez la température pour contrôler la créativité.</p>
-                    <a href="apps/beam-search-temperature.html" class="btn">Essayer</a>
+                    <p>Comment Stable Diffusion et DALL-E génèrent des images : ajout de bruit progressif puis débruitage avec U-Net.</p>
+                    <ul class="app-features">
+                        <li>Forward diffusion (bruit)</li>
+                        <li>Reverse diffusion (débruitage)</li>
+                        <li>U-Net architecture</li>
+                    </ul>
+                    <a href="apps/diffusion-models.html" class="btn">Voir l'animation →</a>
                 </div>
 
                 <div class="app-card" onclick="window.location.href='apps/graph-neural-networks.html'">
-                    <span class="badge badge-architecture">Graph Learning</span>
+                    <span class="badge badge-architecture">Graphes</span>
                     <h3>Graph Neural Networks (GNN)</h3>
-                    <p>Animation du message passing dans un réseau social. Visualisez comment l'information se propage entre nœuds via agrégation (GCN, GraphSAGE, GAT).</p>
-                    <a href="apps/graph-neural-networks.html" class="btn">Voir l'animation</a>
+                    <p>Message passing dans un réseau social. Visualisez comment l'information se propage entre nœuds connectés.</p>
+                    <ul class="app-features">
+                        <li>GCN, GraphSAGE, GAT</li>
+                        <li>Agrégation de voisinage</li>
+                        <li>Cas d'usage réels</li>
+                    </ul>
+                    <a href="apps/graph-neural-networks.html" class="btn">Voir l'animation →</a>
                 </div>
             </div>
         </div>
 
         <footer>
-            <p>Applications éducatives de Machine Learning - Utilisables localement sans serveur</p>
-            <p>Ouvrez simplement les fichiers HTML dans votre navigateur</p>
+            <h3 style="font-size: 1.3em; margin-bottom: 15px;">🎓 Support de Formation Machine Learning</h3>
+            <p>26 applications interactives autonomes | Toutes les explications en français</p>
+            <p>Formules mathématiques détaillées | Visualisations en temps réel</p>
+            <p style="margin-top: 15px;">
+                <strong>100% local</strong> - Aucun serveur requis |
+                Ouvrez simplement les fichiers HTML dans votre navigateur
+            </p>
+            <p style="margin-top: 20px; opacity: 0.8; font-size: 0.9em;">
+                De la Régression Linéaire (1800s) aux Transformers (2017) et Diffusion Models (2024)
+            </p>
         </footer>
     </div>
 </body>

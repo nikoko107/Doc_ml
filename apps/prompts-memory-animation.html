@@ -693,6 +693,51 @@
                     <li><strong>Pas de vraie mémoire :</strong> Le modèle ne "se souvient" pas entre sessions (sauf si historique sauvegardé)</li>
                 </ul>
             </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 15px;">✅ Avantages</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Context window long (Claude 200k):</strong> Conversations multi-heures sans perte contexte</li>
+                    <li><strong>Système = instructions persistantes:</strong> Comportement cohérent sur toute la session</li>
+                    <li><strong>RAG = mémoire infinie:</strong> Combiner avec retrieval pour dépasser limites contexte</li>
+                    <li><strong>Multi-turn comprehension:</strong> Références pronoms ("ça", "il") résolues automatiquement</li>
+                    <li><strong>Flexible:</strong> Ajuster prompt système à la volée pour changements comportement</li>
+                </ul>
+            </div>
+
+            <div style="background: #ffebee; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e53935;">
+                <h3 style="color: #c62828; margin-bottom: 15px;">⚠️ Limites</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Coût proportionnel tokens:</strong> Historique 10k tokens × 100 requêtes = 1M tokens facturés</li>
+                    <li><strong>Attention dilution long contexte:</strong> LLM perd focus sur détails lointains</li>
+                    <li><strong>Lost in the Middle:</strong> Info au milieu du contexte souvent ignorée vs début/fin</li>
+                    <li><strong>Pas de persistance inter-sessions:</strong> Fermer chat = mémoire perdue (sauf stockage external)</li>
+                    <li><strong>Prompt injection vulnérabilités:</strong> Utilisateur peut override système avec prompts malveillants</li>
+                </ul>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #ff9800;">
+                <h3 style="color: #e65100; margin-bottom: 15px;">💼 Cas d'Usage Production</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Chatbots:</strong> Support client avec continuité conversation, résolution problèmes multi-étapes</li>
+                    <li><strong>Code assistants:</strong> Context de fichiers ouverts, imports, fonctions pour suggestions pertinentes</li>
+                    <li><strong>Analyse documents longs:</strong> PDFs 100+ pages dans contexte pour questions précises</li>
+                    <li><strong>Customer support:</strong> Historique client + ticket actuel pour réponses personnalisées</li>
+                    <li><strong>Tutoring adaptatif:</strong> Mémoire erreurs passées pour ajuster difficulté exercices</li>
+                </ul>
+            </div>
+
+            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e91e63;">
+                <h3 style="color: #c2185b; margin-bottom: 15px;">🚨 Pièges à Éviter</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Tout mettre dans prompt:</strong> 50k tokens contexte = slow + cher. Utiliser RAG pour retrieval sélectif</li>
+                    <li><strong>Pas de chunking:</strong> Documents longs non découpés = dépassement limite contexte</li>
+                    <li><strong>Pas de résumé historique:</strong> Après 20+ tours, résumer historique pour libérer tokens</li>
+                    <li><strong>System prompt trop long:</strong> >1k tokens système = gaspillage. Être concis et précis</li>
+                    <li><strong>Pas de truncation strategy:</strong> Définir règles pour quels messages supprimer en premier</li>
+                    <li><strong>Ignorer "Lost in Middle":</strong> Info critique au milieu = mettre au début ou à la fin</li>
+                </ul>
+            </div>
         </div>
     </div>
 

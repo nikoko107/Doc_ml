@@ -30,7 +30,7 @@
         }
 
         h1 {
-            font-size: 2.5em;
+            font-size: clamp(1.8em, 5vw, 2.5em);
             margin-bottom: 10px;
         }
 
@@ -42,6 +42,10 @@
             text-decoration: none;
             border-radius: 20px;
             margin-bottom: 20px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .main-content {
@@ -70,6 +74,8 @@
             border: 2px solid #ddd;
             display: block;
             margin: 0 auto;
+            max-width: 100%;
+            height: auto;
         }
 
         #drawCanvas {
@@ -111,10 +117,11 @@
             margin-bottom: 10px;
             border: none;
             border-radius: 8px;
-            font-size: 1em;
+            font-size: clamp(0.9em, 2vw, 1em);
             cursor: pointer;
             font-weight: bold;
             transition: opacity 0.3s;
+            min-height: 44px;
         }
 
         button:hover {
@@ -146,6 +153,7 @@
             border-radius: 8px;
             border: 2px solid #ddd;
             font-size: 1em;
+            min-height: 44px;
         }
 
         .explanation {
@@ -197,6 +205,157 @@
             width: 100%;
             height: auto;
         }
+
+        .help-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 14px;
+            cursor: help;
+            margin-left: 8px;
+            position: relative;
+        }
+
+        .help-icon:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            white-space: nowrap;
+            font-size: 12px;
+            z-index: 1000;
+            font-weight: normal;
+        }
+
+        .definitions {
+            background: #e8f4f8;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .definitions h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .definitions dl {
+            margin: 0;
+        }
+
+        .definitions dt {
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 12px;
+            margin-bottom: 5px;
+        }
+
+        .definitions dd {
+            margin-left: 0;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .swot-analysis {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .swot-analysis h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .swot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .swot-box {
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid;
+        }
+
+        .swot-box h4 {
+            margin-bottom: 15px;
+        }
+
+        .swot-box ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .swot-box li {
+            margin-bottom: 8px;
+        }
+
+        .advantages {
+            background: #e8f5e9;
+            border-color: #2ecc71;
+        }
+
+        .disadvantages {
+            background: #ffebee;
+            border-color: #e74c3c;
+        }
+
+        .use-cases {
+            background: #e3f2fd;
+            border-color: #3498db;
+        }
+
+        .pitfalls {
+            background: #fff3e0;
+            border-color: #f39c12;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .canvas-grid {
+                grid-template-columns: 1fr;
+            }
+
+            body {
+                padding: 10px;
+            }
+
+            .controls, .canvas-container, .drawing-area, .explanation {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .canvas-grid {
+                gap: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -210,35 +369,44 @@
         <div class="main-content">
             <div style="display: flex; flex-direction: column; gap: 20px;">
                 <div class="drawing-area">
-                    <h3 style="color: #667eea; margin-bottom: 15px;">Zone de Dessin</h3>
-                    <canvas id="drawCanvas" width="280" height="280"></canvas>
+                    <h3 style="color: #667eea; margin-bottom: 15px;">
+                        Zone de Dessin
+                        <span class="help-icon" data-tooltip="Dessinez avec votre souris ou doigt">?</span>
+                    </h3>
+                    <canvas id="drawCanvas"></canvas>
                 </div>
 
                 <div class="canvas-container">
-                    <h3 style="color: #667eea; margin-bottom: 15px;">Visualisation des Couches CNN</h3>
+                    <h3 style="color: #667eea; margin-bottom: 15px;">
+                        Visualisation des Couches CNN
+                        <span class="help-icon" data-tooltip="Chaque filtre détecte des caractéristiques différentes">?</span>
+                    </h3>
 
                     <div class="canvas-grid">
                         <div class="canvas-item">
                             <h4>Filtre Horizontal</h4>
-                            <canvas id="conv1" width="200" height="200"></canvas>
+                            <canvas id="conv1"></canvas>
                         </div>
                         <div class="canvas-item">
                             <h4>Filtre Vertical</h4>
-                            <canvas id="conv2" width="200" height="200"></canvas>
+                            <canvas id="conv2"></canvas>
                         </div>
                         <div class="canvas-item">
                             <h4>Filtre Diagonal ↘</h4>
-                            <canvas id="conv3" width="200" height="200"></canvas>
+                            <canvas id="conv3"></canvas>
                         </div>
                         <div class="canvas-item">
                             <h4>Filtre Diagonal ↙</h4>
-                            <canvas id="conv4" width="200" height="200"></canvas>
+                            <canvas id="conv4"></canvas>
                         </div>
                     </div>
 
                     <div style="margin-top: 20px;">
-                        <h4 style="color: #667eea; margin-bottom: 10px; text-align: center;">Max Pooling (2x2)</h4>
-                        <canvas id="pooled" width="400" height="200" style="margin: 0 auto; display: block;"></canvas>
+                        <h4 style="color: #667eea; margin-bottom: 10px; text-align: center;">
+                            Max Pooling (2x2)
+                            <span class="help-icon" data-tooltip="Réduit la taille en gardant les valeurs maximales">?</span>
+                        </h4>
+                        <canvas id="pooled" style="margin: 0 auto; display: block;"></canvas>
                     </div>
                 </div>
             </div>
@@ -269,15 +437,40 @@
                 <button class="btn-success" onclick="processImage()">Appliquer les filtres CNN</button>
                 <button class="btn-secondary" onclick="clearCanvas()">Effacer</button>
 
-                <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
+                <div style="margin-top: 20px; padding: 15px; background: #e8f4f8; border-radius: 8px;">
                     <p style="font-size: 0.9em; line-height: 1.6;">
-                        <strong>Instructions:</strong><br>
-                        1. Dessinez quelque chose sur le canvas<br>
-                        2. Cliquez sur "Appliquer les filtres"<br>
-                        3. Observez comment chaque filtre détecte différentes caractéristiques
+                        <strong>Comment ça marche:</strong><br>
+                        1. Dessinez une forme simple (ligne, croix, cercle)<br>
+                        2. Cliquez sur "Appliquer les filtres CNN"<br>
+                        3. Observez les 4 filtres: chacun détecte différentes orientations<br>
+                        4. Le Max Pooling réduit la taille tout en gardant les informations importantes<br><br>
+                        <strong>Astuce:</strong> Les zones colorées montrent où chaque filtre "s'active" !
                     </p>
                 </div>
             </div>
+        </div>
+
+        <div class="definitions">
+            <h4>📚 Définitions Clés - CNN</h4>
+            <dl>
+                <dt>Convolution</dt>
+                <dd>Opération qui applique un filtre (matrice de poids) sur l'image en le faisant glisser. Chaque filtre détecte une caractéristique spécifique (bord, coin, texture).</dd>
+
+                <dt>Kernel / Filtre</dt>
+                <dd>Petite matrice (ex: 3x3) de poids qui parcourt l'image. Les valeurs du filtre déterminent quelle caractéristique il détecte (horizontal, vertical, diagonal).</dd>
+
+                <dt>Feature Map (Carte de Caractéristiques)</dt>
+                <dd>Résultat de l'application d'un filtre sur l'image. Montre où dans l'image la caractéristique est présente (zones colorées = forte activation).</dd>
+
+                <dt>Pooling</dt>
+                <dd>Opération qui réduit la taille de la feature map en prenant une valeur représentative (max ou moyenne) dans chaque région. Rend le réseau plus robuste et réduit le calcul.</dd>
+
+                <dt>Stride (Pas)</dt>
+                <dd>Nombre de pixels dont le filtre se déplace à chaque étape. Stride = 1 signifie déplacement pixel par pixel, stride = 2 saute un pixel à chaque fois.</dd>
+
+                <dt>Padding (Remplissage)</dt>
+                <dd>Ajout de pixels (souvent des 0) autour de l'image pour contrôler la taille de sortie et préserver les informations des bords.</dd>
+            </dl>
         </div>
 
         <div class="explanation">
@@ -328,69 +521,185 @@
                 reconnaissance faciale, voitures autonomes, diagnostic médical, et bien plus!
             </p>
         </div>
+
+        <div class="swot-analysis">
+            <h3>📊 Analyse : Quand utiliser les CNN ?</h3>
+
+            <div class="swot-grid">
+                <div class="swot-box advantages">
+                    <h4>✅ Avantages</h4>
+                    <ul>
+                        <li><strong>Invariance spatiale</strong> : Détecte features indépendamment de leur position (translation invariance)</li>
+                        <li><strong>Partage de poids</strong> : Même filtre réutilisé partout → beaucoup moins de paramètres que Dense layers</li>
+                        <li><strong>Hiérarchie de features</strong> : Couches basses = bords, couches hautes = concepts complexes</li>
+                        <li><strong>SOTA en vision</strong> : Meilleure architecture pour images (ResNet, EfficientNet, Vision Transformers)</li>
+                        <li><strong>Transfer learning facile</strong> : Modèles pré-entraînés (ImageNet) réutilisables</li>
+                        <li><strong>Robustesse</strong> : Pooling rend résistant aux petites déformations/translations</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box disadvantages">
+                    <h4>❌ Inconvénients & Limites</h4>
+                    <ul>
+                        <li><strong>Beaucoup de données nécessaires</strong> : Millions d'images pour entraînement from scratch</li>
+                        <li><strong>Calculs intensifs</strong> : Entraînement lent, nécessite GPU/TPU</li>
+                        <li><strong>Boîte noire</strong> : Difficile d'interpréter pourquoi une décision est prise</li>
+                        <li><strong>Sensible aux adversarial attacks</strong> : Modifications pixel imperceptibles trompent le modèle</li>
+                        <li><strong>Overfitting facile</strong> : Sans augmentation de données et régularisation</li>
+                        <li><strong>Taille d'image fixe</strong> : Nécessite redimensionnement des inputs (sauf architectures spéciales)</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box use-cases">
+                    <h4>💡 Cas d'usage recommandés</h4>
+                    <ul>
+                        <li><strong>Classification d'images</strong> : Animaux, objets, scènes (ImageNet, CIFAR)</li>
+                        <li><strong>Détection d'objets</strong> : YOLO, Faster R-CNN (voitures autonomes, vidéosurveillance)</li>
+                        <li><strong>Segmentation sémantique</strong> : U-Net (imagerie médicale, segmentation de tumeurs)</li>
+                        <li><strong>Reconnaissance faciale</strong> : FaceNet, ArcFace (authentification, sécurité)</li>
+                        <li><strong>Génération d'images</strong> : StyleGAN, DALL-E (art génératif, design)</li>
+                        <li><strong>Vision par ordinateur</strong> : OCR, analyse de documents, réalité augmentée</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box pitfalls">
+                    <h4>⚠️ Pièges à éviter</h4>
+                    <ul>
+                        <li><strong>Pas d'augmentation de données</strong> : Toujours utiliser rotation, flip, crop, color jitter</li>
+                        <li><strong>Entraînement from scratch</strong> : Préférer transfer learning (ResNet50, EfficientNet pré-entraînés)</li>
+                        <li><strong>Batch size trop petit</strong> : BatchNorm nécessite batch size ≥ 16, idéalement 32-128</li>
+                        <li><strong>Learning rate mal réglé</strong> : Utiliser warm-up + cosine decay, tester plusieurs valeurs</li>
+                        <li><strong>Ignorer le déséquilibre de classes</strong> : Utiliser weighted loss ou oversampling</li>
+                        <li><strong>Pas de validation</strong> : Toujours garder 10-20% des données pour validation</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 25px; border-left: 5px solid #2ecc71;">
+                <h4 style="color: #1b5e20; margin-bottom: 10px;">🎯 En production : Checklist décisionnelle</h4>
+                <p style="color: #2e7d32; line-height: 1.8; margin-bottom: 10px;"><strong>Utilisez les CNN si :</strong></p>
+                <ul style="color: #2e7d32; line-height: 1.8; margin-left: 25px;">
+                    <li>✓ Données = images (2D) ou séries temporelles (1D CNN)</li>
+                    <li>✓ Besoin d'invariance spatiale (détection de patterns partout)</li>
+                    <li>✓ Dataset conséquent (ou transfer learning possible)</li>
+                    <li>✓ GPU disponible pour entraînement</li>
+                </ul>
+                <p style="color: #c62828; line-height: 1.8; margin-top: 15px; margin-bottom: 10px;"><strong>Alternatives si :</strong></p>
+                <ul style="color: #c62828; line-height: 1.8; margin-left: 25px;">
+                    <li><strong>Peu de données</strong> : Transfer learning OBLIGATOIRE (ou datasets synthétiques)</li>
+                    <li><strong>Données non-images</strong> : MLP, RNN, Transformers selon le type</li>
+                    <li><strong>Relations globales importantes</strong> : Vision Transformers (ViT) > CNN</li>
+                    <li><strong>Interprétabilité critique</strong> : Attention maps, GradCAM pour explications</li>
+                </ul>
+                <p style="color: #1565c0; line-height: 1.8; margin-top: 15px;"><strong>⚡ Best Practice 2025 :</strong> Pour prototypage rapide, utilisez PyTorch/TensorFlow avec modèles pré-entraînés (timm, torchvision). Fine-tuning sur votre dataset custom = 10x plus rapide que from scratch.</p>
+            </div>
+        </div>
     </div>
 
     <script>
-        const drawCanvas = document.getElementById('drawCanvas');
-        const drawCtx = drawCanvas.getContext('2d');
-
-        const conv1Canvas = document.getElementById('conv1');
-        const conv2Canvas = document.getElementById('conv2');
-        const conv3Canvas = document.getElementById('conv3');
-        const conv4Canvas = document.getElementById('conv4');
-        const pooledCanvas = document.getElementById('pooled');
-
+        let drawCanvas, drawCtx;
+        let conv1Canvas, conv2Canvas, conv3Canvas, conv4Canvas, pooledCanvas;
+        let drawCanvasWidth, drawCanvasHeight;
         let isDrawing = false;
 
-        // Initialize white background
-        drawCtx.fillStyle = 'white';
-        drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+        function initCanvases() {
+            // Drawing canvas
+            drawCanvas = document.getElementById('drawCanvas');
+            drawCtx = drawCanvas.getContext('2d');
 
-        drawCanvas.addEventListener('mousedown', (e) => {
-            isDrawing = true;
-            draw(e);
-        });
+            // Visualization canvases
+            conv1Canvas = document.getElementById('conv1');
+            conv2Canvas = document.getElementById('conv2');
+            conv3Canvas = document.getElementById('conv3');
+            conv4Canvas = document.getElementById('conv4');
+            pooledCanvas = document.getElementById('pooled');
 
-        drawCanvas.addEventListener('mousemove', (e) => {
-            if (isDrawing) draw(e);
-        });
+            resizeCanvases();
+            window.addEventListener('resize', resizeCanvases);
+        }
 
-        drawCanvas.addEventListener('mouseup', () => {
-            isDrawing = false;
-        });
+        function resizeCanvases() {
+            // Drawing canvas - square
+            const drawContainer = drawCanvas.parentElement;
+            const containerWidth = drawContainer.clientWidth - 40;
+            drawCanvasWidth = Math.min(containerWidth, 500);
+            drawCanvasHeight = drawCanvasWidth; // Square
 
-        drawCanvas.addEventListener('mouseleave', () => {
-            isDrawing = false;
-        });
+            drawCanvas.width = drawCanvasWidth;
+            drawCanvas.height = drawCanvasHeight;
+            drawCanvas.style.width = drawCanvasWidth + 'px';
+            drawCanvas.style.height = drawCanvasHeight + 'px';
 
-        // Touch support
-        drawCanvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            isDrawing = true;
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousedown', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
+            // Filter canvases - responsive
+            const filterSize = Math.min(200, containerWidth / 2 - 20);
+            [conv1Canvas, conv2Canvas, conv3Canvas, conv4Canvas].forEach(canvas => {
+                canvas.width = filterSize;
+                canvas.height = filterSize;
+                canvas.style.width = filterSize + 'px';
+                canvas.style.height = filterSize + 'px';
             });
-            drawCanvas.dispatchEvent(mouseEvent);
-        });
 
-        drawCanvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (isDrawing) {
+            // Pooled canvas
+            const pooledWidth = Math.min(400, containerWidth);
+            const pooledHeight = Math.min(200, pooledWidth / 2);
+            pooledCanvas.width = pooledWidth;
+            pooledCanvas.height = pooledHeight;
+            pooledCanvas.style.width = pooledWidth + 'px';
+            pooledCanvas.style.height = pooledHeight + 'px';
+
+            // Initialize white background
+            drawCtx.fillStyle = 'white';
+            drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+
+            clearCanvas();
+
+            // Event listeners
+            drawCanvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                draw(e);
+            });
+
+            drawCanvas.addEventListener('mousemove', (e) => {
+                if (isDrawing) draw(e);
+            });
+
+            drawCanvas.addEventListener('mouseup', () => {
+                isDrawing = false;
+            });
+
+            drawCanvas.addEventListener('mouseleave', () => {
+                isDrawing = false;
+            });
+
+            // Touch support
+            drawCanvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isDrawing = true;
                 const touch = e.touches[0];
-                const mouseEvent = new MouseEvent('mousemove', {
+                const mouseEvent = new MouseEvent('mousedown', {
                     clientX: touch.clientX,
                     clientY: touch.clientY
                 });
                 drawCanvas.dispatchEvent(mouseEvent);
-            }
-        });
+            });
 
-        drawCanvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            isDrawing = false;
-        });
+            drawCanvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (isDrawing) {
+                    const touch = e.touches[0];
+                    const mouseEvent = new MouseEvent('mousemove', {
+                        clientX: touch.clientX,
+                        clientY: touch.clientY
+                    });
+                    drawCanvas.dispatchEvent(mouseEvent);
+                }
+            });
+
+            drawCanvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                isDrawing = false;
+            });
+        }
 
         function draw(e) {
             const rect = drawCanvas.getBoundingClientRect();
@@ -658,7 +967,7 @@
         }
 
         // Initialize
-        clearCanvas();
+        initCanvases();
     </script>
 </body>
 </html>

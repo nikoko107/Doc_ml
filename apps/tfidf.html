@@ -30,7 +30,7 @@
         }
 
         h1 {
-            font-size: 2.5em;
+            font-size: clamp(1.8em, 5vw, 2.5em);
             margin-bottom: 10px;
         }
 
@@ -42,6 +42,10 @@
             text-decoration: none;
             border-radius: 20px;
             margin-bottom: 20px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .main-content {
@@ -86,10 +90,11 @@
             margin-bottom: 10px;
             border: none;
             border-radius: 8px;
-            font-size: 1em;
+            font-size: clamp(0.9em, 2vw, 1em);
             cursor: pointer;
             font-weight: bold;
             transition: opacity 0.3s;
+            min-height: 44px;
         }
 
         button:hover {
@@ -223,6 +228,98 @@
         .tab-content.active {
             display: block;
         }
+
+        .help-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 14px;
+            cursor: help;
+            margin-left: 8px;
+            position: relative;
+        }
+
+        .help-icon:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            white-space: nowrap;
+            font-size: 12px;
+            z-index: 1000;
+            font-weight: normal;
+        }
+
+        .definitions {
+            background: #e8f4f8;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .definitions h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .definitions dl {
+            margin: 0;
+        }
+
+        .definitions dt {
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 12px;
+            margin-bottom: 5px;
+        }
+
+        .definitions dd {
+            margin-left: 0;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            body {
+                padding: 10px;
+            }
+
+            .controls, .work-area, .explanation {
+                padding: 15px;
+            }
+
+            .example-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .result-table {
+                font-size: 0.75em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -235,7 +332,10 @@
 
         <div class="main-content">
             <div class="work-area">
-                <h3 style="color: #667eea; margin-bottom: 15px;">Documents à analyser</h3>
+                <h3 style="color: #667eea; margin-bottom: 15px;">
+                    Documents à analyser
+                    <span class="help-icon" data-tooltip="Entrez un document par ligne pour analyser">?</span>
+                </h3>
                 <textarea id="inputText" rows="8" placeholder="Entrez plusieurs documents, un par ligne..."></textarea>
 
                 <div class="info-box" style="margin-top: 20px;">
@@ -268,16 +368,44 @@
 
                 <button class="btn-primary" onclick="calculateTFIDF()">Calculer TF-IDF</button>
 
-                <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
+                <div style="margin-top: 20px; padding: 15px; background: #e8f4f8; border-radius: 8px;">
                     <p style="font-size: 0.9em; line-height: 1.6;">
-                        <strong>Instructions:</strong><br>
-                        1. Entrez plusieurs documents différents<br>
-                        2. Cliquez sur "Calculer TF-IDF"<br>
-                        3. Explorez les différents onglets<br>
-                        4. Les scores élevés = mots importants
+                        <strong>Comment ça marche:</strong><br>
+                        1. Choisissez un exemple ou entrez vos propres documents<br>
+                        2. Un document par ligne<br>
+                        3. Cliquez sur "Calculer TF-IDF" pour analyser<br>
+                        4. Explorez les onglets:<br>
+                        &nbsp;&nbsp;&nbsp;• TF-IDF: scores complets<br>
+                        &nbsp;&nbsp;&nbsp;• TF: fréquence des mots<br>
+                        &nbsp;&nbsp;&nbsp;• IDF: rareté des mots<br>
+                        &nbsp;&nbsp;&nbsp;• Mots-clés: résumé par document<br><br>
+                        <strong>Astuce:</strong> Les scores TF-IDF élevés = mots les plus importants !
                     </p>
                 </div>
             </div>
+        </div>
+
+        <div class="definitions">
+            <h4>📚 Définitions Clés - TF-IDF</h4>
+            <dl>
+                <dt>Term Frequency (TF)</dt>
+                <dd>Fréquence d'un mot dans un document. Calculée comme: TF = (nombre d'occurrences du mot) / (nombre total de mots). Mesure l'importance locale du mot dans ce document.</dd>
+
+                <dt>Document Frequency (DF)</dt>
+                <dd>Nombre de documents qui contiennent un mot donné. Si un mot apparaît dans tous les documents, il a une DF élevée et est probablement peu informatif.</dd>
+
+                <dt>Inverse Document Frequency (IDF)</dt>
+                <dd>Mesure de la rareté d'un mot dans la collection. Formule: IDF = log(N / DF) où N = nombre total de documents. Un IDF élevé signifie que le mot est rare et donc plus distinctif.</dd>
+
+                <dt>TF-IDF Score</dt>
+                <dd>Score final calculé par TF × IDF. Élevé quand le mot est fréquent dans CE document mais rare ailleurs. C'est ce qui rend le mot caractéristique et utile pour identifier le sujet.</dd>
+
+                <dt>Normalisation</dt>
+                <dd>Les scores TF-IDF sont souvent normalisés (divisés par la longueur du vecteur) pour que les documents de différentes longueurs soient comparables.</dd>
+
+                <dt>Vectorisation</dt>
+                <dd>Transformation des documents en vecteurs numériques où chaque dimension représente un mot du vocabulaire avec son score TF-IDF. Permet de comparer mathématiquement les documents.</dd>
+            </dl>
         </div>
 
         <div class="explanation">

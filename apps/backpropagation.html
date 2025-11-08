@@ -15,7 +15,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: clamp(10px, 3vw, 20px);
         }
 
         .container {
@@ -26,11 +26,11 @@
         header {
             text-align: center;
             color: white;
-            margin-bottom: 30px;
+            margin-bottom: clamp(20px, 4vw, 30px);
         }
 
         h1 {
-            font-size: 2.5em;
+            font-size: clamp(1.5em, 4vw, 2.5em);
             margin-bottom: 10px;
         }
 
@@ -42,6 +42,8 @@
             text-decoration: none;
             border-radius: 20px;
             margin-bottom: 20px;
+            min-height: 44px;
+            line-height: 24px;
         }
 
         .main-content {
@@ -62,6 +64,8 @@
             border: 2px solid #ddd;
             display: block;
             margin: 0 auto;
+            max-width: 100%;
+            height: auto;
         }
 
         .controls {
@@ -74,6 +78,7 @@
         .controls h3 {
             color: #667eea;
             margin-bottom: 20px;
+            font-size: clamp(1.1em, 3vw, 1.3em);
         }
 
         .info-box {
@@ -85,7 +90,7 @@
 
         .info-box p {
             margin-bottom: 8px;
-            font-size: 0.95em;
+            font-size: clamp(0.85em, 2vw, 0.95em);
         }
 
         .info-box strong {
@@ -101,6 +106,7 @@
             margin-bottom: 5px;
             font-weight: bold;
             color: #333;
+            font-size: clamp(0.9em, 2vw, 1em);
         }
 
         .input-group input {
@@ -108,7 +114,8 @@
             padding: 8px;
             border: 2px solid #ddd;
             border-radius: 5px;
-            font-size: 1em;
+            font-size: clamp(0.9em, 2vw, 1em);
+            min-height: 44px;
         }
 
         button {
@@ -117,10 +124,11 @@
             margin-bottom: 10px;
             border: none;
             border-radius: 8px;
-            font-size: 1em;
+            font-size: clamp(0.9em, 2vw, 1em);
             cursor: pointer;
             font-weight: bold;
             transition: opacity 0.3s;
+            min-height: 44px;
         }
 
         button:hover {
@@ -145,7 +153,7 @@
             text-align: center;
             margin-bottom: 15px;
             font-weight: bold;
-            font-size: 1.1em;
+            font-size: clamp(1em, 2.5vw, 1.1em);
         }
 
         .explanation {
@@ -158,12 +166,18 @@
         .explanation h3 {
             color: #667eea;
             margin-bottom: 15px;
+            font-size: clamp(1.1em, 3vw, 1.3em);
+        }
+
+        .explanation h4 {
+            font-size: clamp(1em, 2.5vw, 1.1em);
         }
 
         .explanation p {
             line-height: 1.6;
             color: #666;
             margin-bottom: 10px;
+            font-size: clamp(0.9em, 2vw, 1em);
         }
 
         .formula {
@@ -173,7 +187,8 @@
             font-family: 'Courier New', monospace;
             text-align: center;
             margin: 15px 0;
-            font-size: 1.1em;
+            font-size: clamp(0.9em, 2vw, 1.1em);
+            overflow-x: auto;
         }
 
         .step-list {
@@ -186,6 +201,170 @@
         .step-list li {
             margin-bottom: 8px;
             line-height: 1.6;
+            font-size: clamp(0.9em, 2vw, 1em);
+        }
+
+        .help-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 14px;
+            cursor: help;
+            margin-left: 5px;
+            position: relative;
+        }
+
+        .help-icon:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            white-space: nowrap;
+            font-size: 12px;
+            z-index: 1000;
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 250px;
+            white-space: normal;
+            width: max-content;
+        }
+
+        .definitions {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .definitions h4 {
+            color: #1565c0;
+            margin-bottom: 10px;
+        }
+
+        .definitions dt {
+            font-weight: bold;
+            color: #1976d2;
+            margin-top: 8px;
+        }
+
+        .definitions dd {
+            margin-left: 20px;
+            margin-bottom: 8px;
+            color: #666;
+            font-size: clamp(0.85em, 2vw, 0.95em);
+        }
+
+        /* Responsive Design */
+        .swot-analysis {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .swot-analysis h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .swot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .swot-box {
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid;
+        }
+
+        .swot-box h4 {
+            margin-bottom: 15px;
+        }
+
+        .swot-box ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .swot-box li {
+            margin-bottom: 8px;
+        }
+
+        .advantages {
+            background: #e8f5e9;
+            border-color: #2ecc71;
+        }
+
+        .disadvantages {
+            background: #ffebee;
+            border-color: #e74c3c;
+        }
+
+        .use-cases {
+            background: #e3f2fd;
+            border-color: #3498db;
+        }
+
+        .pitfalls {
+            background: #fff3e0;
+            border-color: #f39c12;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .canvas-container {
+                padding: 15px;
+            }
+
+            .controls {
+                padding: 20px;
+            }
+
+            .explanation {
+                padding: 20px;
+            }
+
+            .formula {
+                font-size: 0.85em;
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .back-btn {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+
+            .info-box p {
+                font-size: 0.85em;
+            }
         }
     </style>
 </head>
@@ -199,8 +378,11 @@
 
         <div class="main-content">
             <div class="canvas-container">
-                <h3 style="color: #667eea; margin-bottom: 15px;">Réseau: 2 → 3 → 1</h3>
-                <canvas id="canvas" width="800" height="600"></canvas>
+                <h3 style="color: #667eea; margin-bottom: 15px;">
+                    Réseau: 2 → 3 → 1
+                    <span class="help-icon" data-tooltip="Visualisation du flux de données (forward) et du flux de gradient (backward)">?</span>
+                </h3>
+                <canvas id="canvas"></canvas>
             </div>
 
             <div class="controls">
@@ -289,12 +471,58 @@
                 entraîner efficacement des réseaux multicouches. Cet algorithme permet de calculer exactement comment
                 chaque poids contribue à l'erreur finale, même dans des réseaux très profonds!
             </p>
+
+            <div class="definitions">
+                <h4>📚 Définitions</h4>
+                <dl>
+                    <dt>Forward Pass <span class="help-icon" data-tooltip="Propagation des données de l'entrée vers la sortie">?</span></dt>
+                    <dd>Phase où les données traversent le réseau de l'entrée vers la sortie, en calculant les activations de chaque couche</dd>
+
+                    <dt>Backward Pass <span class="help-icon" data-tooltip="Propagation du gradient de la sortie vers l'entrée">?</span></dt>
+                    <dd>Phase où le gradient de l'erreur est propagé en arrière à travers le réseau pour calculer les gradients de chaque poids</dd>
+
+                    <dt>Règle de la Chaîne <span class="help-icon" data-tooltip="Principe mathématique fondamental de la backpropagation">?</span></dt>
+                    <dd>Principe de calcul différentiel permettant de calculer la dérivée d'une fonction composée. Essentielle à la backpropagation</dd>
+
+                    <dt>Delta (δ) <span class="help-icon" data-tooltip="Gradient de l'erreur pour chaque neurone">?</span></dt>
+                    <dd>Gradient de l'erreur pour un neurone. Indique comment modifier le neurone pour réduire l'erreur</dd>
+
+                    <dt>Loss (Perte) <span class="help-icon" data-tooltip="Mesure de l'écart entre la prédiction et la cible">?</span></dt>
+                    <dd>Fonction mesurant l'écart entre la sortie du réseau et la valeur cible. L'objectif est de minimiser cette valeur</dd>
+
+                    <dt>Gradient <span class="help-icon" data-tooltip="Dérivée de la loss par rapport à chaque poids">?</span></dt>
+                    <dd>Dérivée partielle de la fonction de perte par rapport à un poids. Indique dans quelle direction modifier le poids</dd>
+                </dl>
+            </div>
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+        let canvas, ctx;
+        let canvasWidth, canvasHeight;
+
+        function initCanvas() {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const containerWidth = container.clientWidth - 40;
+
+            canvasWidth = Math.min(containerWidth, 900);
+            canvasHeight = Math.floor(canvasWidth * 0.75);
+
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            canvas.style.width = canvasWidth + 'px';
+            canvas.style.height = canvasHeight + 'px';
+
+            draw();
+        }
 
         // Network: 2 -> 3 -> 1
         let weights1 = [
@@ -315,9 +543,15 @@
         let delta2, delta1;
         let gradW2, gradB2, gradW1, gradB1;
 
-        document.getElementById('learningRate').addEventListener('input', (e) => {
-            learningRate = parseFloat(e.target.value);
-            document.getElementById('lrValue').textContent = learningRate.toFixed(1);
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+
+            document.getElementById('learningRate').addEventListener('input', (e) => {
+                learningRate = parseFloat(e.target.value);
+                document.getElementById('lrValue').textContent = learningRate.toFixed(1);
+            });
+
+            updateInfo();
         });
 
         function sigmoid(x) {
@@ -639,10 +873,6 @@
                 document.getElementById('loss').textContent = '-';
             }
         }
-
-        // Initialize
-        draw();
-        updateInfo();
     </script>
 </body>
 </html>

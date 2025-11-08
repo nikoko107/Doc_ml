@@ -30,7 +30,7 @@
         }
 
         h1 {
-            font-size: 2.5em;
+            font-size: clamp(1.8em, 5vw, 2.5em);
             margin-bottom: 10px;
         }
 
@@ -42,6 +42,10 @@
             text-decoration: none;
             border-radius: 20px;
             margin-bottom: 20px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .main-content {
@@ -70,6 +74,8 @@
             cursor: crosshair;
             display: block;
             margin: 0 auto;
+            max-width: 100%;
+            height: auto;
         }
 
         .controls {
@@ -106,10 +112,11 @@
             margin-bottom: 10px;
             border: none;
             border-radius: 8px;
-            font-size: 1em;
+            font-size: clamp(0.9em, 2vw, 1em);
             cursor: pointer;
             font-weight: bold;
             transition: opacity 0.3s;
+            min-height: 44px;
         }
 
         button:hover {
@@ -158,6 +165,174 @@
             margin: 15px 0;
             font-size: 1.1em;
         }
+
+        .help-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 14px;
+            cursor: help;
+            margin-left: 8px;
+            position: relative;
+        }
+
+        .help-icon:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            white-space: nowrap;
+            font-size: 12px;
+            z-index: 1000;
+            font-weight: normal;
+        }
+
+        .definitions {
+            background: #e8f4f8;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .definitions h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .definitions dl {
+            margin: 0;
+        }
+
+        .definitions dt {
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 12px;
+            margin-bottom: 5px;
+        }
+
+        .definitions dd {
+            margin-left: 0;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .swot-analysis {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .swot-analysis h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: clamp(1.1em, 3vw, 1.3em);
+        }
+
+        .swot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .swot-box {
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid;
+        }
+
+        .swot-box h4 {
+            margin-bottom: 15px;
+            font-size: clamp(1em, 2.5vw, 1.1em);
+        }
+
+        .swot-box ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .swot-box li {
+            margin-bottom: 8px;
+            font-size: clamp(0.9em, 2vw, 0.95em);
+        }
+
+        .advantages {
+            background: #e8f5e9;
+            border-color: #2ecc71;
+        }
+
+        .disadvantages {
+            background: #ffebee;
+            border-color: #e74c3c;
+        }
+
+        .use-cases {
+            background: #e3f2fd;
+            border-color: #3498db;
+        }
+
+        .pitfalls {
+            background: #fff3e0;
+            border-color: #f39c12;
+        }
+
+        .how-it-works {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+
+        .how-it-works h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .how-it-works ol {
+            margin: 15px 0 0 25px;
+            line-height: 2;
+        }
+
+        .how-it-works li {
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content, .visualization-grid {
+                grid-template-columns: 1fr;
+            }
+
+            body {
+                padding: 10px;
+            }
+
+            .controls, .canvas-container, .explanation {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 1.5em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -170,13 +345,19 @@
 
         <div class="visualization-grid">
             <div class="canvas-container">
-                <h3 style="color: #667eea; margin-bottom: 15px;">📊 Clustering Interactif</h3>
-                <canvas id="canvas" width="700" height="500"></canvas>
+                <h3 style="color: #667eea; margin-bottom: 15px;">
+                    📊 Clustering Interactif
+                    <span class="help-icon" data-tooltip="Cliquez pour ajouter des points ou générez des clusters">?</span>
+                </h3>
+                <canvas id="canvas"></canvas>
             </div>
 
             <div class="canvas-container">
-                <h3 style="color: #667eea; margin-bottom: 15px;">📈 Convergence de l'Algorithme</h3>
-                <canvas id="convergenceCanvas" width="700" height="500"></canvas>
+                <h3 style="color: #667eea; margin-bottom: 15px;">
+                    📈 Convergence de l'Algorithme
+                    <span class="help-icon" data-tooltip="Visualise comment l'inertie diminue à chaque itération">?</span>
+                </h3>
+                <canvas id="convergenceCanvas"></canvas>
             </div>
         </div>
 
@@ -211,7 +392,42 @@
                 <button class="btn-primary" onclick="stepKMeans()">1 Itération</button>
                 <button class="btn-primary" onclick="runKMeans()">Exécuter jusqu'à convergence</button>
                 <button class="btn-secondary" onclick="reset()">Réinitialiser</button>
+
+                <div style="margin-top: 20px; padding: 15px; background: #e8f4f8; border-radius: 8px;">
+                    <p style="font-size: 0.9em; line-height: 1.6;">
+                        <strong>Comment ça marche:</strong><br>
+                        1. Cliquez sur "Générer des clusters" pour créer des points<br>
+                        2. Cliquez sur "Initialiser K-Means" pour placer les centroïdes (croix X)<br>
+                        3. Utilisez "1 Itération" pour avancer pas à pas ou "Exécuter" pour tout faire<br>
+                        4. Observez les centroïdes se déplacer vers le centre de leurs clusters<br>
+                        5. Le graphique de droite montre la convergence<br><br>
+                        <strong>Astuce:</strong> Les lignes pointillées montrent le chemin des centroïdes !
+                    </p>
+                </div>
             </div>
+        </div>
+
+        <div class="definitions">
+            <h4>📚 Définitions Clés - K-Means</h4>
+            <dl>
+                <dt>Centroïde</dt>
+                <dd>Point central d'un cluster, calculé comme la moyenne des positions de tous les points du cluster. Les centroïdes (marqués par des X) se déplacent à chaque itération.</dd>
+
+                <dt>Cluster</dt>
+                <dd>Groupe de points similaires. K-Means divise les données en K clusters, où chaque point appartient au cluster du centroïde le plus proche.</dd>
+
+                <dt>Distance Euclidienne</dt>
+                <dd>Mesure de la distance entre deux points dans l'espace. Formule: √[(x₂-x₁)² + (y₂-y₁)²]. K-Means utilise cette distance pour assigner les points aux centroïdes.</dd>
+
+                <dt>Convergence</dt>
+                <dd>État atteint quand les centroïdes ne bougent presque plus (< 0.1 pixel). Signifie que l'algorithme a trouvé une solution stable et peut s'arrêter.</dd>
+
+                <dt>Inertie (WCSS)</dt>
+                <dd>Within-Cluster Sum of Squares - Somme des distances au carré entre chaque point et son centroïde. Une inertie faible = clusters compacts. L'algorithme minimise cette valeur.</dd>
+
+                <dt>Méthode du Coude</dt>
+                <dd>Technique pour choisir le bon nombre de clusters K. On trace l'inertie en fonction de K et on cherche le "coude" où l'amélioration devient marginale.</dd>
+            </dl>
         </div>
 
         <div class="explanation">
@@ -270,13 +486,84 @@
                 analyse de données génomiques, et bien plus!
             </p>
         </div>
+
+        <div class="swot-analysis">
+            <h3>📊 Analyse : Quand utiliser K-Means ?</h3>
+
+            <div class="swot-grid">
+                <div class="swot-box advantages">
+                    <h4>✅ Avantages</h4>
+                    <ul>
+                        <li><strong>Simplicité</strong> : Algorithme facile à comprendre et implémenter</li>
+                        <li><strong>Rapidité</strong> : Complexité O(n×k×i) - très rapide même sur gros datasets</li>
+                        <li><strong>Scalable</strong> : Fonctionne bien avec millions de points (versions parallélisées)</li>
+                        <li><strong>Non supervisé</strong> : Pas besoin de labels, clustering automatique</li>
+                        <li><strong>Convergence garantie</strong> : Inertie diminue à chaque itération</li>
+                        <li><strong>Polyvalent</strong> : Applications variées (marketing, compression, prétraitement)</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box disadvantages">
+                    <h4>❌ Inconvénients & Limites</h4>
+                    <ul>
+                        <li><strong>Choisir K à l'avance</strong> : Nombre de clusters doit être fixé (méthode Elbow pour aider)</li>
+                        <li><strong>Sensible à l'initialisation</strong> : Différents seeds = différents résultats (k-means++)</li>
+                        <li><strong>Clusters sphériques uniquement</strong> : Échoue sur formes complexes (anneaux, croissants)</li>
+                        <li><strong>Sensible aux outliers</strong> : Moyenne tirée par valeurs aberrantes</li>
+                        <li><strong>Sensible à l'échelle</strong> : Nécessite normalisation des features</li>
+                        <li><strong>Assume clusters de taille similaire</strong> : Problèmes si déséquilibre important</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box use-cases">
+                    <h4>💡 Cas d'usage recommandés</h4>
+                    <ul>
+                        <li><strong>Segmentation client</strong> : Marketing (groupes d'acheteurs), ciblage publicitaire</li>
+                        <li><strong>Compression d'images</strong> : Réduction de palette de couleurs (256 couleurs → K couleurs)</li>
+                        <li><strong>Prétraitement</strong> : Feature engineering, réduction de dimensionnalité</li>
+                        <li><strong>Détection d'anomalies</strong> : Points loin de tout centroïde = outliers</li>
+                        <li><strong>Analyse exploratoire</strong> : Découvrir structures cachées dans données</li>
+                        <li><strong>Recommandation</strong> : Regrouper produits/utilisateurs similaires</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box pitfalls">
+                    <h4>⚠️ Pièges à éviter</h4>
+                    <ul>
+                        <li><strong>K mal choisi</strong> : Utiliser méthode Elbow ou Silhouette Score pour optimiser K</li>
+                        <li><strong>Pas de normalisation</strong> : Toujours standardiser features (mean=0, std=1)</li>
+                        <li><strong>Outliers non traités</strong> : Nettoyer données ou utiliser K-medoids (plus robuste)</li>
+                        <li><strong>Clusters non-sphériques</strong> : Passer à DBSCAN, Gaussian Mixture Models, ou Spectral Clustering</li>
+                        <li><strong>Initialisation aléatoire</strong> : Utiliser k-means++ (meilleure initialisation)</li>
+                        <li><strong>Un seul run</strong> : Toujours exécuter plusieurs fois avec seeds différents et garder le meilleur</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 25px; border-left: 5px solid #2ecc71;">
+                <h4 style="color: #1b5e20; margin-bottom: 10px;">🎯 En production : Checklist décisionnelle</h4>
+                <p style="color: #2e7d32; line-height: 1.8; margin-bottom: 10px;"><strong>Utilisez K-Means si :</strong></p>
+                <ul style="color: #2e7d32; line-height: 1.8; margin-left: 25px;">
+                    <li>✓ Besoin de clustering rapide et simple</li>
+                    <li>✓ Données numériques continues</li>
+                    <li>✓ Clusters approximativement sphériques et de taille similaire</li>
+                    <li>✓ Gros dataset (millions de points)</li>
+                </ul>
+                <p style="color: #c62828; line-height: 1.8; margin-top: 15px; margin-bottom: 10px;"><strong>Alternatives si :</strong></p>
+                <ul style="color: #c62828; line-height: 1.8; margin-left: 25px;">
+                    <li><strong>Clusters de formes complexes</strong> : DBSCAN, HDBSCAN</li>
+                    <li><strong>Clusters de densité variable</strong> : Gaussian Mixture Models</li>
+                    <li><strong>K inconnu</strong> : DBSCAN (détection automatique)</li>
+                    <li><strong>Données hiérarchiques</strong> : Agglomerative Clustering</li>
+                </ul>
+                <p style="color: #1565c0; line-height: 1.8; margin-top: 15px;"><strong>⚡ Best Practice :</strong> Toujours visualiser résultats en 2D (t-SNE/UMAP si >2D) et valider avec métriques (Silhouette, Davies-Bouldin).</p>
+            </div>
+        </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const convergenceCanvas = document.getElementById('convergenceCanvas');
-        const convCtx = convergenceCanvas.getContext('2d');
+        let canvas, ctx, canvasWidth, canvasHeight;
+        let convergenceCanvas, convCtx, convCanvasWidth, convCanvasHeight;
         const points = [];
         let centroids = [];
         let assignments = [];
@@ -296,22 +583,58 @@
             '#6c5ce7', '#fd79a8', '#fdcb6e', '#00b894'
         ];
 
-        document.getElementById('kSlider').addEventListener('input', (e) => {
-            k = parseInt(e.target.value);
-            document.getElementById('kValue').textContent = k;
-            if (points.length > 0 && centroids.length === 0) {
-                // Auto-initialize if points exist but not started yet
-            }
-        });
+        function initCanvases() {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            convergenceCanvas = document.getElementById('convergenceCanvas');
+            convCtx = convergenceCanvas.getContext('2d');
 
-        canvas.addEventListener('click', (e) => {
+            resizeCanvases();
+            window.addEventListener('resize', resizeCanvases);
+
+            // Event listeners
+            canvas.addEventListener('click', handleCanvasClick);
+            document.getElementById('kSlider').addEventListener('input', handleKSliderChange);
+        }
+
+        function resizeCanvases() {
+            // Main canvas
+            const container = canvas.parentElement;
+            const containerWidth = container.clientWidth - 40;
+            canvasWidth = Math.min(containerWidth, 700);
+            canvasHeight = Math.floor(canvasWidth * 0.7);
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            canvas.style.width = canvasWidth + 'px';
+            canvas.style.height = canvasHeight + 'px';
+
+            // Convergence canvas
+            const convContainer = convergenceCanvas.parentElement;
+            const convContainerWidth = convContainer.clientWidth - 40;
+            convCanvasWidth = Math.min(convContainerWidth, 700);
+            convCanvasHeight = Math.floor(convCanvasWidth * 0.7);
+            convergenceCanvas.width = convCanvasWidth;
+            convergenceCanvas.height = convCanvasHeight;
+            convergenceCanvas.style.width = convCanvasWidth + 'px';
+            convergenceCanvas.style.height = convCanvasHeight + 'px';
+
+            draw();
+            drawConvergenceGraph();
+        }
+
+        function handleCanvasClick(e) {
             const rect = canvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             points.push({x, y});
             draw();
             updateInfo();
-        });
+        }
+
+        function handleKSliderChange(e) {
+            k = parseInt(e.target.value);
+            document.getElementById('kValue').textContent = k;
+        }
 
         function generateClusters() {
             points.length = 0;
@@ -867,9 +1190,8 @@
             }
         }
 
-        // Initial draw
-        draw();
-        drawConvergenceGraph();
+        // Initialize
+        initCanvases();
         updateInfo();
     </script>
 </body>

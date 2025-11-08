@@ -519,6 +519,51 @@
                     <li><strong>Recommandation:</strong> Items similaires basés sur descriptions textuelles</li>
                 </ul>
             </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 15px;">✅ Avantages</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Capture sens:</strong> Mots similaires sémantiquement → vecteurs proches (roi ≈ reine)</li>
+                    <li><strong>Arithmétique sémantique:</strong> roi - homme + femme = reine, Paris - France + Italie = Rome</li>
+                    <li><strong>Pré-entraînés disponibles:</strong> Word2Vec, GloVe, FastText téléchargeables gratuitement</li>
+                    <li><strong>Légers:</strong> 300 dimensions vs millions paramètres Transformers</li>
+                    <li><strong>Transfer learning:</strong> Embeddings entraînés Wikipedia → utiliser sur domaine spécifique</li>
+                </ul>
+            </div>
+
+            <div style="background: #ffebee; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e53935;">
+                <h3 style="color: #c62828; margin-bottom: 15px;">⚠️ Limites</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Contexte statique (1 vecteur/mot):</strong> "bank" (banque) = même vecteur que "bank" (rive)</li>
+                    <li><strong>Remplacés par contextuels (BERT):</strong> Word2Vec obsolète vs embeddings contextuels modernes</li>
+                    <li><strong>Taille fixe:</strong> 300 dim figée, vs Transformers qui adaptent représentation</li>
+                    <li><strong>Hors vocabulaire (OOV):</strong> Nouveau mot inconnu = pas d'embedding (sauf FastText subwords)</li>
+                    <li><strong>Biais culturels:</strong> Associations stéréotypées (doctor=homme, nurse=femme) encodées</li>
+                </ul>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #ff9800;">
+                <h3 style="color: #e65100; margin-bottom: 15px;">💼 Cas d'Usage Production</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Baseline NLP:</strong> Point de départ rapide avant Transformers lourds</li>
+                    <li><strong>Similarité mots:</strong> Recherche synonymes, expansion requêtes, autocomplete</li>
+                    <li><strong>Clustering documents:</strong> Regrouper articles similaires via moyenne embeddings</li>
+                    <li><strong>Word analogies:</strong> Complétion relations (king:queen :: man:?), tests linguistiques</li>
+                    <li><strong>Features ML classique:</strong> Input pour SVM, Random Forest quand BERT trop lourd</li>
+                </ul>
+            </div>
+
+            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e91e63;">
+                <h3 style="color: #c2185b; margin-bottom: 15px;">🚨 Pièges à Éviter</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Word2Vec vs GloVe (contexte différent):</strong> Word2Vec = fenêtre locale, GloVe = co-occurrence globale. Tester les deux</li>
+                    <li><strong>Embeddings non actualisés:</strong> Word2Vec 2013 ignore mots post-2013 ("selfie", "ChatGPT")</li>
+                    <li><strong>Polysémie (bank = banque vs rive):</strong> Embedding unique rate les sens multiples. Utiliser BERT si critique</li>
+                    <li><strong>Moyenne naïve embeddings:</strong> Moyenner vecteurs mots = perd syntaxe. Ok pour baseline, mauvais si précision nécessaire</li>
+                    <li><strong>Ignorer preprocessing:</strong> Lowercase, lemmatization, stopwords impact qualité embeddings</li>
+                    <li><strong>Dimension trop basse (50):</strong> Perd nuances. Standard 300 dim pour équilibre performance/taille</li>
+                </ul>
+            </div>
         </div>
     </div>
 

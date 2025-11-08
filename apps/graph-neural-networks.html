@@ -489,6 +489,51 @@
                     <li><strong>Dynamic graphs:</strong> Structure évolue. Solution: Temporal GNN (TGAT, EvolveGCN)</li>
                 </ul>
             </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 15px;">✅ Avantages</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Relations explicites:</strong> Modélise connexions entre entités directement (vs CNNs grille régulière)</li>
+                    <li><strong>Message passing = propagation info:</strong> Info se propage naturellement via structure graphe</li>
+                    <li><strong>SOTA réseaux sociaux/molécules:</strong> Performances supérieures sur données relationnelles</li>
+                    <li><strong>Inductive learning:</strong> Généralise à nouveaux noeuds non vus pendant entraînement</li>
+                    <li><strong>Interprétabilité:</strong> Attention weights montrent quels voisins sont importants</li>
+                </ul>
+            </div>
+
+            <div style="background: #ffebee; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e53935;">
+                <h3 style="color: #c62828; margin-bottom: 15px;">⚠️ Limites</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Scalabilité difficile (millions nœuds):</strong> Full-batch GCN impraticable. Sampling nécessaire</li>
+                    <li><strong>Over-smoothing couches profondes:</strong> >4-5 layers, noeuds deviennent indistinguables</li>
+                    <li><strong>GPU graph sampling:</strong> Irrégularité graphe = inefficacité GPU vs CNN/Transformers</li>
+                    <li><strong>Choix architecture complexe:</strong> GCN vs GraphSAGE vs GAT selon structure graphe</li>
+                    <li><strong>Nécessite structure graphe:</strong> Si relations floues, construction graphe = preprocessing lourd</li>
+                </ul>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #ff9800;">
+                <h3 style="color: #e65100; margin-bottom: 15px;">💼 Cas d'Usage Production</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Social networks (influence):</strong> Détection influenceurs, communautés, recommandations amis</li>
+                    <li><strong>Drug discovery (molécules):</strong> Prédiction propriétés chimiques, toxicité, solubilité</li>
+                    <li><strong>Fraud detection:</strong> Transactions suspectes basées sur réseau connexions bancaires</li>
+                    <li><strong>Knowledge graphs:</strong> Completion triplets (sujet, relation, objet), question answering</li>
+                    <li><strong>Recommandation:</strong> User-item bipartite graph pour collaborative filtering avancé</li>
+                </ul>
+            </div>
+
+            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e91e63;">
+                <h3 style="color: #c2185b; margin-bottom: 15px;">🚨 Pièges à Éviter</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Ignorer structure graph (connexions):</strong> Traiter comme features tabulaires = perd avantage GNN</li>
+                    <li><strong>GCN vs GraphSAGE vs GAT choice:</strong> GCN = dense, GraphSAGE = sampling, GAT = attention. Tester empiriquement</li>
+                    <li><strong>Oversmoothing:</strong> Stacker 10 layers GNN = convergence. Limiter à 2-4 layers + residual connections</li>
+                    <li><strong>Pas de node feature engineering:</strong> GNN amplifie features, mauvaises features = mauvais résultats</li>
+                    <li><strong>Train/val/test split incorrect:</strong> Respecter structure temporelle (leak si edges futurs dans train)</li>
+                    <li><strong>Ignorer edge features:</strong> Poids arêtes, timestamps souvent cruciaux, pas que topologie</li>
+                </ul>
+            </div>
         </div>
     </div>
 

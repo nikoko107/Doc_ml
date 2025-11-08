@@ -15,7 +15,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: clamp(10px, 3vw, 20px);
         }
 
         .container {
@@ -26,11 +26,11 @@
         header {
             text-align: center;
             color: white;
-            margin-bottom: 30px;
+            margin-bottom: clamp(20px, 4vw, 30px);
         }
 
         h1 {
-            font-size: 2.5em;
+            font-size: clamp(1.5em, 4vw, 2.5em);
             margin-bottom: 10px;
         }
 
@@ -42,6 +42,8 @@
             text-decoration: none;
             border-radius: 20px;
             margin-bottom: 20px;
+            min-height: 44px;
+            line-height: 24px;
         }
 
         .main-content {
@@ -70,6 +72,8 @@
             cursor: crosshair;
             display: block;
             margin: 0 auto;
+            max-width: 100%;
+            height: auto;
         }
 
         .controls {
@@ -82,6 +86,7 @@
         .controls h3 {
             color: #667eea;
             margin-bottom: 20px;
+            font-size: clamp(1.1em, 3vw, 1.3em);
         }
 
         .info-box {
@@ -93,7 +98,7 @@
 
         .info-box p {
             margin-bottom: 8px;
-            font-size: 0.95em;
+            font-size: clamp(0.85em, 2vw, 0.95em);
         }
 
         .info-box strong {
@@ -106,10 +111,11 @@
             margin-bottom: 10px;
             border: none;
             border-radius: 8px;
-            font-size: 1em;
+            font-size: clamp(0.9em, 2vw, 1em);
             cursor: pointer;
             font-weight: bold;
             transition: opacity 0.3s;
+            min-height: 44px;
         }
 
         button:hover {
@@ -136,12 +142,18 @@
         .explanation h3 {
             color: #667eea;
             margin-bottom: 15px;
+            font-size: clamp(1.1em, 3vw, 1.3em);
+        }
+
+        .explanation h4 {
+            font-size: clamp(1em, 2.5vw, 1.1em);
         }
 
         .explanation p {
             line-height: 1.6;
             color: #666;
             margin-bottom: 10px;
+            font-size: clamp(0.9em, 2vw, 1em);
         }
 
         .formula {
@@ -151,7 +163,199 @@
             font-family: 'Courier New', monospace;
             text-align: center;
             margin: 15px 0;
-            font-size: 1.1em;
+            font-size: clamp(0.9em, 2vw, 1.1em);
+            overflow-x: auto;
+        }
+
+        .help-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 14px;
+            cursor: help;
+            margin-left: 5px;
+            position: relative;
+        }
+
+        .help-icon:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            white-space: nowrap;
+            font-size: 12px;
+            z-index: 1000;
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 250px;
+            white-space: normal;
+            width: max-content;
+        }
+
+        .definitions {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .definitions h4 {
+            color: #1565c0;
+            margin-bottom: 10px;
+        }
+
+        .definitions dt {
+            font-weight: bold;
+            color: #1976d2;
+            margin-top: 8px;
+        }
+
+        .definitions dd {
+            margin-left: 20px;
+            margin-bottom: 8px;
+            color: #666;
+        }
+
+        .swot-analysis {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .swot-analysis h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: clamp(1.1em, 3vw, 1.3em);
+        }
+
+        .swot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .swot-box {
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid;
+        }
+
+        .swot-box h4 {
+            margin-bottom: 15px;
+            font-size: clamp(1em, 2.5vw, 1.1em);
+        }
+
+        .swot-box ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .swot-box li {
+            margin-bottom: 8px;
+            font-size: clamp(0.9em, 2vw, 0.95em);
+        }
+
+        .advantages {
+            background: #e8f5e9;
+            border-color: #2ecc71;
+        }
+
+        .disadvantages {
+            background: #ffebee;
+            border-color: #e74c3c;
+        }
+
+        .use-cases {
+            background: #e3f2fd;
+            border-color: #3498db;
+        }
+
+        .pitfalls {
+            background: #fff3e0;
+            border-color: #f39c12;
+        }
+
+        .how-it-works {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+
+        .how-it-works h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .how-it-works ol {
+            margin: 15px 0 0 25px;
+            line-height: 2;
+        }
+
+        .how-it-works li {
+            margin-bottom: 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .visualization-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .canvas-container {
+                padding: 15px;
+            }
+
+            .controls {
+                padding: 20px;
+            }
+
+            .explanation {
+                padding: 20px;
+            }
+
+            .formula {
+                font-size: 0.85em;
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .back-btn {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+
+            .info-box p {
+                font-size: 0.85em;
+            }
         }
     </style>
 </head>
@@ -165,13 +369,19 @@
 
         <div class="visualization-grid">
             <div class="canvas-container">
-                <h3 style="color: #667eea; margin-bottom: 15px; text-align: center;">Régression Linéaire</h3>
-                <canvas id="canvas" width="700" height="500"></canvas>
+                <h3 style="color: #667eea; margin-bottom: 15px; text-align: center;">
+                    Régression Linéaire
+                    <span class="help-icon" data-tooltip="Cliquez pour ajouter des points. Les lignes représentent les modèles MSE (bleu) et MAE (vert)">?</span>
+                </h3>
+                <canvas id="canvas"></canvas>
             </div>
 
             <div class="canvas-container">
-                <h3 style="color: #667eea; margin-bottom: 15px; text-align: center;">Convergence de l'erreur</h3>
-                <canvas id="convergenceCanvas" width="700" height="500"></canvas>
+                <h3 style="color: #667eea; margin-bottom: 15px; text-align: center;">
+                    Convergence de l'erreur
+                    <span class="help-icon" data-tooltip="Visualise comment les erreurs MSE et MAE diminuent au fil des itérations">?</span>
+                </h3>
+                <canvas id="convergenceCanvas"></canvas>
             </div>
         </div>
 
@@ -264,6 +474,93 @@
                 <p>
                     <strong>🔬 Expérience:</strong> Ajoutez des points avec outliers et observez comment MAE (verte) est robuste et ignore les outliers tandis que MSE (bleue) est attirée vers eux!
                 </p>
+
+                <div class="definitions">
+                    <h4>📚 Définitions</h4>
+                    <dl>
+                        <dt>Régression Linéaire <span class="help-icon" data-tooltip="Technique pour trouver la meilleure ligne droite qui passe au plus près de tous les points">?</span></dt>
+                        <dd>Méthode statistique pour modéliser la relation entre une variable dépendante et une ou plusieurs variables indépendantes</dd>
+
+                        <dt>Descente de Gradient <span class="help-icon" data-tooltip="Comme descendre une montagne pas à pas en cherchant toujours le chemin le plus pentu">?</span></dt>
+                        <dd>Algorithme d'optimisation itératif qui ajuste progressivement les paramètres pour minimiser l'erreur</dd>
+
+                        <dt>Outlier (Valeur Aberrante) <span class="help-icon" data-tooltip="Point qui s'écarte significativement de la tendance générale des données">?</span></dt>
+                        <dd>Point de données qui se situe loin de la tendance générale et peut influencer fortement le modèle</dd>
+
+                        <dt>Taux d'Apprentissage <span class="help-icon" data-tooltip="Contrôle la taille des pas lors de la descente de gradient. Trop grand = instabilité, trop petit = lenteur">?</span></dt>
+                        <dd>Paramètre qui contrôle la vitesse de convergence de l'algorithme (valeur entre 0.001 et 0.5)</dd>
+                    </dl>
+                </div>
+
+                <div class="swot-analysis">
+                    <h3>📊 Analyse : Quand utiliser la régression linéaire ?</h3>
+
+                    <div class="swot-grid">
+                        <div class="swot-box advantages">
+                            <h4>✅ Avantages</h4>
+                            <ul>
+                                <li><strong>Simplicité</strong> : Facile à comprendre et à interpréter</li>
+                                <li><strong>Rapidité</strong> : Entraînement très rapide, même sur gros datasets</li>
+                                <li><strong>Interprétabilité</strong> : Chaque coefficient a un sens clair (impact de chaque variable)</li>
+                                <li><strong>Peu d'hyperparamètres</strong> : Pas de tuning complexe nécessaire</li>
+                                <li><strong>Solution analytique</strong> : Optimum exact calculable directement (pas besoin d'itérations)</li>
+                                <li><strong>Baseline parfaite</strong> : Excellent point de départ pour tout projet ML</li>
+                            </ul>
+                        </div>
+
+                        <div class="swot-box disadvantages">
+                            <h4>❌ Inconvénients & Limites</h4>
+                            <ul>
+                                <li><strong>Relations linéaires uniquement</strong> : Ne capture pas les relations complexes/non-linéaires</li>
+                                <li><strong>Sensible aux outliers</strong> : MSE pénalise fortement les valeurs aberrantes (au carré)</li>
+                                <li><strong>Hypothèses strictes</strong> : Assume indépendance des features, homoscédasticité, normalité des erreurs</li>
+                                <li><strong>Multicolinéarité</strong> : Problèmes si features corrélées entre elles</li>
+                                <li><strong>Extrapolation dangereuse</strong> : Prédictions hors domaine d'entraînement peu fiables</li>
+                            </ul>
+                        </div>
+
+                        <div class="swot-box use-cases">
+                            <h4>💡 Cas d'usage recommandés</h4>
+                            <ul>
+                                <li><strong>Prédiction de prix</strong> : Immobilier (surface → prix), ventes (budget pub → revenus)</li>
+                                <li><strong>Prévisions simples</strong> : Tendances temporelles linéaires, croissance</li>
+                                <li><strong>Modèle baseline</strong> : Toujours commencer par régression linéaire avant modèles complexes</li>
+                                <li><strong>Données tabulaires</strong> : Features numériques continues avec relation approximativement linéaire</li>
+                                <li><strong>Interprétabilité critique</strong> : Secteur médical, finance (besoin d'expliquer les décisions)</li>
+                                <li><strong>Peu de données</strong> : Fonctionne bien même avec datasets réduits</li>
+                            </ul>
+                        </div>
+
+                        <div class="swot-box pitfalls">
+                            <h4>⚠️ Pièges à éviter</h4>
+                            <ul>
+                                <li><strong>Outliers non traités</strong> : Toujours visualiser et gérer les valeurs aberrantes (MAE ou robustesse)</li>
+                                <li><strong>Multicolinéarité ignorée</strong> : Vérifier VIF (Variance Inflation Factor) ou utiliser régularisation (Ridge/Lasso)</li>
+                                <li><strong>Extrapolation aveugle</strong> : Ne jamais prédire loin des données d'entraînement</li>
+                                <li><strong>Relations non-linéaires</strong> : Transformer features (log, polynomial) ou passer à modèles non-linéaires</li>
+                                <li><strong>Features non normalisées</strong> : Standardiser si échelles très différentes (régularisation)</li>
+                                <li><strong>Overfitting avec trop de features</strong> : Utiliser régularisation (Ridge, Lasso, ElasticNet)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 25px; border-left: 5px solid #2ecc71;">
+                        <h4 style="color: #1b5e20; margin-bottom: 10px;">🎯 En production : Checklist décisionnelle</h4>
+                        <p style="color: #2e7d32; line-height: 1.8; margin-bottom: 10px;"><strong>Utilisez la régression linéaire si :</strong></p>
+                        <ul style="color: #2e7d32; line-height: 1.8; margin-left: 25px;">
+                            <li>✓ Relation approximativement linéaire entre X et y</li>
+                            <li>✓ Besoin d'interprétabilité claire des résultats</li>
+                            <li>✓ Budget computationnel limité (rapidité critère)</li>
+                            <li>✓ Première itération / baseline du projet</li>
+                        </ul>
+                        <p style="color: #c62828; line-height: 1.8; margin-top: 15px; margin-bottom: 10px;"><strong>Passez à autre chose si :</strong></p>
+                        <ul style="color: #c62828; line-height: 1.8; margin-left: 25px;">
+                            <li>✗ Relation clairement non-linéaire (courbes, interactions complexes)</li>
+                            <li>✗ Besoin de performance maximale (privilégier Random Forest, Gradient Boosting)</li>
+                            <li>✗ Beaucoup d'outliers non gérables (essayer MAE ou modèles robustes)</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
 
             <div class="controls">
@@ -296,10 +593,9 @@
     </div>
 
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const convergenceCanvas = document.getElementById('convergenceCanvas');
-        const convCtx = convergenceCanvas.getContext('2d');
+        let canvas, ctx, convergenceCanvas, convCtx;
+        let canvasWidth, canvasHeight;
+        let convCanvasWidth, convCanvasHeight;
 
         const points = [];
 
@@ -316,23 +612,68 @@
         let isOptimizing = false;
         let animationId = null;
 
-        document.getElementById('learningRate').addEventListener('input', (e) => {
-            learningRate = parseFloat(e.target.value);
-            document.getElementById('lrValue').textContent = learningRate.toFixed(4);
-        });
+        function initCanvas() {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            convergenceCanvas = document.getElementById('convergenceCanvas');
+            convCtx = convergenceCanvas.getContext('2d');
 
-        // Update learning rate display
-        document.getElementById('lrValue').textContent = learningRate.toFixed(4);
-        document.getElementById('learningRate').value = learningRate;
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        }
 
-        canvas.addEventListener('click', (e) => {
-            if (isOptimizing) return; // Don't add points during optimization
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            points.push({x, y});
+        function resizeCanvas() {
+            // Resize main canvas
+            const container = canvas.parentElement;
+            const containerWidth = container.clientWidth - 40;
+
+            canvasWidth = Math.min(containerWidth, 900);
+            canvasHeight = Math.floor(canvasWidth * 0.7);
+
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            canvas.style.width = canvasWidth + 'px';
+            canvas.style.height = canvasHeight + 'px';
+
+            // Resize convergence canvas
+            const convContainer = convergenceCanvas.parentElement;
+            const convContainerWidth = convContainer.clientWidth - 40;
+
+            convCanvasWidth = Math.min(convContainerWidth, 900);
+            convCanvasHeight = Math.floor(convCanvasWidth * 0.7);
+
+            convergenceCanvas.width = convCanvasWidth;
+            convergenceCanvas.height = convCanvasHeight;
+            convergenceCanvas.style.width = convCanvasWidth + 'px';
+            convergenceCanvas.style.height = convCanvasHeight + 'px';
+
             draw();
-            updateInfo();
+            drawConvergenceGraph();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+
+            document.getElementById('learningRate').addEventListener('input', (e) => {
+                learningRate = parseFloat(e.target.value);
+                document.getElementById('lrValue').textContent = learningRate.toFixed(4);
+            });
+
+            // Update learning rate display
+            document.getElementById('lrValue').textContent = learningRate.toFixed(4);
+            document.getElementById('learningRate').value = learningRate;
+
+            canvas.addEventListener('click', (e) => {
+                if (isOptimizing) return;
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const x = (e.clientX - rect.left) * scaleX;
+                const y = (e.clientY - rect.top) * scaleY;
+                points.push({x, y});
+                draw();
+                updateInfo();
+            });
         });
 
         function addRandomPoints() {
@@ -804,9 +1145,6 @@
             }
         }
 
-        // Initial draw
-        draw();
-        drawConvergenceGraph();
     </script>
 </body>
 </html>

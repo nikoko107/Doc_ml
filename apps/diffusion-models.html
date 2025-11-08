@@ -509,6 +509,51 @@
                     <li><strong>Seed:</strong> Reproductibilité</li>
                 </ul>
             </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 15px;">✅ Avantages</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Qualité image exceptionnelle:</strong> Photoréalisme, cohérence artistique supérieure aux GANs</li>
+                    <li><strong>Contrôle fin (ControlNet):</strong> Poser, depth map, edge detection, segmentation</li>
+                    <li><strong>Inpainting & img2img:</strong> Édition sélective, variations d'images existantes</li>
+                    <li><strong>Open-source (Stable Diffusion):</strong> Déploiement local, fine-tuning, modèles custom</li>
+                    <li><strong>Guidance scale flexible:</strong> Trade-off créativité vs fidélité au prompt</li>
+                </ul>
+            </div>
+
+            <div style="background: #ffebee; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e53935;">
+                <h3 style="color: #c62828; margin-bottom: 15px;">⚠️ Limites</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Lent (50 steps):</strong> 5-30s par image selon GPU. SDXL encore plus lent</li>
+                    <li><strong>GPU haut de gamme requis:</strong> 10GB+ VRAM pour SD 1.5, 24GB pour SDXL</li>
+                    <li><strong>Prompts difficiles:</strong> Apprentissage du prompt engineering nécessaire</li>
+                    <li><strong>Mains/texte problématiques:</strong> Détails fins souvent ratés (doigts supplémentaires, texte illisible)</li>
+                    <li><strong>Biais training data:</strong> Sur-représentation styles occidentaux, problèmes diversité</li>
+                </ul>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #ff9800;">
+                <h3 style="color: #e65100; margin-bottom: 15px;">💼 Cas d'Usage Production</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Génération images marketing:</strong> Ads, bannières, visuals réseaux sociaux</li>
+                    <li><strong>Prototypage design:</strong> Mockups UI/UX, variations produits, mood boards</li>
+                    <li><strong>Game assets:</strong> Textures, concepts art, backgrounds</li>
+                    <li><strong>Art génératif:</strong> NFTs, illustrations, style transfer</li>
+                    <li><strong>Édition photo pro:</strong> Inpainting objets indésirables, super-resolution, colorization</li>
+                </ul>
+            </div>
+
+            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e91e63;">
+                <h3 style="color: #c2185b; margin-bottom: 15px;">🚨 Pièges à Éviter</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Prompts vagues:</strong> "Beautiful girl" → résultats génériques. Détailler: style, lighting, composition</li>
+                    <li><strong>Pas de negative prompts:</strong> Toujours spécifier ce qu'on ne veut pas (ugly, blurry, artifacts)</li>
+                    <li><strong>CFG scale par défaut (7):</strong> Tester 4-12. Trop haut = oversaturé, trop bas = ignore prompt</li>
+                    <li><strong>Biais training data ignoré:</strong> Générer visages = majoritairement caucasiens si pas spécifié</li>
+                    <li><strong>Oublier ControlNet:</strong> Pour contrôle précis pose/composition, essentiel en production</li>
+                    <li><strong>Pas de seed fixing:</strong> Reproductibilité impossible sans seed fixe pour itérations</li>
+                </ul>
+            </div>
         </div>
     </div>
 
