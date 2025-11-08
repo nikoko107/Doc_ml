@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réseau de Neurones : Entraînement & Inférence</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: clamp(10px, 3vw, 20px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: clamp(20px, 4vw, 30px);
+        }
+
+        h1 {
+            font-size: clamp(1.5em, 4vw, 2.5em);
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            min-height: 44px;
+            line-height: 24px;
+        }
+
+        .phase-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .phase-btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 25px;
+            font-size: clamp(1em, 2.5vw, 1.2em);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-height: 50px;
+            background: rgba(255,255,255,0.3);
+            color: white;
+        }
+
+        .phase-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .canvas-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        canvas {
+            border: 2px solid #ddd;
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .controls h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: clamp(1.1em, 3vw, 1.3em);
+        }
+
+        .info-box {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-box p {
+            margin-bottom: 8px;
+            font-size: clamp(0.85em, 2vw, 0.95em);
+        }
+
+        .info-box strong {
+            color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: clamp(0.9em, 2vw, 1em);
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.3s;
+            min-height: 44px;
+        }
+
+        button:hover:not(:disabled) {
+            opacity: 0.8;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .activation-selector {
+            margin: 15px 0;
+        }
+
+        .activation-selector select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            font-size: clamp(0.9em, 2vw, 1em);
+            min-height: 44px;
+        }
+
+        .explanation {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-top: 20px;
+        }
+
+        .explanation h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: clamp(1.1em, 3vw, 1.3em);
+        }
+
+        .explanation p {
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 10px;
+            font-size: clamp(0.9em, 2vw, 1em);
+        }
+
+        .formula {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            margin: 15px 0;
+            font-size: clamp(0.9em, 2vw, 1.1em);
+            overflow-x: auto;
+        }
+
+        .step-indicator {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: clamp(1em, 2.5vw, 1.1em);
+        }
+
+        .help-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 14px;
+            cursor: help;
+            margin-left: 5px;
+            position: relative;
+        }
+
+        .help-icon:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            white-space: nowrap;
+            font-size: 12px;
+            z-index: 1000;
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 250px;
+            white-space: normal;
+            width: max-content;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .phase-selector {
+                gap: 10px;
+            }
+
+            .phase-btn {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+
+            .canvas-container {
+                padding: 15px;
+            }
+
+            .controls {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .back-btn {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+
+            .phase-btn {
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-btn">← Retour</a>
+            <h1>🧠 Réseau de Neurones : Entraînement & Inférence</h1>
+            <p>Comprenez le neurone, la backpropagation et la descente de gradient</p>
+        </header>
+
+        <div class="phase-selector">
+            <button class="phase-btn active" onclick="switchPhase('training')">
+                📚 Phase 1 : Entraînement
+            </button>
+            <button class="phase-btn" onclick="switchPhase('inference')">
+                🎯 Phase 2 : Inférence
+            </button>
+        </div>
+
+        <div id="trainingPhase">
+            <div class="step-indicator" id="stepIndicator">
+                Étape 1/4 : Forward Pass (Propagation Avant)
+            </div>
+
+            <div class="main-content">
+                <div class="canvas-container">
+                    <h3 style="color: #667eea; margin-bottom: 15px; text-align: center;">
+                        Réseau de Neurones (1 couche cachée)
+                        <span class="help-icon" data-tooltip="Visualisation du réseau : 2 entrées → 3 neurones cachés → 1 sortie">?</span>
+                    </h3>
+                    <canvas id="networkCanvas"></canvas>
+                </div>
+
+                <div class="controls">
+                    <h3>⚙️ Contrôles d'Entraînement</h3>
+
+                    <div class="info-box">
+                        <p><strong>Epoch:</strong> <span id="epoch">0</span> / <span id="maxEpoch">100</span></p>
+                        <p><strong>Loss (MSE):</strong> <span id="loss">-</span></p>
+                        <p><strong>Précision:</strong> <span id="accuracy">-</span></p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="activation-selector">
+                        <label><strong>Fonction d'activation:</strong></label>
+                        <select id="activationSelect">
+                            <option value="sigmoid">Sigmoid (σ)</option>
+                            <option value="relu" selected>ReLU</option>
+                            <option value="tanh">Tanh</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-primary" onclick="trainOneStep()" id="stepBtn">
+                        ▶️ Avancer d'1 étape
+                    </button>
+                    <button class="btn-success" onclick="startTraining()" id="trainBtn">
+                        🚀 Entraîner (automatique)
+                    </button>
+                    <button class="btn-warning" onclick="resetNetwork()" id="resetBtn">
+                        🔄 Réinitialiser
+                    </button>
+
+                    <div style="margin-top: 20px;">
+                        <label><strong>Taux d'apprentissage:</strong></label>
+                        <input type="range" id="learningRate" min="0.01" max="1.0" step="0.01" value="0.1" style="width: 100%;">
+                        <p style="text-align: center;" id="lrValue">0.1</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h3>🎓 Les 4 Étapes de l'Entraînement d'un Réseau de Neurones</h3>
+
+                <div class="formula" style="background: #e3f2fd; text-align: left; padding: 20px;">
+                    <h4 style="color: #1976d2; margin-bottom: 10px;">🔹 Étape 1 : Forward Pass (Propagation Avant)</h4>
+                    <p style="font-family: 'Segoe UI'; margin-bottom: 10px; color: #666;">
+                        Calcul de la sortie du réseau à partir des entrées :
+                    </p>
+                    <div style="font-family: 'Courier New'; background: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        z = w·x + b<br>
+                        a = activation(z)<br>
+                        ŷ = sortie finale
+                    </div>
+                    <p style="font-family: 'Segoe UI'; font-size: 0.9em; color: #666;">
+                        Où <strong>w</strong> = poids, <strong>x</strong> = entrées, <strong>b</strong> = biais
+                    </p>
+                </div>
+
+                <div class="formula" style="background: #fff3e0; text-align: left; padding: 20px; margin-top: 15px;">
+                    <h4 style="color: #e65100; margin-bottom: 10px;">🔹 Étape 2 : Calcul de l'Erreur (Loss)</h4>
+                    <p style="font-family: 'Segoe UI'; margin-bottom: 10px; color: #666;">
+                        Mesurer l'écart entre prédiction et réalité :
+                    </p>
+                    <div style="font-family: 'Courier New'; background: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        Loss = MSE = (1/n) Σ (y - ŷ)²
+                    </div>
+                    <p style="font-family: 'Segoe UI'; font-size: 0.9em; color: #666;">
+                        Plus la loss est petite, meilleur est le modèle
+                    </p>
+                </div>
+
+                <div class="formula" style="background: #ffebee; text-align: left; padding: 20px; margin-top: 15px;">
+                    <h4 style="color: #c62828; margin-bottom: 10px;">🔹 Étape 3 : Backward Pass (Backpropagation)</h4>
+                    <p style="font-family: 'Segoe UI'; margin-bottom: 10px; color: #666;">
+                        Calculer les gradients (comment l'erreur change avec chaque poids) :
+                    </p>
+                    <div style="font-family: 'Courier New'; background: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        ∂Loss/∂w = gradient du poids<br>
+                        ∂Loss/∂b = gradient du biais
+                    </div>
+                    <p style="font-family: 'Segoe UI'; font-size: 0.9em; color: #666;">
+                        Utilise la règle de la chaîne : propagation de l'erreur de la sortie vers l'entrée
+                    </p>
+                </div>
+
+                <div class="formula" style="background: #e8f5e9; text-align: left; padding: 20px; margin-top: 15px;">
+                    <h4 style="color: #2e7d32; margin-bottom: 10px;">🔹 Étape 4 : Mise à Jour (Gradient Descent)</h4>
+                    <p style="font-family: 'Segoe UI'; margin-bottom: 10px; color: #666;">
+                        Ajuster les poids pour réduire l'erreur :
+                    </p>
+                    <div style="font-family: 'Courier New'; background: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        w = w - α · ∂Loss/∂w<br>
+                        b = b - α · ∂Loss/∂b
+                    </div>
+                    <p style="font-family: 'Segoe UI'; font-size: 0.9em; color: #666;">
+                        Où <strong>α</strong> = taux d'apprentissage (learning rate)
+                    </p>
+                </div>
+
+                <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 5px solid #9c27b0;">
+                    <h4 style="color: #6a1b9a; margin-bottom: 10px;">🔄 Cycle Complet</h4>
+                    <p style="color: #666; line-height: 1.8;">
+                        1️⃣ <strong>Forward</strong> : Calcul de la prédiction<br>
+                        2️⃣ <strong>Loss</strong> : Mesure de l'erreur<br>
+                        3️⃣ <strong>Backward</strong> : Calcul des gradients<br>
+                        4️⃣ <strong>Update</strong> : Correction des poids<br>
+                        🔁 <strong>Répéter</strong> jusqu'à convergence (loss → 0)
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div id="inferencePhase" style="display: none;">
+            <div class="main-content">
+                <div class="canvas-container">
+                    <h3 style="color: #667eea; margin-bottom: 15px; text-align: center;">
+                        Inférence : Testez le Réseau Entraîné
+                        <span class="help-icon" data-tooltip="Cliquez sur le canvas pour tester le réseau avec de nouveaux points">?</span>
+                    </h3>
+                    <canvas id="inferenceCanvas"></canvas>
+                    <p style="text-align: center; margin-top: 10px; color: #666; font-size: 0.9em;">
+                        Cliquez pour ajouter un point et voir la prédiction
+                    </p>
+                </div>
+
+                <div class="controls">
+                    <h3>🎯 Résultats d'Inférence</h3>
+
+                    <div class="info-box">
+                        <p><strong>Points testés:</strong> <span id="testedPoints">0</span></p>
+                        <p><strong>Dernière prédiction:</strong> <span id="lastPrediction">-</span></p>
+                        <p><strong>Confiance:</strong> <span id="confidence">-</span></p>
+                    </div>
+
+                    <div style="background: #e8f5e9; padding: 15px; border-radius: 10px; margin: 15px 0;">
+                        <h4 style="color: #2e7d32; margin-bottom: 10px;">✅ Réseau Entraîné</h4>
+                        <p style="color: #666; font-size: 0.9em; line-height: 1.6;">
+                            Le réseau a appris à classifier les données. En phase d'inférence,
+                            il utilise les poids entraînés (figés) pour faire des prédictions sur de nouvelles données.
+                        </p>
+                    </div>
+
+                    <button class="btn-warning" onclick="switchPhase('training')">
+                        ← Retour à l'Entraînement
+                    </button>
+                    <button class="btn-secondary" onclick="clearInferencePoints()">
+                        🗑️ Effacer les points de test
+                    </button>
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h3>🎯 Phase d'Inférence : Utilisation du Modèle</h3>
+                <p>
+                    Une fois le réseau <strong>entraîné</strong>, nous entrons en phase d'<strong>inférence</strong>.
+                    C'est la phase de production où le modèle est utilisé pour faire des prédictions sur de nouvelles données.
+                </p>
+
+                <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4 style="color: #1976d2; margin-bottom: 10px;">🔍 Différences Entraînement vs Inférence</h4>
+                    <table style="width: 100%; color: #666; line-height: 2;">
+                        <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Aspect</strong></td>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Entraînement</strong></td>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Inférence</strong></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Poids</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Modifiés (appris)</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Figés (constants)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Phases</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Forward + Backward</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Forward uniquement</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Données</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Dataset d'entraînement</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Nouvelles données</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px;">Objectif</td>
+                            <td style="padding: 8px;">Minimiser la loss</td>
+                            <td style="padding: 8px;">Prédire la classe/valeur</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 5px solid #f57c00;">
+                    <h4 style="color: #e65100; margin-bottom: 10px;">💡 En Production</h4>
+                    <p style="color: #666; line-height: 1.8;">
+                        • <strong>Entraînement</strong> : Fait une fois (ou périodiquement pour recycler le modèle)<br>
+                        • <strong>Inférence</strong> : Exécutée des millions de fois par jour<br>
+                        • <strong>Optimisation</strong> : L'inférence doit être RAPIDE (quantization, pruning, distillation)<br>
+                        • <strong>Batch inference</strong> : Grouper les requêtes pour meilleure performance GPU
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas et contextes
+        let networkCanvas, networkCtx;
+        let inferenceCanvas, inferenceCtx;
+        let canvasWidth, canvasHeight;
+
+        // État de l'application
+        let currentPhase = 'training';
+        let currentStep = 1; // 1=Forward, 2=Loss, 3=Backward, 4=Update
+        let isTraining = false;
+        let epoch = 0;
+        const maxEpochs = 100;
+
+        // Réseau de neurones (2 inputs → 3 hidden → 1 output)
+        let network = {
+            // Poids couche cachée (2 entrées x 3 neurones)
+            w1: [[Math.random()-0.5, Math.random()-0.5],
+                 [Math.random()-0.5, Math.random()-0.5],
+                 [Math.random()-0.5, Math.random()-0.5]],
+            b1: [Math.random()-0.5, Math.random()-0.5, Math.random()-0.5],
+
+            // Poids couche sortie (3 entrées x 1 neurone)
+            w2: [Math.random()-0.5, Math.random()-0.5, Math.random()-0.5],
+            b2: Math.random()-0.5,
+
+            // Activations intermédiaires (pour backprop)
+            a1: [0, 0, 0], // Activations couche cachée
+            z1: [0, 0, 0], // Sommes pondérées couche cachée
+            a2: 0, // Activation sortie
+            z2: 0  // Somme pondérée sortie
+        };
+
+        // Dataset (XOR problem)
+        const trainingData = [
+            {x: [0.2, 0.2], y: 0}, // Classe 0
+            {x: [0.2, 0.8], y: 1}, // Classe 1
+            {x: [0.8, 0.2], y: 1}, // Classe 1
+            {x: [0.8, 0.8], y: 0}  // Classe 0
+        ];
+
+        // Points d'inférence
+        let inferencePoints = [];
+
+        // Paramètres
+        let learningRate = 0.1;
+        let activationType = 'relu';
+
+        // Fonctions d'activation
+        function activation(x, type = activationType) {
+            switch(type) {
+                case 'sigmoid':
+                    return 1 / (1 + Math.exp(-x));
+                case 'relu':
+                    return Math.max(0, x);
+                case 'tanh':
+                    return Math.tanh(x);
+                default:
+                    return x;
+            }
+        }
+
+        function activationDerivative(x, type = activationType) {
+            switch(type) {
+                case 'sigmoid':
+                    const sig = activation(x, 'sigmoid');
+                    return sig * (1 - sig);
+                case 'relu':
+                    return x > 0 ? 1 : 0;
+                case 'tanh':
+                    const th = Math.tanh(x);
+                    return 1 - th * th;
+                default:
+                    return 1;
+            }
+        }
+
+        // Forward pass
+        function forward(inputs) {
+            // Couche cachée
+            for (let i = 0; i < 3; i++) {
+                network.z1[i] = inputs[0] * network.w1[i][0] +
+                                inputs[1] * network.w1[i][1] +
+                                network.b1[i];
+                network.a1[i] = activation(network.z1[i]);
+            }
+
+            // Couche sortie
+            network.z2 = network.a1[0] * network.w2[0] +
+                         network.a1[1] * network.w2[1] +
+                         network.a1[2] * network.w2[2] +
+                         network.b2;
+            network.a2 = activation(network.z2, 'sigmoid'); // Sigmoid pour sortie [0,1]
+
+            return network.a2;
+        }
+
+        // Calcul de la loss (MSE)
+        function calculateLoss() {
+            let totalLoss = 0;
+            for (let data of trainingData) {
+                const pred = forward(data.x);
+                totalLoss += Math.pow(data.y - pred, 2);
+            }
+            return totalLoss / trainingData.length;
+        }
+
+        // Backward pass (backpropagation)
+        function backward(inputs, target) {
+            const output = network.a2;
+
+            // Gradient sortie
+            const dLoss_dOutput = 2 * (output - target);
+            const dOutput_dZ2 = activationDerivative(network.z2, 'sigmoid');
+            const delta2 = dLoss_dOutput * dOutput_dZ2;
+
+            // Gradients w2 et b2
+            const dw2 = [delta2 * network.a1[0],
+                         delta2 * network.a1[1],
+                         delta2 * network.a1[2]];
+            const db2 = delta2;
+
+            // Gradients couche cachée
+            const delta1 = [
+                delta2 * network.w2[0] * activationDerivative(network.z1[0]),
+                delta2 * network.w2[1] * activationDerivative(network.z1[1]),
+                delta2 * network.w2[2] * activationDerivative(network.z1[2])
+            ];
+
+            // Gradients w1 et b1
+            const dw1 = [
+                [delta1[0] * inputs[0], delta1[0] * inputs[1]],
+                [delta1[1] * inputs[0], delta1[1] * inputs[1]],
+                [delta1[2] * inputs[0], delta1[2] * inputs[1]]
+            ];
+            const db1 = delta1;
+
+            return { dw1, db1, dw2, db2 };
+        }
+
+        // Mise à jour des poids (gradient descent)
+        function updateWeights(gradients) {
+            // Update w1 et b1
+            for (let i = 0; i < 3; i++) {
+                network.w1[i][0] -= learningRate * gradients.dw1[i][0];
+                network.w1[i][1] -= learningRate * gradients.dw1[i][1];
+                network.b1[i] -= learningRate * gradients.db1[i];
+            }
+
+            // Update w2 et b2
+            for (let i = 0; i < 3; i++) {
+                network.w2[i] -= learningRate * gradients.dw2[i];
+            }
+            network.b2 -= learningRate * gradients.db2;
+        }
+
+        // Entraînement (1 epoch)
+        function trainEpoch() {
+            for (let data of trainingData) {
+                forward(data.x);
+                const gradients = backward(data.x, data.y);
+                updateWeights(gradients);
+            }
+            epoch++;
+        }
+
+        // Initialisation canvas
+        function initCanvas() {
+            networkCanvas = document.getElementById('networkCanvas');
+            networkCtx = networkCanvas.getContext('2d');
+            inferenceCanvas = document.getElementById('inferenceCanvas');
+            inferenceCtx = inferenceCanvas.getContext('2d');
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        function resizeCanvas() {
+            const container = networkCanvas.parentElement;
+            const containerWidth = container.clientWidth - 40;
+
+            canvasWidth = Math.min(containerWidth, 900);
+            canvasHeight = Math.floor(canvasWidth * 0.6);
+
+            networkCanvas.width = canvasWidth;
+            networkCanvas.height = canvasHeight;
+            networkCanvas.style.width = canvasWidth + 'px';
+            networkCanvas.style.height = canvasHeight + 'px';
+
+            inferenceCanvas.width = canvasWidth;
+            inferenceCanvas.height = canvasHeight;
+            inferenceCanvas.style.width = canvasWidth + 'px';
+            inferenceCanvas.style.height = canvasHeight + 'px';
+
+            drawNetwork();
+            drawInference();
+        }
+
+        // Dessin du réseau
+        function drawNetwork() {
+            networkCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            const padding = 80;
+            const layerWidth = (canvasWidth - 2 * padding) / 3;
+
+            // Positions des neurones
+            const inputY = [canvasHeight/3, 2*canvasHeight/3];
+            const hiddenY = [canvasHeight/4, canvasHeight/2, 3*canvasHeight/4];
+            const outputY = canvasHeight/2;
+
+            const inputX = padding;
+            const hiddenX = padding + layerWidth;
+            const outputX = padding + 2 * layerWidth;
+
+            // Dessiner les connexions
+            networkCtx.strokeStyle = '#ddd';
+            networkCtx.lineWidth = 1;
+
+            // Input → Hidden
+            for (let i = 0; i < 2; i++) {
+                for (let j = 0; j < 3; j++) {
+                    const weight = network.w1[j][i];
+                    networkCtx.strokeStyle = weight > 0 ? `rgba(46, 204, 113, ${Math.abs(weight)})` : `rgba(231, 76, 60, ${Math.abs(weight)})`;
+                    networkCtx.lineWidth = 1 + Math.abs(weight) * 3;
+                    networkCtx.beginPath();
+                    networkCtx.moveTo(inputX, inputY[i]);
+                    networkCtx.lineTo(hiddenX, hiddenY[j]);
+                    networkCtx.stroke();
+                }
+            }
+
+            // Hidden → Output
+            for (let i = 0; i < 3; i++) {
+                const weight = network.w2[i];
+                networkCtx.strokeStyle = weight > 0 ? `rgba(46, 204, 113, ${Math.abs(weight)})` : `rgba(231, 76, 60, ${Math.abs(weight)})`;
+                networkCtx.lineWidth = 1 + Math.abs(weight) * 3;
+                networkCtx.beginPath();
+                networkCtx.moveTo(hiddenX, hiddenY[i]);
+                networkCtx.lineTo(outputX, outputY);
+                networkCtx.stroke();
+            }
+
+            // Dessiner les neurones
+            const neuronRadius = 25;
+
+            // Input neurons
+            for (let i = 0; i < 2; i++) {
+                networkCtx.fillStyle = '#3498db';
+                networkCtx.beginPath();
+                networkCtx.arc(inputX, inputY[i], neuronRadius, 0, Math.PI * 2);
+                networkCtx.fill();
+                networkCtx.strokeStyle = '#2980b9';
+                networkCtx.lineWidth = 3;
+                networkCtx.stroke();
+
+                networkCtx.fillStyle = 'white';
+                networkCtx.font = '14px Arial';
+                networkCtx.textAlign = 'center';
+                networkCtx.textBaseline = 'middle';
+                networkCtx.fillText(`x${i+1}`, inputX, inputY[i]);
+            }
+
+            // Hidden neurons
+            for (let i = 0; i < 3; i++) {
+                const activation = network.a1[i];
+                networkCtx.fillStyle = `rgba(155, 89, 182, ${0.3 + activation * 0.7})`;
+                networkCtx.beginPath();
+                networkCtx.arc(hiddenX, hiddenY[i], neuronRadius, 0, Math.PI * 2);
+                networkCtx.fill();
+                networkCtx.strokeStyle = '#8e44ad';
+                networkCtx.lineWidth = 3;
+                networkCtx.stroke();
+
+                networkCtx.fillStyle = 'white';
+                networkCtx.font = '12px Arial';
+                networkCtx.fillText(activation.toFixed(2), hiddenX, hiddenY[i]);
+            }
+
+            // Output neuron
+            const output = network.a2;
+            networkCtx.fillStyle = `rgba(46, 204, 113, ${0.3 + output * 0.7})`;
+            networkCtx.beginPath();
+            networkCtx.arc(outputX, outputY, neuronRadius, 0, Math.PI * 2);
+            networkCtx.fill();
+            networkCtx.strokeStyle = '#27ae60';
+            networkCtx.lineWidth = 3;
+            networkCtx.stroke();
+
+            networkCtx.fillStyle = 'white';
+            networkCtx.font = '14px Arial';
+            networkCtx.fillText(output.toFixed(2), outputX, outputY);
+
+            // Labels
+            networkCtx.fillStyle = '#333';
+            networkCtx.font = 'bold 14px Arial';
+            networkCtx.fillText('Entrées', inputX, 30);
+            networkCtx.fillText('Couche Cachée', hiddenX, 30);
+            networkCtx.fillText('Sortie', outputX, 30);
+
+            // Activation function
+            networkCtx.fillStyle = '#666';
+            networkCtx.font = '12px Arial';
+            networkCtx.fillText(`f = ${activationType}`, hiddenX, canvasHeight - 20);
+        }
+
+        // Dessin inférence
+        function drawInference() {
+            inferenceCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            // Dessiner la frontière de décision
+            const resolution = 10;
+            for (let x = 0; x < canvasWidth; x += resolution) {
+                for (let y = 0; y < canvasHeight; y += resolution) {
+                    const inputX = x / canvasWidth;
+                    const inputY = y / canvasHeight;
+                    const pred = forward([inputX, inputY]);
+
+                    const color = pred > 0.5 ?
+                        `rgba(46, 204, 113, ${pred * 0.3})` :
+                        `rgba(231, 76, 60, ${(1-pred) * 0.3})`;
+
+                    inferenceCtx.fillStyle = color;
+                    inferenceCtx.fillRect(x, y, resolution, resolution);
+                }
+            }
+
+            // Dessiner les points de training
+            for (let data of trainingData) {
+                const x = data.x[0] * canvasWidth;
+                const y = data.x[1] * canvasHeight;
+
+                inferenceCtx.fillStyle = data.y === 1 ? '#2ecc71' : '#e74c3c';
+                inferenceCtx.beginPath();
+                inferenceCtx.arc(x, y, 8, 0, Math.PI * 2);
+                inferenceCtx.fill();
+
+                inferenceCtx.strokeStyle = 'white';
+                inferenceCtx.lineWidth = 2;
+                inferenceCtx.stroke();
+            }
+
+            // Dessiner les points d'inférence
+            for (let point of inferencePoints) {
+                const x = point.x * canvasWidth;
+                const y = point.y * canvasHeight;
+
+                inferenceCtx.fillStyle = point.pred > 0.5 ? '#2ecc71' : '#e74c3c';
+                inferenceCtx.globalAlpha = 0.7;
+                inferenceCtx.beginPath();
+                inferenceCtx.arc(x, y, 12, 0, Math.PI * 2);
+                inferenceCtx.fill();
+                inferenceCtx.globalAlpha = 1;
+
+                inferenceCtx.strokeStyle = '#fff';
+                inferenceCtx.lineWidth = 3;
+                inferenceCtx.stroke();
+
+                // Afficher la prédiction
+                inferenceCtx.fillStyle = '#333';
+                inferenceCtx.font = 'bold 12px Arial';
+                inferenceCtx.textAlign = 'center';
+                inferenceCtx.fillText(point.pred.toFixed(2), x, y - 20);
+            }
+        }
+
+        // Changement de phase
+        function switchPhase(phase) {
+            currentPhase = phase;
+
+            if (phase === 'training') {
+                document.getElementById('trainingPhase').style.display = 'block';
+                document.getElementById('inferencePhase').style.display = 'none';
+                document.querySelectorAll('.phase-btn')[0].classList.add('active');
+                document.querySelectorAll('.phase-btn')[1].classList.remove('active');
+            } else {
+                document.getElementById('trainingPhase').style.display = 'none';
+                document.getElementById('inferencePhase').style.display = 'block';
+                document.querySelectorAll('.phase-btn')[0].classList.remove('active');
+                document.querySelectorAll('.phase-btn')[1].classList.add('active');
+                drawInference();
+            }
+        }
+
+        // Entraînement pas à pas
+        function trainOneStep() {
+            const stepNames = [
+                'Étape 1/4 : Forward Pass (Propagation Avant)',
+                'Étape 2/4 : Calcul de l\'Erreur (Loss)',
+                'Étape 3/4 : Backward Pass (Backpropagation)',
+                'Étape 4/4 : Mise à Jour (Gradient Descent)'
+            ];
+
+            if (currentStep === 1) {
+                // Forward
+                for (let data of trainingData) {
+                    forward(data.x);
+                }
+            } else if (currentStep === 2) {
+                // Calculate loss
+                const loss = calculateLoss();
+                document.getElementById('loss').textContent = loss.toFixed(6);
+            } else if (currentStep === 3) {
+                // Backward (accumulate gradients)
+            } else if (currentStep === 4) {
+                // Update weights
+                trainEpoch();
+                updateInfo();
+                currentStep = 0; // Reset for next cycle
+            }
+
+            currentStep++;
+            if (currentStep > 4) currentStep = 1;
+
+            document.getElementById('stepIndicator').textContent = stepNames[currentStep - 1];
+            drawNetwork();
+        }
+
+        // Entraînement automatique
+        let trainingInterval = null;
+        function startTraining() {
+            if (isTraining) {
+                // Stop training
+                clearInterval(trainingInterval);
+                isTraining = false;
+                document.getElementById('trainBtn').textContent = '🚀 Entraîner (automatique)';
+                document.getElementById('trainBtn').classList.remove('btn-secondary');
+                document.getElementById('trainBtn').classList.add('btn-success');
+            } else {
+                // Start training
+                isTraining = true;
+                document.getElementById('trainBtn').textContent = '⏸️ Pause';
+                document.getElementById('trainBtn').classList.remove('btn-success');
+                document.getElementById('trainBtn').classList.add('btn-secondary');
+
+                trainingInterval = setInterval(() => {
+                    if (epoch >= maxEpochs) {
+                        clearInterval(trainingInterval);
+                        isTraining = false;
+                        document.getElementById('trainBtn').textContent = '✅ Entraînement Terminé';
+                        document.getElementById('trainBtn').disabled = true;
+                        return;
+                    }
+
+                    trainEpoch();
+                    updateInfo();
+                    drawNetwork();
+                }, 50);
+            }
+        }
+
+        // Mise à jour de l'affichage
+        function updateInfo() {
+            document.getElementById('epoch').textContent = epoch;
+            const loss = calculateLoss();
+            document.getElementById('loss').textContent = loss.toFixed(6);
+
+            // Calcul précision
+            let correct = 0;
+            for (let data of trainingData) {
+                const pred = forward(data.x);
+                if ((pred > 0.5 && data.y === 1) || (pred <= 0.5 && data.y === 0)) {
+                    correct++;
+                }
+            }
+            const accuracy = (correct / trainingData.length * 100).toFixed(0);
+            document.getElementById('accuracy').textContent = accuracy + '%';
+
+            // Barre de progression
+            const progress = (epoch / maxEpochs * 100).toFixed(0);
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressFill').textContent = progress + '%';
+        }
+
+        // Réinitialisation
+        function resetNetwork() {
+            if (trainingInterval) {
+                clearInterval(trainingInterval);
+            }
+            isTraining = false;
+            epoch = 0;
+            currentStep = 1;
+
+            // Réinitialiser les poids
+            network.w1 = [[Math.random()-0.5, Math.random()-0.5],
+                          [Math.random()-0.5, Math.random()-0.5],
+                          [Math.random()-0.5, Math.random()-0.5]];
+            network.b1 = [Math.random()-0.5, Math.random()-0.5, Math.random()-0.5];
+            network.w2 = [Math.random()-0.5, Math.random()-0.5, Math.random()-0.5];
+            network.b2 = Math.random()-0.5;
+
+            document.getElementById('trainBtn').textContent = '🚀 Entraîner (automatique)';
+            document.getElementById('trainBtn').classList.remove('btn-secondary');
+            document.getElementById('trainBtn').classList.add('btn-success');
+            document.getElementById('trainBtn').disabled = false;
+            document.getElementById('stepIndicator').textContent = 'Étape 1/4 : Forward Pass (Propagation Avant)';
+
+            updateInfo();
+            drawNetwork();
+        }
+
+        // Click sur canvas d'inférence
+        function setupInferenceCanvas() {
+            inferenceCanvas.addEventListener('click', (e) => {
+                const rect = inferenceCanvas.getBoundingClientRect();
+                const scaleX = inferenceCanvas.width / rect.width;
+                const scaleY = inferenceCanvas.height / rect.height;
+
+                const x = ((e.clientX - rect.left) * scaleX) / canvasWidth;
+                const y = ((e.clientY - rect.top) * scaleY) / canvasHeight;
+
+                const pred = forward([x, y]);
+
+                inferencePoints.push({x, y, pred});
+
+                document.getElementById('testedPoints').textContent = inferencePoints.length;
+                document.getElementById('lastPrediction').textContent = pred > 0.5 ? 'Classe 1' : 'Classe 0';
+                document.getElementById('confidence').textContent = (Math.abs(pred - 0.5) * 200).toFixed(0) + '%';
+
+                drawInference();
+            });
+        }
+
+        function clearInferencePoints() {
+            inferencePoints = [];
+            document.getElementById('testedPoints').textContent = '0';
+            document.getElementById('lastPrediction').textContent = '-';
+            document.getElementById('confidence').textContent = '-';
+            drawInference();
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+            setupInferenceCanvas();
+
+            document.getElementById('learningRate').addEventListener('input', (e) => {
+                learningRate = parseFloat(e.target.value);
+                document.getElementById('lrValue').textContent = learningRate.toFixed(2);
+            });
+
+            document.getElementById('activationSelect').addEventListener('change', (e) => {
+                activationType = e.target.value;
+                resetNetwork();
+            });
+
+            updateInfo();
+            drawNetwork();
+        });
+    </script>
+</body>
+</html>
