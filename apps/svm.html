@@ -273,6 +273,8 @@
 </head>
 <body>
     <div class="container">
+        <a href="../index.html" style="display: inline-block; margin-bottom: 15px; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">← Retour à l'accueil</a>
+
         <h1>🎯 SVM - Animation d'Entraînement</h1>
         <p class="subtitle">Visualisez comment le SVM trouve l'hyperplan optimal avec marge maximale</p>
 
@@ -668,21 +670,36 @@
 
             updateStatus('🔄 Animation en cours...');
 
-            // Animation progressive
+            // Animation progressive TRÈS VISIBLE
             animationInterval = setInterval(() => {
                 currentIteration++;
                 trainSVMStep();
                 updateStats();
                 draw();
 
-                const progress = Math.min(currentIteration / 20 * 100, 100);
+                const progress = Math.min(currentIteration / 30 * 100, 100);
                 document.getElementById('progressFill').style.width = progress + '%';
 
-                if (currentIteration >= 20) {
-                    stopAnimation();
-                    updateStatus('✅ Entraînement terminé ! Hyperplan optimal trouvé.');
+                // Messages d'animation clairs
+                if (currentIteration === 1) {
+                    updateStatus('🔍 Étape 1/30 : Initialisation de l\'hyperplan...');
+                } else if (currentIteration === 5) {
+                    updateStatus('🔄 Étape 5/30 : Recherche des vecteurs de support...');
+                } else if (currentIteration === 10) {
+                    updateStatus('📊 Étape 10/30 : Optimisation de la marge...');
+                } else if (currentIteration === 15) {
+                    updateStatus('⚡ Étape 15/30 : Ajustement de l\'hyperplan...');
+                } else if (currentIteration === 20) {
+                    updateStatus('🎯 Étape 20/30 : Convergence en cours...');
+                } else if (currentIteration === 25) {
+                    updateStatus('✨ Étape 25/30 : Finalisation...');
                 }
-            }, 300);
+
+                if (currentIteration >= 30) {
+                    stopAnimation();
+                    updateStatus('✅ TERMINÉ ! Hyperplan optimal trouvé avec ' + supportVectors.length + ' vecteurs de support !');
+                }
+            }, 500);
         }
 
         function stopAnimation() {
