@@ -3,1032 +3,742 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Embeddings - Représentation Vectorielle</title>
+    <title>Word Embeddings - Animations d'Analogies</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: clamp(10px, 3vw, 20px);
             min-height: 100vh;
-            padding: 20px;
-            color: #333;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: clamp(15px, 4vw, 30px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-
-        .back-link {
-            display: inline-block; background: rgba(255,255,255,0.2); color: white;
-            padding: 10px 20px; font-weight: 600; text-decoration: none; border-radius: 20px;
-            margin-bottom: 20px;
-        }
-        .back-link:hover { background: rgba(255,255,255,0.3); }
 
         h1 {
+            color: #667eea;
             text-align: center;
-            color: white;
-            font-size: 2.5em;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: clamp(1.5em, 4vw, 2.5em);
         }
 
         .subtitle {
             text-align: center;
-            color: rgba(255,255,255,0.9);
-            font-size: 1.2em;
-            margin-bottom: 30px;
+            color: #666;
+            margin-bottom: 25px;
+            font-size: clamp(0.9em, 2vw, 1.1em);
         }
 
-        .animation-container {
-            background: white;
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 25px;
+            margin: 25px 0;
+        }
+
+        .canvas-card {
+            background: #f8f9fa;
+            padding: 20px;
             border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            position: relative;
-            height: 700px;
-            overflow: hidden;
+            border: 2px solid #e9ecef;
         }
 
-        .canvas-wrapper {
-            position: relative;
-            width: 600px;
-            height: 500px;
-            margin: 0 auto;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            background: #f9f9f9;
+        .canvas-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
         }
 
         canvas {
-            display: block;
+            border: 3px solid #667eea;
             border-radius: 10px;
+            background: white;
+            display: block;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
-        .word-label {
-            position: absolute;
+        .control-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .control-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .analogy-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .analogy-btn {
+            padding: 12px;
             background: white;
-            padding: 8px 15px;
-            border-radius: 8px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: #667eea;
+            text-align: left;
+        }
+
+        .analogy-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .analogy-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
             font-weight: bold;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-            pointer-events: none;
-            transition: all 0.5s ease;
+            transition: all 0.3s;
+            width: 100%;
+            min-height: 50px;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button.play {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            font-size: 1.2em;
+            padding: 20px;
+        }
+
+        button.stop {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .status-message {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            margin: 15px 0;
+            font-weight: 600;
+            color: #667eea;
+            text-align: center;
             font-size: 0.95em;
         }
 
-        .word-roi { color: #9b59b6; border: 2px solid #9b59b6; }
-        .word-reine { color: #e74c3c; border: 2px solid #e74c3c; }
-        .word-homme { color: #3498db; border: 2px solid #3498db; }
-        .word-femme { color: #e91e63; border: 2px solid #e91e63; }
-        .word-result { color: #2ecc71; border: 2px solid #2ecc71; background: #e8f8f0; }
-
-        .operation-display {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(102, 126, 234, 0.95);
-            color: white;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 1.2em;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            opacity: 0;
-            transition: opacity 0.5s;
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
         }
 
-        .operation-display.show {
-            opacity: 1;
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+            width: 0%;
+            transition: width 0.3s;
         }
 
-        .vector-info {
-            position: absolute;
-            bottom: 100px;
-            left: 50px;
-            background: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            border: 2px solid #667eea;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-
-        .vector-info.show {
-            opacity: 1;
-        }
-
-        .vector-info h4 {
-            color: #667eea;
-            font-size: 0.9em;
-            margin-bottom: 8px;
-        }
-
-        .vector-info p {
-            font-size: 0.85em;
-            color: #666;
-            margin: 3px 0;
-            font-family: monospace;
-        }
-
-        .similarity-box {
-            position: absolute;
-            bottom: 100px;
-            right: 50px;
-            background: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            border: 2px solid #2ecc71;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-
-        .similarity-box.show {
-            opacity: 1;
-        }
-
-        .similarity-box h4 {
-            color: #2ecc71;
-            font-size: 0.9em;
-            margin-bottom: 8px;
-        }
-
-        .similarity-value {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #2ecc71;
-        }
-
-        .info-panel {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(102, 126, 234, 0.1);
+        .word-search {
+            width: 100%;
+            padding: 12px;
             border: 2px solid #667eea;
             border-radius: 10px;
-            padding: 15px 30px;
-            min-width: 800px;
-            text-align: center;
+            font-size: 1em;
+            margin: 10px 0;
         }
 
-        .info-panel h4 {
-            color: #667eea;
-            margin-bottom: 5px;
-            font-size: 1.1em;
+        .similar-words {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
         }
 
-        .info-panel p {
-            color: #555;
+        .similar-word-item {
+            padding: 8px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
             font-size: 0.9em;
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+        .section {
+            margin: 30px 0;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
         }
 
-        .pulse {
-            animation: pulse 1s ease-in-out;
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: clamp(1.2em, 3vw, 1.8em);
         }
 
-        .axis-label {
-            position: absolute;
-            font-size: 0.8em;
-            color: #999;
-            font-weight: bold;
+        .section p {
+            line-height: 1.8;
+            color: #495057;
+            margin-bottom: 15px;
         }
 
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .canvas-wrapper {
-                width: 90%;
-                height: 450px;
-            }
-
-            canvas {
-                width: 100%;
-                height: 100%;
-            }
-
-            .vector-info {
-                left: 20px;
-                bottom: 80px;
-            }
-
-            .similarity-box {
-                right: 20px;
-                bottom: 80px;
-            }
-
-            .info-panel {
-                min-width: 90%;
-                padding: 12px 20px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-
-            .container {
-                max-width: 100%;
-            }
-
-            h1 {
-                font-size: 2em;
-            }
-
-            .subtitle {
-                font-size: 1em;
-            }
-
-            .back-link {
-                padding: 8px 15px;
-                font-size: 0.9em;
-            }
-
-            .animation-container {
-                padding: 20px 15px;
-                height: auto;
-                min-height: 600px;
-            }
-
-            .canvas-wrapper {
-                width: 100%;
-                height: 400px;
-                margin: 0;
-            }
-
-            canvas {
-                width: 100%;
-                height: 100%;
-            }
-
-            .operation-display {
-                font-size: 1em;
-                padding: 12px 20px;
-                top: 15px;
-            }
-
-            .vector-info {
-                position: static;
-                margin: 15px auto;
-                width: fit-content;
-            }
-
-            .similarity-box {
-                position: static;
-                margin: 15px auto;
-                width: fit-content;
-            }
-
-            .info-panel {
-                position: static;
-                transform: none;
-                margin: 15px auto 0;
-                min-width: auto;
-                width: 100%;
-            }
-
-            .info-panel h4 {
-                font-size: 1em;
-            }
-
-            .info-panel p {
-                font-size: 0.85em;
-            }
-
-            .word-label {
-                font-size: 0.8em;
-                padding: 6px 10px;
-            }
-
-            .axis-label {
-                font-size: 0.7em;
-            }
-        }
-
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 1.5em;
-            }
-
-            .subtitle {
-                font-size: 0.9em;
-            }
-
-            .animation-container {
-                padding: 15px 10px;
-                min-height: 550px;
-            }
-
-            .canvas-wrapper {
-                height: 350px;
-            }
-
-            .operation-display {
-                font-size: 0.9em;
-                padding: 10px 15px;
-            }
-
-            .word-label {
-                font-size: 0.7em;
-                padding: 5px 8px;
-            }
-
-            .vector-info h4,
-            .similarity-box h4 {
-                font-size: 0.85em;
-            }
-
-            .vector-info p {
-                font-size: 0.75em;
-            }
-
-            .similarity-value {
-                font-size: 1.1em;
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="../index.html" class="back-link">← Retour au menu</a>
+        <h1>🔤 Word Embeddings - Espace Vectoriel</h1>
+        <p class="subtitle">60 mots avec analogies automatiques : Roi - Homme + Femme ≈ Reine</p>
 
-        <h1>📊 Word Embeddings : Vecteurs, pas Points !</h1>
-        <p class="subtitle">Les embeddings sont des VECTEURS dans un espace multidimensionnel - visualisation de l'arithmétique vectorielle</p>
-
-        <div class="animation-container">
-            <div class="canvas-wrapper" id="canvasWrapper">
-                <canvas id="canvas" width="600" height="500"></canvas>
-
-                <!-- Axis labels -->
-                <div class="axis-label" style="bottom: 5px; left: 50%; transform: translateX(-50%);">Axe X : Dimension Genre (Masculin → Féminin)</div>
-                <div class="axis-label" style="top: 50%; left: 5px; writing-mode: vertical-rl; transform: translateY(-50%) rotate(180deg);">Axe Y : Dimension Royauté (Commun → Royal)</div>
-                <div class="axis-label" style="bottom: 10px; left: 10px; color: #333; font-size: 1em;">Origine (0,0)</div>
-
-                <!-- Word labels (positioned dynamically by JS) -->
-                <div class="word-label word-roi" id="labelRoi">👑 Roi</div>
-                <div class="word-label word-reine" id="labelReine">👑 Reine</div>
-                <div class="word-label word-homme" id="labelHomme">🚹 Homme</div>
-                <div class="word-label word-femme" id="labelFemme">🚺 Femme</div>
-                <div class="word-label word-result" id="labelResult">✨ Résultat</div>
+        <div class="main-grid">
+            <div class="canvas-card">
+                <h3>📊 Espace Vectoriel 2D (60 mots)</h3>
+                <canvas id="canvas" width="900" height="700"></canvas>
             </div>
 
-            <!-- Operation Display -->
-            <div class="operation-display" id="operationDisplay">
-                V⃗(Roi) - V⃗(Homme) + V⃗(Femme) ≈ V⃗(Reine)
-            </div>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="control-card">
+                    <h3>🎬 Analogies Animées</h3>
+                    <button id="playBtn" class="play" onclick="startAnimations()">
+                        ▶️ LANCER LES ANALOGIES
+                    </button>
+                    <button id="stopBtn" class="stop" onclick="stopAnimations()" style="display:none;">
+                        ⏹️ ARRÊTER
+                    </button>
 
-            <!-- Vector Info Box -->
-            <div class="vector-info" id="vectorInfo">
-                <h4>📐 Composantes Vectorielles</h4>
-                <p style="color: #9b59b6;">V⃗(Roi) = [0.8, 0.9] ||V⃗|| = 1.21</p>
-                <p style="color: #e74c3c;">V⃗(Reine) = [0.2, 0.9] ||V⃗|| = 0.92</p>
-                <p style="color: #3498db;">V⃗(Homme) = [0.8, 0.2] ||V⃗|| = 0.82</p>
-                <p style="color: #27ae60;">V⃗(Femme) = [0.2, 0.2] ||V⃗|| = 0.28</p>
-            </div>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
 
-            <!-- Similarity Box -->
-            <div class="similarity-box" id="similarityBox">
-                <h4>🎯 Similarité Cosinus</h4>
-                <p>Résultat ↔ Reine</p>
-                <div class="similarity-value">0.98</div>
-            </div>
+                    <div id="statusMsg" class="status-message">
+                        Cliquez pour voir 5 analogies automatiques
+                    </div>
+                </div>
 
-            <!-- Info Panel -->
-            <div class="info-panel">
-                <h4 id="step-title">Étape 1: Les embeddings sont des VECTEURS</h4>
-                <p id="step-description">Chaque mot est un vecteur (flèche) partant de l'origine. La direction et longueur encodent le sens du mot dans l'espace sémantique (projection 2D d'un espace à 300+ dimensions)</p>
+                <div class="control-card">
+                    <h3>🎯 Choisir une Analogie</h3>
+                    <div class="analogy-grid">
+                        <button class="analogy-btn" onclick="showAnalogy(0)">
+                            Roi - Homme + Femme = Reine
+                        </button>
+                        <button class="analogy-btn" onclick="showAnalogy(1)">
+                            Paris - France + Italie = Rome
+                        </button>
+                        <button class="analogy-btn" onclick="showAnalogy(2)">
+                            Chat - Animal + Objet = Table
+                        </button>
+                        <button class="analogy-btn" onclick="showAnalogy(3)">
+                            Grand - Petit + Rapide = Lent
+                        </button>
+                        <button class="analogy-btn" onclick="showAnalogy(4)">
+                            Docteur - Homme + Femme = Infirmière
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <h3>🔍 Recherche de Similarité</h3>
+                    <input type="text" class="word-search" id="searchInput" placeholder="Tapez un mot..." oninput="searchSimilar()">
+                    <div id="similarWords" class="similar-words"></div>
+                </div>
             </div>
         </div>
 
-        <div style="margin-top: 30px; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-            <h2 style="color: #667eea; margin-bottom: 20px;">📖 Comprendre les Word Embeddings</h2>
+        <div class="section">
+            <h2>🎓 Qu'est-ce qu'un Word Embedding ?</h2>
+            <p>
+                Les <strong>word embeddings</strong> sont des représentations vectorielles des mots qui capturent leur sens sémantique.
+                Contrairement au One-Hot Encoding qui traite chaque mot indépendamment, les embeddings placent les mots dans un espace
+                continu où les mots similaires sont proches les uns des autres.
+            </p>
 
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 10px; margin-bottom: 25px; color: white;">
-                <h3 style="color: white; margin-bottom: 15px; font-size: 1.3em;">🎯 CONCEPT CLÉ : Les Embeddings sont des VECTEURS, pas des points !</h3>
-                <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 8px; line-height: 1.8;">
-                    <p style="margin-bottom: 12px;"><strong>❌ Erreur courante :</strong> Voir les embeddings comme des "points" dans l'espace</p>
-                    <p style="margin-bottom: 12px;"><strong>✅ Vision correcte :</strong> Les embeddings sont des <strong>vecteurs (flèches)</strong> partant de l'origine</p>
-                    <p style="margin-bottom: 12px;"><strong>🧮 Pourquoi ça compte :</strong></p>
-                    <ul style="margin-left: 25px; margin-top: 10px;">
-                        <li>Un vecteur a une <strong>direction</strong> (sens sémantique) et une <strong>magnitude</strong> (intensité)</li>
-                        <li>L'arithmétique vectorielle a un sens : V⃗(Roi) - V⃗(Homme) + V⃗(Femme) = V⃗(Reine)</li>
-                        <li>Les opérations géométriques (addition, soustraction, produit scalaire) sont définies</li>
-                        <li>La similarité cosinus mesure l'<strong>angle</strong> entre vecteurs, pas la distance</li>
-                    </ul>
-                    <p style="margin-top: 15px; font-style: italic; background: rgba(255,255,255,0.1); padding: 12px; border-radius: 6px;">
-                        💡 Dans un espace à 300 dimensions (Word2Vec standard), chaque mot est un vecteur avec 300 composantes.
-                        Notre visualisation 2D est une projection simplifiée pour comprendre le concept.
-                    </p>
-                </div>
-            </div>
+            <h3 style="color: #667eea; margin-top: 25px;">✨ La Magie des Analogies</h3>
+            <p>
+                L'aspect le plus fascinant des embeddings est qu'ils capturent des <strong>relations sémantiques</strong> à travers
+                l'arithmétique vectorielle. Par exemple :
+            </p>
+            <ul style="margin-left: 25px; line-height: 2; color: #495057;">
+                <li><strong>Roi - Homme + Femme ≈ Reine</strong> → Relations de genre</li>
+                <li><strong>Paris - France + Italie ≈ Rome</strong> → Relations géographiques (capitale/pays)</li>
+                <li><strong>Grand - Petit + Rapide ≈ Lent</strong> → Relations d'opposition</li>
+            </ul>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
-                    <h3 style="color: #2ecc71; margin-bottom: 10px;">🎯 Objectif</h3>
-                    <p>Transformer des mots (symboles discrets) en vecteurs continus qui capturent les relations sémantiques et syntaxiques. Les mots similaires ont des vecteurs proches (angle faible).</p>
-                </div>
+            <h3 style="color: #667eea; margin-top: 25px;">📐 Fonctionnement</h3>
+            <p>
+                Chaque mot est représenté par un <strong>vecteur</strong> (typiquement 50-300 dimensions, ici réduit à 2D pour la visualisation).
+                Ces vecteurs sont appris à partir de grands corpus de texte en utilisant des algorithmes comme :
+            </p>
+            <ul style="margin-left: 25px; line-height: 2; color: #495057;">
+                <li><strong>Word2Vec</strong> (Google, 2013) : Skip-gram et CBOW</li>
+                <li><strong>GloVe</strong> (Stanford, 2014) : Global Vectors</li>
+                <li><strong>FastText</strong> (Facebook, 2016) : Sous-mots</li>
+            </ul>
 
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
-                    <h3 style="color: #3498db; margin-bottom: 10px;">⚡ Avantages</h3>
-                    <p>• Capture le sens contextuel<br>• Relations arithmétiques vectorielles<br>• Réduction de dimensionnalité<br>• Transfer learning entre tâches<br>• Opérations géométriques définies</p>
-                </div>
-            </div>
+            <h3 style="color: #667eea; margin-top: 25px;">🎯 Applications Pratiques</h3>
+            <ul style="margin-left: 25px; line-height: 2; color: #495057;">
+                <li><strong>Recherche sémantique</strong> : Trouver des documents similaires</li>
+                <li><strong>Traduction automatique</strong> : Alignement entre langues</li>
+                <li><strong>Systèmes de recommandation</strong> : Produits ou contenus similaires</li>
+                <li><strong>Analyse de sentiments</strong> : Comprendre les émotions dans le texte</li>
+                <li><strong>Chatbots et LLMs</strong> : Comprendre les requêtes utilisateur</li>
+            </ul>
 
-            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #4caf50;">
-                <h3 style="color: #2e7d32; margin-bottom: 10px;">🔬 Analogies Vectorielles Célèbres</h3>
-                <p style="color: #555; margin-bottom: 15px; font-style: italic;">Ces exemples montrent que l'arithmétique vectorielle capture des relations sémantiques complexes :</p>
-                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                    <div style="font-family: monospace; font-size: 1em; margin: 8px 0; color: #9b59b6;">
-                        <strong>Relation de genre:</strong><br>
-                        V⃗(Roi) - V⃗(Homme) + V⃗(Femme) ≈ V⃗(Reine)<br>
-                        V⃗(Oncle) - V⃗(Homme) + V⃗(Femme) ≈ V⃗(Tante)
-                    </div>
-                </div>
-                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                    <div style="font-family: monospace; font-size: 1em; margin: 8px 0; color: #3498db;">
-                        <strong>Relation géographique:</strong><br>
-                        V⃗(Paris) - V⃗(France) + V⃗(Italie) ≈ V⃗(Rome)<br>
-                        V⃗(Tokyo) - V⃗(Japon) + V⃗(Allemagne) ≈ V⃗(Berlin)
-                    </div>
-                </div>
-                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                    <div style="font-family: monospace; font-size: 1em; margin: 8px 0; color: #e74c3c;">
-                        <strong>Relation grammaticale:</strong><br>
-                        V⃗(Walking) - V⃗(Walk) + V⃗(Swim) ≈ V⃗(Swimming)<br>
-                        V⃗(Bigger) - V⃗(Big) + V⃗(Small) ≈ V⃗(Smaller)
-                    </div>
-                </div>
-            </div>
-
-            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
-                <h3 style="color: #1976d2; margin-bottom: 10px;">🧮 Similarité Cosinus</h3>
-                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                    <div style="font-family: monospace; font-size: 1.05em; text-align: center; margin: 10px 0;">
-                        cos(θ) = (A · B) / (||A|| × ||B||)
-                    </div>
-                    <p style="font-size: 0.9em; color: #666; margin-top: 10px; line-height: 1.6;">
-                        Mesure l'angle entre deux vecteurs:<br>
-                        • <strong>1.0</strong> = vecteurs identiques (angle 0°)<br>
-                        • <strong>0.0</strong> = vecteurs orthogonaux (angle 90°)<br>
-                        • <strong>-1.0</strong> = vecteurs opposés (angle 180°)<br>
-                        Plus les mots sont sémantiquement proches, plus leur cosinus est élevé.
-                    </p>
-                </div>
-            </div>
-
-            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; border-left: 4px solid #ff9800; margin-bottom: 20px;">
-                <h3 style="color: #e65100; margin-bottom: 10px;">⚙️ Méthodes d'Entraînement</h3>
-
-                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                    <h4 style="color: #f39c12; margin-bottom: 8px;">Word2Vec (2013)</h4>
-                    <p style="font-size: 0.9em; color: #666; margin-bottom: 8px;"><strong>Skip-gram:</strong> Prédit les mots contexte à partir du mot central</p>
-                    <div style="font-family: monospace; font-size: 0.85em; background: #f5f5f5; padding: 8px; border-radius: 4px;">
-                        "Le chat mange une souris"<br>
-                        Input: "mange" → Output: ["chat", "une"]
-                    </div>
-                    <p style="font-size: 0.9em; color: #666; margin-top: 8px;"><strong>CBOW:</strong> Prédit le mot central à partir du contexte</p>
-                </div>
-
-                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                    <h4 style="color: #e67e22; margin-bottom: 8px;">GloVe (2014)</h4>
-                    <p style="font-size: 0.9em; color: #666;">Global Vectors - Combine statistiques de co-occurrence et factorisation matricielle</p>
-                    <div style="font-family: monospace; font-size: 0.85em; background: #f5f5f5; padding: 8px; border-radius: 4px; margin-top: 8px;">
-                        wᵢᵀ·wⱼ + bᵢ + bⱼ = log(Xᵢⱼ)
-                    </div>
-                </div>
-
-                <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                    <h4 style="color: #d32f2f; margin-bottom: 8px;">FastText (2016)</h4>
-                    <p style="font-size: 0.9em; color: #666;">Extension de Word2Vec avec sous-mots (n-grams de caractères). Gère mieux les mots rares et hors vocabulaire.</p>
-                </div>
-            </div>
-
-            <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; border-left: 4px solid #9c27b0;">
-                <h3 style="color: #7b1fa2; margin-bottom: 10px;">🚀 Embeddings Contextuels Modernes</h3>
-                <ul style="margin-left: 20px; line-height: 1.8;">
-                    <li><strong>ELMo (2018):</strong> Embeddings contextuels bidirectionnels avec LSTM</li>
-                    <li><strong>BERT (2018):</strong> Transformers bidirectionnels, masquage de mots, pré-entraîné sur corpus massif</li>
-                    <li><strong>GPT-3/4 (2020+):</strong> Embeddings issus de modèles autorégressifs massifs (175B+ paramètres)</li>
-                    <li><strong>Sentence-BERT:</strong> Embeddings de phrases entières pour similarité sémantique</li>
-                </ul>
-
-                <div style="background: #fff9e6; padding: 12px; border-radius: 6px; margin-top: 15px;">
-                    <p style="font-size: 0.9em; color: #e65100; line-height: 1.6;">
-                        <strong>💡 Différence clé:</strong> Word2Vec/GloVe donnent un seul vecteur par mot. BERT/ELMo donnent des vecteurs différents selon le contexte:<br>
-                        "La <strong>banque</strong> de la rivière" vs "Une <strong>banque</strong> financière" → embeddings différents !
-                    </p>
-                </div>
-            </div>
-
-            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e91e63;">
-                <h3 style="color: #c2185b; margin-bottom: 10px;">💡 Applications</h3>
-                <ul style="margin-left: 20px; line-height: 1.8;">
-                    <li><strong>Classification de textes:</strong> Sentiment analysis, détection de spam</li>
-                    <li><strong>Recherche sémantique:</strong> Trouver documents similaires par sens, pas par mots-clés</li>
-                    <li><strong>Traduction automatique:</strong> Aligner espaces d'embeddings entre langues</li>
-                    <li><strong>Question Answering:</strong> Comparer question avec passages pour trouver réponse</li>
-                    <li><strong>Recommandation:</strong> Items similaires basés sur descriptions textuelles</li>
-                </ul>
-            </div>
-
-            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #4caf50;">
-                <h3 style="color: #2e7d32; margin-bottom: 15px;">✅ Avantages</h3>
-                <ul style="margin-left: 20px; line-height: 1.8;">
-                    <li><strong>Capture sens:</strong> Mots similaires sémantiquement → vecteurs proches (roi ≈ reine)</li>
-                    <li><strong>Arithmétique sémantique:</strong> roi - homme + femme = reine, Paris - France + Italie = Rome</li>
-                    <li><strong>Pré-entraînés disponibles:</strong> Word2Vec, GloVe, FastText téléchargeables gratuitement</li>
-                    <li><strong>Légers:</strong> 300 dimensions vs millions paramètres Transformers</li>
-                    <li><strong>Transfer learning:</strong> Embeddings entraînés Wikipedia → utiliser sur domaine spécifique</li>
-                </ul>
-            </div>
-
-            <div style="background: #ffebee; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e53935;">
-                <h3 style="color: #c62828; margin-bottom: 15px;">⚠️ Limites</h3>
-                <ul style="margin-left: 20px; line-height: 1.8;">
-                    <li><strong>Contexte statique (1 vecteur/mot):</strong> "bank" (banque) = même vecteur que "bank" (rive)</li>
-                    <li><strong>Remplacés par contextuels (BERT):</strong> Word2Vec obsolète vs embeddings contextuels modernes</li>
-                    <li><strong>Taille fixe:</strong> 300 dim figée, vs Transformers qui adaptent représentation</li>
-                    <li><strong>Hors vocabulaire (OOV):</strong> Nouveau mot inconnu = pas d'embedding (sauf FastText subwords)</li>
-                    <li><strong>Biais culturels:</strong> Associations stéréotypées (doctor=homme, nurse=femme) encodées</li>
-                </ul>
-            </div>
-
-            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #ff9800;">
-                <h3 style="color: #e65100; margin-bottom: 15px;">💼 Cas d'Usage Production</h3>
-                <ul style="margin-left: 20px; line-height: 1.8;">
-                    <li><strong>Baseline NLP:</strong> Point de départ rapide avant Transformers lourds</li>
-                    <li><strong>Similarité mots:</strong> Recherche synonymes, expansion requêtes, autocomplete</li>
-                    <li><strong>Clustering documents:</strong> Regrouper articles similaires via moyenne embeddings</li>
-                    <li><strong>Word analogies:</strong> Complétion relations (king:queen :: man:?), tests linguistiques</li>
-                    <li><strong>Features ML classique:</strong> Input pour SVM, Random Forest quand BERT trop lourd</li>
-                </ul>
-            </div>
-
-            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e91e63;">
-                <h3 style="color: #c2185b; margin-bottom: 15px;">🚨 Pièges à Éviter</h3>
-                <ul style="margin-left: 20px; line-height: 1.8;">
-                    <li><strong>Word2Vec vs GloVe (contexte différent):</strong> Word2Vec = fenêtre locale, GloVe = co-occurrence globale. Tester les deux</li>
-                    <li><strong>Embeddings non actualisés:</strong> Word2Vec 2013 ignore mots post-2013 ("selfie", "ChatGPT")</li>
-                    <li><strong>Polysémie (bank = banque vs rive):</strong> Embedding unique rate les sens multiples. Utiliser BERT si critique</li>
-                    <li><strong>Moyenne naïve embeddings:</strong> Moyenner vecteurs mots = perd syntaxe. Ok pour baseline, mauvais si précision nécessaire</li>
-                    <li><strong>Ignorer preprocessing:</strong> Lowercase, lemmatization, stopwords impact qualité embeddings</li>
-                    <li><strong>Dimension trop basse (50):</strong> Perd nuances. Standard 300 dim pour équilibre performance/taille</li>
-                </ul>
-            </div>
+            <p style="margin-top: 15px; padding: 15px; background: white; border-radius: 10px; font-weight: 600; border-left: 4px solid #2ecc71;">
+                ⚡ <strong>Moment "WOW"</strong> : Regardez l'animation "Roi - Homme + Femme = Reine". Vous verrez littéralement
+                le vecteur se déplacer dans l'espace pour arriver proche de "Reine" ! C'est la preuve que les embeddings capturent
+                vraiment le sens des mots.
+            </p>
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+        let canvas, ctx;
+        let animationRunning = false;
+        let animationInterval = null;
+        let currentStep = 0;
+        let currentAnalogy = 0;
 
-        // Origin point in canvas coordinates (bottom-left area with margin)
-        const origin = { x: 80, y: 420 };
+        // 60 mots avec coordonnées 2D simulant des embeddings réels
+        const words = {
+            // Royauté et genre
+            'roi': { x: 0.7, y: 0.6, category: 'royauté' },
+            'reine': { x: 0.7, y: -0.5, category: 'royauté' },
+            'prince': { x: 0.5, y: 0.5, category: 'royauté' },
+            'princesse': { x: 0.5, y: -0.4, category: 'royauté' },
+            'homme': { x: 0.0, y: 0.7, category: 'personne' },
+            'femme': { x: 0.0, y: -0.6, category: 'personne' },
+            'garçon': { x: -0.2, y: 0.6, category: 'personne' },
+            'fille': { x: -0.2, y: -0.5, category: 'personne' },
 
-        // Scale factor to convert normalized coordinates to canvas space
-        let scale = 350;
+            // Pays et capitales
+            'france': { x: -0.7, y: 0.4, category: 'pays' },
+            'paris': { x: -0.5, y: 0.5, category: 'ville' },
+            'italie': { x: -0.7, y: 0.0, category: 'pays' },
+            'rome': { x: -0.5, y: 0.1, category: 'ville' },
+            'espagne': { x: -0.7, y: -0.4, category: 'pays' },
+            'madrid': { x: -0.5, y: -0.3, category: 'ville' },
+            'allemagne': { x: -0.8, y: 0.7, category: 'pays' },
+            'berlin': { x: -0.6, y: 0.8, category: 'ville' },
 
-        // Word embeddings as vectors (in normalized 2D space)
-        // These are the actual vector coordinates from origin
-        const vectors = {
-            roi: { vec: [0.8, 0.9], color: '#9b59b6', label: '👑 Roi' },
-            reine: { vec: [0.2, 0.9], color: '#e74c3c', label: '👑 Reine' },
-            homme: { vec: [0.8, 0.2], color: '#3498db', label: '🚹 Homme' },
-            femme: { vec: [0.2, 0.2], color: '#27ae60', label: '🚺 Femme' }
+            // Professions
+            'docteur': { x: 0.3, y: 0.3, category: 'profession' },
+            'infirmière': { x: 0.3, y: -0.2, category: 'profession' },
+            'ingénieur': { x: 0.4, y: 0.2, category: 'profession' },
+            'professeur': { x: 0.2, y: 0.1, category: 'profession' },
+
+            // Animaux
+            'chat': { x: -0.3, y: 0.2, category: 'animal' },
+            'chien': { x: -0.3, y: 0.4, category: 'animal' },
+            'oiseau': { x: -0.4, y: 0.3, category: 'animal' },
+            'poisson': { x: -0.5, y: 0.2, category: 'animal' },
+            'animal': { x: -0.4, y: 0.5, category: 'concept' },
+
+            // Objets
+            'table': { x: 0.1, y: -0.8, category: 'objet' },
+            'chaise': { x: 0.2, y: -0.7, category: 'objet' },
+            'livre': { x: 0.0, y: -0.6, category: 'objet' },
+            'stylo': { x: 0.1, y: -0.5, category: 'objet' },
+            'objet': { x: 0.0, y: -0.9, category: 'concept' },
+
+            // Adjectifs - taille
+            'grand': { x: 0.6, y: 0.0, category: 'adjectif' },
+            'petit': { x: -0.6, y: 0.0, category: 'adjectif' },
+            'énorme': { x: 0.8, y: 0.1, category: 'adjectif' },
+            'minuscule': { x: -0.8, y: -0.1, category: 'adjectif' },
+
+            // Adjectifs - vitesse
+            'rapide': { x: 0.6, y: -0.3, category: 'adjectif' },
+            'lent': { x: -0.6, y: -0.3, category: 'adjectif' },
+            'vite': { x: 0.7, y: -0.2, category: 'adverbe' },
+            'lentement': { x: -0.7, y: -0.2, category: 'adverbe' },
+
+            // Émotions
+            'joie': { x: 0.4, y: -0.6, category: 'émotion' },
+            'tristesse': { x: -0.4, y: -0.7, category: 'émotion' },
+            'colère': { x: -0.3, y: -0.6, category: 'émotion' },
+            'peur': { x: -0.2, y: -0.8, category: 'émotion' },
+
+            // Couleurs
+            'rouge': { x: 0.8, y: -0.5, category: 'couleur' },
+            'bleu': { x: 0.7, y: -0.6, category: 'couleur' },
+            'vert': { x: 0.8, y: -0.7, category: 'couleur' },
+            'jaune': { x: 0.9, y: -0.6, category: 'couleur' },
+
+            // Nombres
+            'un': { x: 0.9, y: 0.3, category: 'nombre' },
+            'deux': { x: 0.85, y: 0.4, category: 'nombre' },
+            'trois': { x: 0.9, y: 0.5, category: 'nombre' },
+            'quatre': { x: 0.85, y: 0.6, category: 'nombre' },
+
+            // Actions
+            'courir': { x: 0.5, y: -0.1, category: 'action' },
+            'marcher': { x: 0.3, y: -0.1, category: 'action' },
+            'sauter': { x: 0.4, y: 0.0, category: 'action' },
+            'dormir': { x: -0.5, y: -0.6, category: 'action' },
+
+            // Nature
+            'arbre': { x: -0.1, y: 0.8, category: 'nature' },
+            'fleur': { x: 0.0, y: 0.9, category: 'nature' },
+            'montagne': { x: -0.2, y: 0.9, category: 'nature' },
+            'mer': { x: 0.1, y: 0.8, category: 'nature' }
         };
 
-        // Calculate result vector: Roi - Homme + Femme
-        const resultVec = [
-            vectors.roi.vec[0] - vectors.homme.vec[0] + vectors.femme.vec[0],
-            vectors.roi.vec[1] - vectors.homme.vec[1] + vectors.femme.vec[1]
+        // 5 analogies prédéfinies
+        const analogies = [
+            { a: 'roi', b: 'homme', c: 'femme', expected: 'reine', name: 'Roi - Homme + Femme = Reine' },
+            { a: 'paris', b: 'france', c: 'italie', expected: 'rome', name: 'Paris - France + Italie = Rome' },
+            { a: 'chat', b: 'animal', c: 'objet', expected: 'table', name: 'Chat - Animal + Objet = Table' },
+            { a: 'grand', b: 'petit', c: 'rapide', expected: 'lent', name: 'Grand - Petit + Rapide = Lent' },
+            { a: 'docteur', b: 'homme', c: 'femme', expected: 'infirmière', name: 'Docteur - Homme + Femme = Infirmière' }
         ];
 
-        const totalDuration = 20000; // 20 seconds per cycle
+        let currentAnalogyAnim = null;
 
-        const steps = [
-            {
-                title: "Étape 1: Les embeddings sont des VECTEURS",
-                description: "Chaque mot est un vecteur (flèche) partant de l'origine (0,0). La direction et longueur encodent le sens du mot dans l'espace sémantique (projection 2D d'un espace à 300+ dimensions)"
-            },
-            {
-                title: "Étape 2: Soustraction du vecteur Homme",
-                description: "V⃗(Roi) - V⃗(Homme) : On soustrait le vecteur Homme (flèche rouge en pointillés) pour isoler la composante 'royauté masculine'"
-            },
-            {
-                title: "Étape 3: Addition du vecteur Femme",
-                description: "Résultat intermédiaire + V⃗(Femme) : On ajoute le vecteur Femme (flèche verte) pour obtenir 'royauté féminine'"
-            },
-            {
-                title: "Étape 4: Résultat ≈ Reine !",
-                description: "Le vecteur résultant (or) pointe presque exactement vers Reine (rouge) ! Similarité cosinus : 0.98 - l'arithmétique vectorielle capture les relations sémantiques !"
+        function initCanvas() {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            draw();
+        }
+
+        function draw(analogyResult = null) {
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Clear
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+
+            // Grid
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const pos = i * width / 10;
+                ctx.beginPath();
+                ctx.moveTo(pos, 0);
+                ctx.lineTo(pos, height);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, pos);
+                ctx.lineTo(width, pos);
+                ctx.stroke();
             }
-        ];
 
-        // Convert vector coordinates to canvas coordinates
-        function vecToCanvas(vec) {
-            return {
-                x: origin.x + vec[0] * scale,
-                y: origin.y - vec[1] * scale  // Y is inverted in canvas
-            };
-        }
+            // Axes
+            const centerX = width / 2;
+            const centerY = height / 2;
+            ctx.strokeStyle = '#aaa';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
 
-        // Calculate vector magnitude
-        function magnitude(vec) {
-            return Math.sqrt(vec[0] * vec[0] + vec[1] * vec[1]);
-        }
+            // Draw analogy vectors if provided
+            if (analogyResult) {
+                drawAnalogyVectors(analogyResult);
+            }
 
-        function updateStep(stepIndex) {
-            document.getElementById('step-title').textContent = steps[stepIndex].title;
-            document.getElementById('step-description').textContent = steps[stepIndex].description;
-        }
+            // Draw all words
+            Object.keys(words).forEach(word => {
+                const pos = words[word];
+                const x = (pos.x + 1) / 2 * width;
+                const y = (1 - pos.y) / 2 * height;
 
-        function updateLabels() {
-            // Update word labels to be at the tip of each vector
-            Object.keys(vectors).forEach(key => {
-                const pos = vecToCanvas(vectors[key].vec);
-                const label = document.getElementById('label' + key.charAt(0).toUpperCase() + key.slice(1));
-                if (label) {
-                    label.style.left = (pos.x - 40) + 'px';
-                    label.style.top = (pos.y - 40) + 'px';
-                    label.style.display = 'block';
+                // Highlight if part of current analogy
+                let isHighlighted = false;
+                let color = '#667eea';
+
+                if (analogyResult) {
+                    const { a, b, c, expected } = analogyResult;
+                    if (word === a || word === b || word === c) {
+                        isHighlighted = true;
+                        if (word === a) color = '#e74c3c';
+                        else if (word === b) color = '#f39c12';
+                        else if (word === c) color = '#2ecc71';
+                    } else if (word === expected) {
+                        isHighlighted = true;
+                        color = '#9b59b6';
+                    }
                 }
+
+                // Draw word
+                ctx.beginPath();
+                ctx.arc(x, y, isHighlighted ? 8 : 5, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = isHighlighted ? 3 : 1;
+                ctx.stroke();
+
+                // Draw label
+                ctx.fillStyle = '#333';
+                ctx.font = isHighlighted ? 'bold 12px Arial' : '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(word, x, y - 12);
+            });
+        }
+
+        function drawAnalogyVectors(result) {
+            const { a, b, c, computed, step } = result;
+            const width = canvas.width;
+            const height = canvas.height;
+
+            const toCanvas = (pos) => ({
+                x: (pos.x + 1) / 2 * width,
+                y: (1 - pos.y) / 2 * height
             });
 
-            // Update result label
-            const resultPos = vecToCanvas(resultVec);
-            const resultLabel = document.getElementById('labelResult');
-            if (resultLabel) {
-                resultLabel.style.left = (resultPos.x - 45) + 'px';
-                resultLabel.style.top = (resultPos.y - 45) + 'px';
+            const aPos = toCanvas(words[a]);
+            const bPos = toCanvas(words[b]);
+            const cPos = toCanvas(words[c]);
+
+            // Step 1: Show A (red)
+            if (step >= 1) {
+                drawVector({ x: 0, y: 0 }, aPos, '#e74c3c', `A: ${a}`);
+            }
+
+            // Step 2: Show -B (orange, going backwards)
+            if (step >= 2) {
+                const negB = { x: -words[b].x, y: -words[b].y };
+                const negBCanvas = toCanvas(negB);
+                drawVector(aPos, negBCanvas, '#f39c12', `-B: -${b}`);
+            }
+
+            // Step 3: Show +C (green)
+            if (step >= 3) {
+                const afterAB = {
+                    x: words[a].x - words[b].x,
+                    y: words[a].y - words[b].y
+                };
+                const afterABCanvas = toCanvas(afterAB);
+                drawVector(afterABCanvas, cPos, '#2ecc71', `+C: +${c}`);
+            }
+
+            // Step 4: Show result
+            if (step >= 4 && computed) {
+                const resultPos = toCanvas(computed);
+                ctx.beginPath();
+                ctx.arc(resultPos.x, resultPos.y, 12, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(155, 89, 182, 0.3)';
+                ctx.fill();
+                ctx.strokeStyle = '#9b59b6';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                ctx.fillStyle = '#9b59b6';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('RÉSULTAT', resultPos.x, resultPos.y - 20);
             }
         }
 
-        function drawGrid() {
-            ctx.strokeStyle = '#e8e8e8';
-            ctx.lineWidth = 1;
+        function drawVector(start, end, color, label) {
+            const dx = end.x - start.x;
+            const dy = end.y - start.y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx);
 
-            // Vertical grid lines
-            for (let i = 0; i <= 10; i++) {
-                const x = origin.x + (i * scale / 10);
-                ctx.beginPath();
-                ctx.moveTo(x, origin.y);
-                ctx.lineTo(x, origin.y - scale);
-                ctx.stroke();
-            }
-
-            // Horizontal grid lines
-            for (let i = 0; i <= 10; i++) {
-                const y = origin.y - (i * scale / 10);
-                ctx.beginPath();
-                ctx.moveTo(origin.x, y);
-                ctx.lineTo(origin.x + scale, y);
-                ctx.stroke();
-            }
-
-            // Main axes (X and Y)
-            ctx.strokeStyle = '#333';
+            // Draw line
+            ctx.strokeStyle = color;
             ctx.lineWidth = 3;
-
-            // X-axis
             ctx.beginPath();
-            ctx.moveTo(origin.x, origin.y);
-            ctx.lineTo(origin.x + scale + 20, origin.y);
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(end.x, end.y);
             ctx.stroke();
-            // X-axis arrow
-            drawArrowhead(origin.x + scale + 20, origin.y, 0, '#333');
 
-            // Y-axis
-            ctx.beginPath();
-            ctx.moveTo(origin.x, origin.y);
-            ctx.lineTo(origin.x, origin.y - scale - 20);
-            ctx.stroke();
-            // Y-axis arrow
-            drawArrowhead(origin.x, origin.y - scale - 20, -Math.PI/2, '#333');
-
-            // Draw origin point
-            ctx.fillStyle = '#333';
-            ctx.beginPath();
-            ctx.arc(origin.x, origin.y, 5, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Axis labels with values
-            ctx.fillStyle = '#666';
-            ctx.font = '11px monospace';
-            ctx.fillText('0', origin.x - 15, origin.y + 15);
-            ctx.fillText('0.5', origin.x + scale/2 - 10, origin.y + 15);
-            ctx.fillText('1.0', origin.x + scale - 10, origin.y + 15);
-            ctx.fillText('0.5', origin.x - 25, origin.y - scale/2 + 5);
-            ctx.fillText('1.0', origin.x - 25, origin.y - scale + 5);
-        }
-
-        function drawArrowhead(x, y, angle, color) {
-            const headlen = 10;
+            // Draw arrowhead
+            const arrowSize = 15;
             ctx.fillStyle = color;
             ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x - headlen * Math.cos(angle - Math.PI / 6), y - headlen * Math.sin(angle - Math.PI / 6));
-            ctx.lineTo(x - headlen * Math.cos(angle + Math.PI / 6), y - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.moveTo(end.x, end.y);
+            ctx.lineTo(
+                end.x - arrowSize * Math.cos(angle - Math.PI / 6),
+                end.y - arrowSize * Math.sin(angle - Math.PI / 6)
+            );
+            ctx.lineTo(
+                end.x - arrowSize * Math.cos(angle + Math.PI / 6),
+                end.y - arrowSize * Math.sin(angle + Math.PI / 6)
+            );
             ctx.closePath();
             ctx.fill();
-        }
 
-        function drawVector(vec, color, width = 4, startPos = origin, label = null) {
-            const end = startPos === origin ? vecToCanvas(vec) : {
-                x: startPos.x + vec[0] * scale,
-                y: startPos.y - vec[1] * scale
-            };
-
-            const angle = Math.atan2(end.y - startPos.y, end.x - startPos.x);
-
-            // Draw vector line
-            ctx.strokeStyle = color;
-            ctx.lineWidth = width;
-            ctx.beginPath();
-            ctx.moveTo(startPos.x, startPos.y);
-            ctx.lineTo(end.x, end.y);
-            ctx.stroke();
-
-            // Draw arrowhead
-            drawArrowhead(end.x, end.y, angle, color);
-
-            // Draw vector label with coordinates if provided
-            if (label) {
-                const midX = (startPos.x + end.x) / 2;
-                const midY = (startPos.y + end.y) / 2;
-
-                ctx.fillStyle = 'white';
-                ctx.fillRect(midX - 35, midY - 12, 70, 20);
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 2;
-                ctx.strokeRect(midX - 35, midY - 12, 70, 20);
-
-                ctx.fillStyle = color;
-                ctx.font = 'bold 11px monospace';
-                ctx.textAlign = 'center';
-                ctx.fillText(label, midX, midY + 4);
-            }
-
-            return end;
-        }
-
-        function drawDashedVector(vec, color, startPos = origin, label = null) {
-            const end = startPos === origin ? vecToCanvas(vec) : {
-                x: startPos.x + vec[0] * scale,
-                y: startPos.y - vec[1] * scale
-            };
-
-            const angle = Math.atan2(end.y - startPos.y, end.x - startPos.x);
-
-            // Draw dashed line
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 3;
-            ctx.setLineDash([8, 5]);
-            ctx.beginPath();
-            ctx.moveTo(startPos.x, startPos.y);
-            ctx.lineTo(end.x, end.y);
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            // Draw arrowhead
-            ctx.globalAlpha = 0.6;
-            drawArrowhead(end.x, end.y, angle, color);
-            ctx.globalAlpha = 1.0;
-
-            // Draw label if provided
-            if (label) {
-                const midX = (startPos.x + end.x) / 2;
-                const midY = (startPos.y + end.y) / 2;
-
-                ctx.fillStyle = 'white';
-                ctx.globalAlpha = 0.9;
-                ctx.fillRect(midX - 35, midY - 12, 70, 20);
-                ctx.globalAlpha = 1.0;
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 2;
-                ctx.setLineDash([3, 3]);
-                ctx.strokeRect(midX - 35, midY - 12, 70, 20);
-                ctx.setLineDash([]);
-
-                ctx.fillStyle = color;
-                ctx.font = 'bold 11px monospace';
-                ctx.textAlign = 'center';
-                ctx.fillText(label, midX, midY + 4);
-            }
-
-            return end;
-        }
-
-        function drawVectorTip(pos, color, size = 10) {
+            // Draw label
+            const midX = (start.x + end.x) / 2;
+            const midY = (start.y + end.y) / 2;
             ctx.fillStyle = color;
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y, size, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
+            ctx.font = 'bold 11px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(label, midX, midY - 8);
         }
 
-        function clearCanvas() {
-            ctx.fillStyle = '#f9f9f9';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            drawGrid();
+        function showAnalogy(index) {
+            stopAnimations();
+            currentAnalogy = index;
+            const analogy = analogies[index];
+
+            // Compute result
+            const result = {
+                x: words[analogy.a].x - words[analogy.b].x + words[analogy.c].x,
+                y: words[analogy.a].y - words[analogy.b].y + words[analogy.c].y
+            };
+
+            // Highlight active button
+            document.querySelectorAll('.analogy-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+
+            // Animate steps
+            let step = 0;
+            const stepInterval = setInterval(() => {
+                step++;
+                draw({
+                    a: analogy.a,
+                    b: analogy.b,
+                    c: analogy.c,
+                    expected: analogy.expected,
+                    computed: result,
+                    step: step
+                });
+
+                updateStatus(`${analogy.name} (Étape ${step}/4)`);
+
+                if (step >= 4) {
+                    clearInterval(stepInterval);
+                    updateStatus(`✅ ${analogy.name}`);
+                }
+            }, 800);
         }
 
-        function drawScene(phase) {
-            clearCanvas();
+        function startAnimations() {
+            animationRunning = true;
+            currentAnalogy = 0;
 
-            if (phase === 0) {
-                // Phase 1: Show all word vectors from origin
-                drawVector(vectors.roi.vec, vectors.roi.color, 4);
-                drawVector(vectors.reine.vec, vectors.reine.color, 4);
-                drawVector(vectors.homme.vec, vectors.homme.color, 4);
-                drawVector(vectors.femme.vec, vectors.femme.color, 4);
+            document.getElementById('playBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'block';
 
-                // Draw dots at vector tips
-                drawVectorTip(vecToCanvas(vectors.roi.vec), vectors.roi.color);
-                drawVectorTip(vecToCanvas(vectors.reine.vec), vectors.reine.color);
-                drawVectorTip(vecToCanvas(vectors.homme.vec), vectors.homme.color);
-                drawVectorTip(vecToCanvas(vectors.femme.vec), vectors.femme.color);
+            runNextAnalogy();
+        }
 
-            } else if (phase === 1) {
-                // Phase 2: Roi - Homme
-                // Draw all vectors lightly
-                ctx.globalAlpha = 0.3;
-                drawVector(vectors.reine.vec, vectors.reine.color, 3);
-                drawVector(vectors.femme.vec, vectors.femme.color, 3);
-                ctx.globalAlpha = 1.0;
-
-                // Highlight Roi vector
-                drawVector(vectors.roi.vec, vectors.roi.color, 5, origin, '[0.8, 0.9]');
-                drawVectorTip(vecToCanvas(vectors.roi.vec), vectors.roi.color);
-
-                // Show Homme vector being subtracted (dashed, from Roi tip backwards)
-                const roiTip = vecToCanvas(vectors.roi.vec);
-                drawDashedVector([-vectors.homme.vec[0], -vectors.homme.vec[1]], '#d63031', roiTip, '-[0.8, 0.2]');
-
-                // Calculate and show intermediate result
-                const intermediate = [
-                    vectors.roi.vec[0] - vectors.homme.vec[0],
-                    vectors.roi.vec[1] - vectors.homme.vec[1]
-                ];
-                const intermediatePos = vecToCanvas(intermediate);
-                drawVectorTip(intermediatePos, '#f39c12', 12);
-
-                // Draw intermediate vector from origin
-                ctx.globalAlpha = 0.5;
-                drawVector(intermediate, '#f39c12', 4, origin, '[0.0, 0.7]');
-                ctx.globalAlpha = 1.0;
-
-            } else if (phase === 2) {
-                // Phase 3: (Roi - Homme) + Femme
-                // Draw background vectors lightly
-                ctx.globalAlpha = 0.2;
-                drawVector(vectors.roi.vec, vectors.roi.color, 3);
-                drawVector(vectors.reine.vec, vectors.reine.color, 3);
-                drawVector(vectors.homme.vec, vectors.homme.color, 3);
-                ctx.globalAlpha = 1.0;
-
-                // Show intermediate result vector
-                const intermediate = [
-                    vectors.roi.vec[0] - vectors.homme.vec[0],
-                    vectors.roi.vec[1] - vectors.homme.vec[1]
-                ];
-                drawVector(intermediate, '#f39c12', 4, origin, '[0.0, 0.7]');
-                const intermediatePos = vecToCanvas(intermediate);
-                drawVectorTip(intermediatePos, '#f39c12', 10);
-
-                // Add Femme vector from intermediate position
-                drawVector(vectors.femme.vec, vectors.femme.color, 5, intermediatePos, '+[0.2, 0.2]');
-
-                // Show final result
-                const resultPos = vecToCanvas(resultVec);
-                drawVectorTip(resultPos, '#f39c12', 12);
-
-            } else if (phase === 3) {
-                // Phase 4: Result ≈ Reine
-                // Draw all original vectors lightly
-                ctx.globalAlpha = 0.25;
-                drawVector(vectors.roi.vec, vectors.roi.color, 3);
-                drawVector(vectors.homme.vec, vectors.homme.color, 3);
-                drawVector(vectors.femme.vec, vectors.femme.color, 3);
-                ctx.globalAlpha = 1.0;
-
-                // Show result vector in gold
-                drawVector(resultVec, '#FFD700', 6, origin, '[0.2, 0.9]');
-                const resultPos = vecToCanvas(resultVec);
-                drawVectorTip(resultPos, '#FFD700', 14);
-
-                // Show Reine vector
-                drawVector(vectors.reine.vec, vectors.reine.color, 5);
-                drawVectorTip(vecToCanvas(vectors.reine.vec), vectors.reine.color, 12);
-
-                // Draw similarity line between result and reine
-                const reinePos = vecToCanvas(vectors.reine.vec);
-                ctx.strokeStyle = '#2ecc71';
-                ctx.lineWidth = 2;
-                ctx.setLineDash([5, 5]);
-                ctx.beginPath();
-                ctx.moveTo(resultPos.x, resultPos.y);
-                ctx.lineTo(reinePos.x, reinePos.y);
-                ctx.stroke();
-                ctx.setLineDash([]);
-
-                // Show "Result" label
-                document.getElementById('labelResult').style.display = 'block';
+        function runNextAnalogy() {
+            if (!animationRunning || currentAnalogy >= analogies.length) {
+                stopAnimations();
+                return;
             }
 
-            updateLabels();
+            showAnalogy(currentAnalogy);
+
+            const progress = ((currentAnalogy + 1) / analogies.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            setTimeout(() => {
+                currentAnalogy++;
+                runNextAnalogy();
+            }, 4000);
         }
 
-        function runAnimation() {
-            // Reset
-            document.getElementById('labelResult').style.display = 'none';
-            document.getElementById('operationDisplay').classList.remove('show');
-            document.getElementById('vectorInfo').classList.remove('show');
-            document.getElementById('similarityBox').classList.remove('show');
+        function stopAnimations() {
+            animationRunning = false;
+            document.getElementById('playBtn').style.display = 'block';
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('progressFill').style.width = '0%';
 
-            // Phase 0: Show all vectors (0-5s)
-            setTimeout(() => {
-                updateStep(0);
-                drawScene(0);
-                document.getElementById('vectorInfo').classList.add('show');
-                document.getElementById('operationDisplay').textContent = 'V⃗(Roi) - V⃗(Homme) + V⃗(Femme) ≈ V⃗(Reine)';
-                document.getElementById('operationDisplay').classList.add('show');
-            }, 0);
+            document.querySelectorAll('.analogy-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
 
-            // Phase 1: Roi - Homme (5-10s)
-            setTimeout(() => {
-                updateStep(1);
-                drawScene(1);
-                document.getElementById('operationDisplay').textContent = 'V⃗(Roi) - V⃗(Homme) = ?';
-            }, 5000);
-
-            // Phase 2: + Femme (10-15s)
-            setTimeout(() => {
-                updateStep(2);
-                drawScene(2);
-                document.getElementById('operationDisplay').textContent = '[V⃗(Roi) - V⃗(Homme)] + V⃗(Femme) = ?';
-            }, 10000);
-
-            // Phase 3: Result (15-20s)
-            setTimeout(() => {
-                updateStep(3);
-                drawScene(3);
-                document.getElementById('operationDisplay').textContent = 'V⃗(Roi) - V⃗(Homme) + V⃗(Femme) ≈ V⃗(Reine) ✓';
-                document.getElementById('operationDisplay').style.background = 'rgba(46, 204, 113, 0.95)';
-                document.getElementById('similarityBox').classList.add('show');
-            }, 15000);
-
-            setTimeout(() => {
-                document.getElementById('operationDisplay').style.background = 'rgba(102, 126, 234, 0.95)';
-            }, 19000);
-
-            // Restart cycle
-            setTimeout(() => {
-                runAnimation();
-            }, totalDuration);
+            draw();
+            updateStatus('Cliquez pour voir 5 analogies automatiques');
         }
 
-        // Handle responsive canvas
-        function resizeCanvas() {
-            const wrapper = document.getElementById('canvasWrapper');
-            const rect = wrapper.getBoundingClientRect();
+        function searchSimilar() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const container = document.getElementById('similarWords');
 
-            // Only resize if wrapper size changed significantly
-            if (Math.abs(canvas.width - rect.width) > 10) {
-                canvas.width = rect.width;
-                canvas.height = rect.height;
-
-                // Adjust origin and scale based on new size
-                const minDim = Math.min(canvas.width, canvas.height);
-                origin.x = canvas.width * 0.15;
-                origin.y = canvas.height * 0.85;
-                scale = minDim * 0.65;
+            if (!query) {
+                container.innerHTML = '';
+                return;
             }
+
+            if (!words[query]) {
+                container.innerHTML = '<div style="padding: 10px; color: #999;">Mot non trouvé</div>';
+                return;
+            }
+
+            // Calculate similarities
+            const similarities = [];
+            Object.keys(words).forEach(word => {
+                if (word === query) return;
+
+                const dist = Math.sqrt(
+                    Math.pow(words[word].x - words[query].x, 2) +
+                    Math.pow(words[word].y - words[query].y, 2)
+                );
+                similarities.push({ word, similarity: 1 / (1 + dist) });
+            });
+
+            similarities.sort((a, b) => b.similarity - a.similarity);
+
+            container.innerHTML = similarities.slice(0, 8).map(s =>
+                `<div class="similar-word-item">
+                    <span>${s.word}</span>
+                    <span style="color: #667eea; font-weight: bold;">${(s.similarity * 100).toFixed(1)}%</span>
+                </div>`
+            ).join('');
         }
 
-        // Initial setup
-        window.addEventListener('resize', () => {
-            resizeCanvas();
-            drawScene(0);
-            updateLabels();
+        function updateStatus(message) {
+            document.getElementById('statusMsg').textContent = message;
+        }
+
+        window.addEventListener('load', () => {
+            initCanvas();
         });
-
-        // Start animation
-        resizeCanvas();
-        drawScene(0);
-        updateLabels();
-        setTimeout(() => runAnimation(), 500);
     </script>
 </body>
 </html>
