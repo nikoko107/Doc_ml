@@ -362,16 +362,17 @@
     <div class="container">
         <a href="../index.html" class="back-link">← Retour au menu</a>
 
-        <h1>📊 Word Embeddings</h1>
-        <p class="subtitle">Représentation vectorielle des mots capturant les relations sémantiques</p>
+        <h1>📊 Word Embeddings : Vecteurs, pas Points !</h1>
+        <p class="subtitle">Les embeddings sont des VECTEURS dans un espace multidimensionnel - visualisation de l'arithmétique vectorielle</p>
 
         <div class="animation-container">
             <div class="canvas-wrapper" id="canvasWrapper">
                 <canvas id="canvas" width="600" height="500"></canvas>
 
                 <!-- Axis labels -->
-                <div class="axis-label" style="bottom: 5px; right: 10px;">Dimension 1 (Genre) →</div>
-                <div class="axis-label" style="top: 10px; left: 10px; writing-mode: vertical-rl; transform: rotate(180deg);">Dimension 2 (Royauté) →</div>
+                <div class="axis-label" style="bottom: 5px; left: 50%; transform: translateX(-50%);">Axe X : Dimension Genre (Masculin → Féminin)</div>
+                <div class="axis-label" style="top: 50%; left: 5px; writing-mode: vertical-rl; transform: translateY(-50%) rotate(180deg);">Axe Y : Dimension Royauté (Commun → Royal)</div>
+                <div class="axis-label" style="bottom: 10px; left: 10px; color: #333; font-size: 1em;">Origine (0,0)</div>
 
                 <!-- Word labels (positioned dynamically by JS) -->
                 <div class="word-label word-roi" id="labelRoi">👑 Roi</div>
@@ -383,16 +384,16 @@
 
             <!-- Operation Display -->
             <div class="operation-display" id="operationDisplay">
-                Roi - Homme + Femme = ?
+                V⃗(Roi) - V⃗(Homme) + V⃗(Femme) ≈ V⃗(Reine)
             </div>
 
             <!-- Vector Info Box -->
             <div class="vector-info" id="vectorInfo">
-                <h4>📐 Vecteurs</h4>
-                <p>Roi: [0.8, 0.9]</p>
-                <p>Homme: [0.8, 0.1]</p>
-                <p>Femme: [0.2, 0.1]</p>
-                <p>Reine: [0.2, 0.9]</p>
+                <h4>📐 Composantes Vectorielles</h4>
+                <p style="color: #9b59b6;">V⃗(Roi) = [0.8, 0.9] ||V⃗|| = 1.21</p>
+                <p style="color: #e74c3c;">V⃗(Reine) = [0.2, 0.9] ||V⃗|| = 0.92</p>
+                <p style="color: #3498db;">V⃗(Homme) = [0.8, 0.2] ||V⃗|| = 0.82</p>
+                <p style="color: #27ae60;">V⃗(Femme) = [0.2, 0.2] ||V⃗|| = 0.28</p>
             </div>
 
             <!-- Similarity Box -->
@@ -404,47 +405,67 @@
 
             <!-- Info Panel -->
             <div class="info-panel">
-                <h4 id="step-title">Étape 1: Représentation vectorielle des mots</h4>
-                <p id="step-description">Chaque mot est représenté par un vecteur dans un espace multidimensionnel (ici simplifié en 2D)</p>
+                <h4 id="step-title">Étape 1: Les embeddings sont des VECTEURS</h4>
+                <p id="step-description">Chaque mot est un vecteur (flèche) partant de l'origine. La direction et longueur encodent le sens du mot dans l'espace sémantique (projection 2D d'un espace à 300+ dimensions)</p>
             </div>
         </div>
 
         <div style="margin-top: 30px; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
             <h2 style="color: #667eea; margin-bottom: 20px;">📖 Comprendre les Word Embeddings</h2>
 
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 10px; margin-bottom: 25px; color: white;">
+                <h3 style="color: white; margin-bottom: 15px; font-size: 1.3em;">🎯 CONCEPT CLÉ : Les Embeddings sont des VECTEURS, pas des points !</h3>
+                <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 8px; line-height: 1.8;">
+                    <p style="margin-bottom: 12px;"><strong>❌ Erreur courante :</strong> Voir les embeddings comme des "points" dans l'espace</p>
+                    <p style="margin-bottom: 12px;"><strong>✅ Vision correcte :</strong> Les embeddings sont des <strong>vecteurs (flèches)</strong> partant de l'origine</p>
+                    <p style="margin-bottom: 12px;"><strong>🧮 Pourquoi ça compte :</strong></p>
+                    <ul style="margin-left: 25px; margin-top: 10px;">
+                        <li>Un vecteur a une <strong>direction</strong> (sens sémantique) et une <strong>magnitude</strong> (intensité)</li>
+                        <li>L'arithmétique vectorielle a un sens : V⃗(Roi) - V⃗(Homme) + V⃗(Femme) = V⃗(Reine)</li>
+                        <li>Les opérations géométriques (addition, soustraction, produit scalaire) sont définies</li>
+                        <li>La similarité cosinus mesure l'<strong>angle</strong> entre vecteurs, pas la distance</li>
+                    </ul>
+                    <p style="margin-top: 15px; font-style: italic; background: rgba(255,255,255,0.1); padding: 12px; border-radius: 6px;">
+                        💡 Dans un espace à 300 dimensions (Word2Vec standard), chaque mot est un vecteur avec 300 composantes.
+                        Notre visualisation 2D est une projection simplifiée pour comprendre le concept.
+                    </p>
+                </div>
+            </div>
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                 <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
                     <h3 style="color: #2ecc71; margin-bottom: 10px;">🎯 Objectif</h3>
-                    <p>Transformer des mots (symboles discrets) en vecteurs continus qui capturent les relations sémantiques et syntaxiques. Les mots similaires ont des vecteurs proches.</p>
+                    <p>Transformer des mots (symboles discrets) en vecteurs continus qui capturent les relations sémantiques et syntaxiques. Les mots similaires ont des vecteurs proches (angle faible).</p>
                 </div>
 
                 <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
                     <h3 style="color: #3498db; margin-bottom: 10px;">⚡ Avantages</h3>
-                    <p>• Capture le sens contextuel<br>• Relations arithmétiques (roi - homme + femme = reine)<br>• Réduction de dimensionnalité<br>• Transfer learning entre tâches</p>
+                    <p>• Capture le sens contextuel<br>• Relations arithmétiques vectorielles<br>• Réduction de dimensionnalité<br>• Transfer learning entre tâches<br>• Opérations géométriques définies</p>
                 </div>
             </div>
 
             <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #4caf50;">
                 <h3 style="color: #2e7d32; margin-bottom: 10px;">🔬 Analogies Vectorielles Célèbres</h3>
+                <p style="color: #555; margin-bottom: 15px; font-style: italic;">Ces exemples montrent que l'arithmétique vectorielle capture des relations sémantiques complexes :</p>
                 <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
                     <div style="font-family: monospace; font-size: 1em; margin: 8px 0; color: #9b59b6;">
                         <strong>Relation de genre:</strong><br>
-                        Roi - Homme + Femme ≈ Reine<br>
-                        Oncle - Homme + Femme ≈ Tante
+                        V⃗(Roi) - V⃗(Homme) + V⃗(Femme) ≈ V⃗(Reine)<br>
+                        V⃗(Oncle) - V⃗(Homme) + V⃗(Femme) ≈ V⃗(Tante)
                     </div>
                 </div>
                 <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
                     <div style="font-family: monospace; font-size: 1em; margin: 8px 0; color: #3498db;">
                         <strong>Relation géographique:</strong><br>
-                        Paris - France + Italie ≈ Rome<br>
-                        Tokyo - Japon + Allemagne ≈ Berlin
+                        V⃗(Paris) - V⃗(France) + V⃗(Italie) ≈ V⃗(Rome)<br>
+                        V⃗(Tokyo) - V⃗(Japon) + V⃗(Allemagne) ≈ V⃗(Berlin)
                     </div>
                 </div>
                 <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
                     <div style="font-family: monospace; font-size: 1em; margin: 8px 0; color: #e74c3c;">
                         <strong>Relation grammaticale:</strong><br>
-                        Walking - Walk + Swim ≈ Swimming<br>
-                        Bigger - Big + Small ≈ Smaller
+                        V⃗(Walking) - V⃗(Walk) + V⃗(Swim) ≈ V⃗(Swimming)<br>
+                        V⃗(Bigger) - V⃗(Big) + V⃗(Small) ≈ V⃗(Smaller)
                     </div>
                 </div>
             </div>
@@ -571,39 +592,60 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
 
-        // Word vectors (normalized to canvas space)
-        const words = {
-            roi: { x: 450, y: 100, vec: [0.8, 0.9], color: '#9b59b6' },
-            reine: { x: 150, y: 100, vec: [0.2, 0.9], color: '#e74c3c' },
-            homme: { x: 450, y: 400, vec: [0.8, 0.1], color: '#3498db' },
-            femme: { x: 150, y: 400, vec: [0.2, 0.1], color: '#e91e63' },
-            result: { x: 150, y: 100, vec: [0.2, 0.9], color: '#2ecc71', hidden: true }
+        // Origin point in canvas coordinates (bottom-left area with margin)
+        const origin = { x: 80, y: 420 };
+
+        // Scale factor to convert normalized coordinates to canvas space
+        let scale = 350;
+
+        // Word embeddings as vectors (in normalized 2D space)
+        // These are the actual vector coordinates from origin
+        const vectors = {
+            roi: { vec: [0.8, 0.9], color: '#9b59b6', label: '👑 Roi' },
+            reine: { vec: [0.2, 0.9], color: '#e74c3c', label: '👑 Reine' },
+            homme: { vec: [0.8, 0.2], color: '#3498db', label: '🚹 Homme' },
+            femme: { vec: [0.2, 0.2], color: '#27ae60', label: '🚺 Femme' }
         };
 
-        const totalDuration = 18000; // 18 seconds per cycle
+        // Calculate result vector: Roi - Homme + Femme
+        const resultVec = [
+            vectors.roi.vec[0] - vectors.homme.vec[0] + vectors.femme.vec[0],
+            vectors.roi.vec[1] - vectors.homme.vec[1] + vectors.femme.vec[1]
+        ];
+
+        const totalDuration = 20000; // 20 seconds per cycle
 
         const steps = [
             {
-                title: "Étape 1: Représentation vectorielle des mots",
-                description: "Chaque mot est représenté par un vecteur dans un espace multidimensionnel (ici simplifié en 2D: Genre et Royauté)",
-                time: 0
+                title: "Étape 1: Les embeddings sont des VECTEURS",
+                description: "Chaque mot est un vecteur (flèche) partant de l'origine (0,0). La direction et longueur encodent le sens du mot dans l'espace sémantique (projection 2D d'un espace à 300+ dimensions)"
             },
             {
-                title: "Étape 2: Opération vectorielle - Roi - Homme",
-                description: "On soustrait le vecteur 'Homme' du vecteur 'Roi' pour capturer la dimension 'féminin'",
-                time: 4500
+                title: "Étape 2: Soustraction du vecteur Homme",
+                description: "V⃗(Roi) - V⃗(Homme) : On soustrait le vecteur Homme (flèche rouge en pointillés) pour isoler la composante 'royauté masculine'"
             },
             {
                 title: "Étape 3: Addition du vecteur Femme",
-                description: "On ajoute le vecteur 'Femme' au résultat précédent: (Roi - Homme) + Femme",
-                time: 9000
+                description: "Résultat intermédiaire + V⃗(Femme) : On ajoute le vecteur Femme (flèche verte) pour obtenir 'royauté féminine'"
             },
             {
-                title: "Étape 4: Résultat ≈ Reine",
-                description: "Le vecteur résultant est très proche de 'Reine' (similarité cosinus: 0.98) - l'analogie fonctionne!",
-                time: 13500
+                title: "Étape 4: Résultat ≈ Reine !",
+                description: "Le vecteur résultant (or) pointe presque exactement vers Reine (rouge) ! Similarité cosinus : 0.98 - l'arithmétique vectorielle capture les relations sémantiques !"
             }
         ];
+
+        // Convert vector coordinates to canvas coordinates
+        function vecToCanvas(vec) {
+            return {
+                x: origin.x + vec[0] * scale,
+                y: origin.y - vec[1] * scale  // Y is inverted in canvas
+            };
+        }
+
+        // Calculate vector magnitude
+        function magnitude(vec) {
+            return Math.sqrt(vec[0] * vec[0] + vec[1] * vec[1]);
+        }
 
         function updateStep(stepIndex) {
             document.getElementById('step-title').textContent = steps[stepIndex].title;
@@ -611,92 +653,189 @@
         }
 
         function updateLabels() {
-            Object.keys(words).forEach(key => {
-                const word = words[key];
+            // Update word labels to be at the tip of each vector
+            Object.keys(vectors).forEach(key => {
+                const pos = vecToCanvas(vectors[key].vec);
                 const label = document.getElementById('label' + key.charAt(0).toUpperCase() + key.slice(1));
                 if (label) {
-                    label.style.left = (word.x - 40) + 'px';
-                    label.style.top = (word.y - 35) + 'px';
-                    label.style.display = word.hidden ? 'none' : 'block';
+                    label.style.left = (pos.x - 40) + 'px';
+                    label.style.top = (pos.y - 40) + 'px';
+                    label.style.display = 'block';
                 }
             });
+
+            // Update result label
+            const resultPos = vecToCanvas(resultVec);
+            const resultLabel = document.getElementById('labelResult');
+            if (resultLabel) {
+                resultLabel.style.left = (resultPos.x - 45) + 'px';
+                resultLabel.style.top = (resultPos.y - 45) + 'px';
+            }
         }
 
         function drawGrid() {
-            ctx.strokeStyle = '#e0e0e0';
+            ctx.strokeStyle = '#e8e8e8';
             ctx.lineWidth = 1;
 
-            // Vertical lines
-            for (let i = 0; i <= canvas.width; i += 50) {
+            // Vertical grid lines
+            for (let i = 0; i <= 10; i++) {
+                const x = origin.x + (i * scale / 10);
                 ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, canvas.height);
+                ctx.moveTo(x, origin.y);
+                ctx.lineTo(x, origin.y - scale);
                 ctx.stroke();
             }
 
-            // Horizontal lines
-            for (let i = 0; i <= canvas.height; i += 50) {
+            // Horizontal grid lines
+            for (let i = 0; i <= 10; i++) {
+                const y = origin.y - (i * scale / 10);
                 ctx.beginPath();
-                ctx.moveTo(0, i);
-                ctx.lineTo(canvas.width, i);
+                ctx.moveTo(origin.x, y);
+                ctx.lineTo(origin.x + scale, y);
                 ctx.stroke();
             }
 
-            // Axes
-            ctx.strokeStyle = '#999';
-            ctx.lineWidth = 2;
+            // Main axes (X and Y)
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 3;
+
             // X-axis
             ctx.beginPath();
-            ctx.moveTo(0, canvas.height - 50);
-            ctx.lineTo(canvas.width, canvas.height - 50);
+            ctx.moveTo(origin.x, origin.y);
+            ctx.lineTo(origin.x + scale + 20, origin.y);
             ctx.stroke();
+            // X-axis arrow
+            drawArrowhead(origin.x + scale + 20, origin.y, 0, '#333');
+
             // Y-axis
             ctx.beginPath();
-            ctx.moveTo(50, 0);
-            ctx.lineTo(50, canvas.height);
+            ctx.moveTo(origin.x, origin.y);
+            ctx.lineTo(origin.x, origin.y - scale - 20);
             ctx.stroke();
-        }
+            // Y-axis arrow
+            drawArrowhead(origin.x, origin.y - scale - 20, -Math.PI/2, '#333');
 
-        function drawPoint(x, y, color, size = 8) {
-            ctx.fillStyle = color;
+            // Draw origin point
+            ctx.fillStyle = '#333';
             ctx.beginPath();
-            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.arc(origin.x, origin.y, 5, 0, Math.PI * 2);
             ctx.fill();
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+
+            // Axis labels with values
+            ctx.fillStyle = '#666';
+            ctx.font = '11px monospace';
+            ctx.fillText('0', origin.x - 15, origin.y + 15);
+            ctx.fillText('0.5', origin.x + scale/2 - 10, origin.y + 15);
+            ctx.fillText('1.0', origin.x + scale - 10, origin.y + 15);
+            ctx.fillText('0.5', origin.x - 25, origin.y - scale/2 + 5);
+            ctx.fillText('1.0', origin.x - 25, origin.y - scale + 5);
         }
 
-        function drawVector(startX, startY, endX, endY, color, width = 3) {
-            const headlen = 15;
-            const angle = Math.atan2(endY - startY, endX - startX);
-
-            ctx.strokeStyle = color;
-            ctx.lineWidth = width;
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(endX, endY);
-            ctx.stroke();
-
-            // Arrow head
+        function drawArrowhead(x, y, angle, color) {
+            const headlen = 10;
             ctx.fillStyle = color;
             ctx.beginPath();
-            ctx.moveTo(endX, endY);
-            ctx.lineTo(endX - headlen * Math.cos(angle - Math.PI / 6), endY - headlen * Math.sin(angle - Math.PI / 6));
-            ctx.lineTo(endX - headlen * Math.cos(angle + Math.PI / 6), endY - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.moveTo(x, y);
+            ctx.lineTo(x - headlen * Math.cos(angle - Math.PI / 6), y - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(x - headlen * Math.cos(angle + Math.PI / 6), y - headlen * Math.sin(angle + Math.PI / 6));
             ctx.closePath();
             ctx.fill();
         }
 
-        function drawDashedVector(startX, startY, endX, endY, color) {
+        function drawVector(vec, color, width = 4, startPos = origin, label = null) {
+            const end = startPos === origin ? vecToCanvas(vec) : {
+                x: startPos.x + vec[0] * scale,
+                y: startPos.y - vec[1] * scale
+            };
+
+            const angle = Math.atan2(end.y - startPos.y, end.x - startPos.x);
+
+            // Draw vector line
             ctx.strokeStyle = color;
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
+            ctx.lineWidth = width;
             ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(endX, endY);
+            ctx.moveTo(startPos.x, startPos.y);
+            ctx.lineTo(end.x, end.y);
+            ctx.stroke();
+
+            // Draw arrowhead
+            drawArrowhead(end.x, end.y, angle, color);
+
+            // Draw vector label with coordinates if provided
+            if (label) {
+                const midX = (startPos.x + end.x) / 2;
+                const midY = (startPos.y + end.y) / 2;
+
+                ctx.fillStyle = 'white';
+                ctx.fillRect(midX - 35, midY - 12, 70, 20);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(midX - 35, midY - 12, 70, 20);
+
+                ctx.fillStyle = color;
+                ctx.font = 'bold 11px monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, midX, midY + 4);
+            }
+
+            return end;
+        }
+
+        function drawDashedVector(vec, color, startPos = origin, label = null) {
+            const end = startPos === origin ? vecToCanvas(vec) : {
+                x: startPos.x + vec[0] * scale,
+                y: startPos.y - vec[1] * scale
+            };
+
+            const angle = Math.atan2(end.y - startPos.y, end.x - startPos.x);
+
+            // Draw dashed line
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.setLineDash([8, 5]);
+            ctx.beginPath();
+            ctx.moveTo(startPos.x, startPos.y);
+            ctx.lineTo(end.x, end.y);
             ctx.stroke();
             ctx.setLineDash([]);
+
+            // Draw arrowhead
+            ctx.globalAlpha = 0.6;
+            drawArrowhead(end.x, end.y, angle, color);
+            ctx.globalAlpha = 1.0;
+
+            // Draw label if provided
+            if (label) {
+                const midX = (startPos.x + end.x) / 2;
+                const midY = (startPos.y + end.y) / 2;
+
+                ctx.fillStyle = 'white';
+                ctx.globalAlpha = 0.9;
+                ctx.fillRect(midX - 35, midY - 12, 70, 20);
+                ctx.globalAlpha = 1.0;
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.setLineDash([3, 3]);
+                ctx.strokeRect(midX - 35, midY - 12, 70, 20);
+                ctx.setLineDash([]);
+
+                ctx.fillStyle = color;
+                ctx.font = 'bold 11px monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, midX, midY + 4);
+            }
+
+            return end;
+        }
+
+        function drawVectorTip(pos, color, size = 10) {
+            ctx.fillStyle = color;
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
         }
 
         function clearCanvas() {
@@ -708,35 +847,104 @@
         function drawScene(phase) {
             clearCanvas();
 
-            // Always draw all word points
-            drawPoint(words.roi.x, words.roi.y, words.roi.color);
-            drawPoint(words.reine.x, words.reine.y, words.reine.color);
-            drawPoint(words.homme.x, words.homme.y, words.homme.color);
-            drawPoint(words.femme.x, words.femme.y, words.femme.color);
-
             if (phase === 0) {
-                // Phase 1: Show all words
-                // Nothing extra to draw
+                // Phase 1: Show all word vectors from origin
+                drawVector(vectors.roi.vec, vectors.roi.color, 4);
+                drawVector(vectors.reine.vec, vectors.reine.color, 4);
+                drawVector(vectors.homme.vec, vectors.homme.color, 4);
+                drawVector(vectors.femme.vec, vectors.femme.color, 4);
+
+                // Draw dots at vector tips
+                drawVectorTip(vecToCanvas(vectors.roi.vec), vectors.roi.color);
+                drawVectorTip(vecToCanvas(vectors.reine.vec), vectors.reine.color);
+                drawVectorTip(vecToCanvas(vectors.homme.vec), vectors.homme.color);
+                drawVectorTip(vecToCanvas(vectors.femme.vec), vectors.femme.color);
+
             } else if (phase === 1) {
                 // Phase 2: Roi - Homme
-                drawVector(words.roi.x, words.roi.y, words.homme.x, words.homme.y, '#f39c12', 4);
+                // Draw all vectors lightly
+                ctx.globalAlpha = 0.3;
+                drawVector(vectors.reine.vec, vectors.reine.color, 3);
+                drawVector(vectors.femme.vec, vectors.femme.color, 3);
+                ctx.globalAlpha = 1.0;
 
-                // Show intermediate result (roughly)
-                const intermediateX = words.roi.x - (words.homme.x - 50);
-                const intermediateY = words.roi.y - (words.homme.y - words.roi.y);
-                drawPoint(150, 250, '#f39c12', 10);
+                // Highlight Roi vector
+                drawVector(vectors.roi.vec, vectors.roi.color, 5, origin, '[0.8, 0.9]');
+                drawVectorTip(vecToCanvas(vectors.roi.vec), vectors.roi.color);
+
+                // Show Homme vector being subtracted (dashed, from Roi tip backwards)
+                const roiTip = vecToCanvas(vectors.roi.vec);
+                drawDashedVector([-vectors.homme.vec[0], -vectors.homme.vec[1]], '#d63031', roiTip, '-[0.8, 0.2]');
+
+                // Calculate and show intermediate result
+                const intermediate = [
+                    vectors.roi.vec[0] - vectors.homme.vec[0],
+                    vectors.roi.vec[1] - vectors.homme.vec[1]
+                ];
+                const intermediatePos = vecToCanvas(intermediate);
+                drawVectorTip(intermediatePos, '#f39c12', 12);
+
+                // Draw intermediate vector from origin
+                ctx.globalAlpha = 0.5;
+                drawVector(intermediate, '#f39c12', 4, origin, '[0.0, 0.7]');
+                ctx.globalAlpha = 1.0;
+
             } else if (phase === 2) {
                 // Phase 3: (Roi - Homme) + Femme
-                drawDashedVector(words.roi.x, words.roi.y, words.homme.x, words.homme.y, '#999');
-                drawVector(150, 250, words.femme.x, words.femme.y, '#e91e63', 4);
-                drawPoint(150, 250, '#f39c12', 8);
+                // Draw background vectors lightly
+                ctx.globalAlpha = 0.2;
+                drawVector(vectors.roi.vec, vectors.roi.color, 3);
+                drawVector(vectors.reine.vec, vectors.reine.color, 3);
+                drawVector(vectors.homme.vec, vectors.homme.color, 3);
+                ctx.globalAlpha = 1.0;
+
+                // Show intermediate result vector
+                const intermediate = [
+                    vectors.roi.vec[0] - vectors.homme.vec[0],
+                    vectors.roi.vec[1] - vectors.homme.vec[1]
+                ];
+                drawVector(intermediate, '#f39c12', 4, origin, '[0.0, 0.7]');
+                const intermediatePos = vecToCanvas(intermediate);
+                drawVectorTip(intermediatePos, '#f39c12', 10);
+
+                // Add Femme vector from intermediate position
+                drawVector(vectors.femme.vec, vectors.femme.color, 5, intermediatePos, '+[0.2, 0.2]');
+
+                // Show final result
+                const resultPos = vecToCanvas(resultVec);
+                drawVectorTip(resultPos, '#f39c12', 12);
+
             } else if (phase === 3) {
                 // Phase 4: Result ≈ Reine
-                words.result.hidden = false;
-                drawPoint(words.result.x, words.result.y, words.result.color, 12);
+                // Draw all original vectors lightly
+                ctx.globalAlpha = 0.25;
+                drawVector(vectors.roi.vec, vectors.roi.color, 3);
+                drawVector(vectors.homme.vec, vectors.homme.color, 3);
+                drawVector(vectors.femme.vec, vectors.femme.color, 3);
+                ctx.globalAlpha = 1.0;
 
-                // Draw connection to reine
-                drawDashedVector(words.result.x, words.result.y, words.reine.x, words.reine.y, '#2ecc71');
+                // Show result vector in gold
+                drawVector(resultVec, '#FFD700', 6, origin, '[0.2, 0.9]');
+                const resultPos = vecToCanvas(resultVec);
+                drawVectorTip(resultPos, '#FFD700', 14);
+
+                // Show Reine vector
+                drawVector(vectors.reine.vec, vectors.reine.color, 5);
+                drawVectorTip(vecToCanvas(vectors.reine.vec), vectors.reine.color, 12);
+
+                // Draw similarity line between result and reine
+                const reinePos = vecToCanvas(vectors.reine.vec);
+                ctx.strokeStyle = '#2ecc71';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(resultPos.x, resultPos.y);
+                ctx.lineTo(reinePos.x, reinePos.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Show "Result" label
+                document.getElementById('labelResult').style.display = 'block';
             }
 
             updateLabels();
@@ -744,45 +952,46 @@
 
         function runAnimation() {
             // Reset
-            words.result.hidden = true;
+            document.getElementById('labelResult').style.display = 'none';
             document.getElementById('operationDisplay').classList.remove('show');
             document.getElementById('vectorInfo').classList.remove('show');
             document.getElementById('similarityBox').classList.remove('show');
 
-            // Phase 0: Show all words (0-4.5s)
+            // Phase 0: Show all vectors (0-5s)
             setTimeout(() => {
                 updateStep(0);
                 drawScene(0);
                 document.getElementById('vectorInfo').classList.add('show');
+                document.getElementById('operationDisplay').textContent = 'V⃗(Roi) - V⃗(Homme) + V⃗(Femme) ≈ V⃗(Reine)';
+                document.getElementById('operationDisplay').classList.add('show');
             }, 0);
 
-            // Phase 1: Roi - Homme (4.5-9s)
+            // Phase 1: Roi - Homme (5-10s)
             setTimeout(() => {
                 updateStep(1);
                 drawScene(1);
-                document.getElementById('operationDisplay').textContent = 'Roi - Homme = ?';
-                document.getElementById('operationDisplay').classList.add('show');
-            }, 4500);
+                document.getElementById('operationDisplay').textContent = 'V⃗(Roi) - V⃗(Homme) = ?';
+            }, 5000);
 
-            // Phase 2: + Femme (9-13.5s)
+            // Phase 2: + Femme (10-15s)
             setTimeout(() => {
                 updateStep(2);
                 drawScene(2);
-                document.getElementById('operationDisplay').textContent = '(Roi - Homme) + Femme = ?';
-            }, 9000);
+                document.getElementById('operationDisplay').textContent = '[V⃗(Roi) - V⃗(Homme)] + V⃗(Femme) = ?';
+            }, 10000);
 
-            // Phase 3: Result (13.5-18s)
+            // Phase 3: Result (15-20s)
             setTimeout(() => {
                 updateStep(3);
                 drawScene(3);
-                document.getElementById('operationDisplay').textContent = 'Roi - Homme + Femme ≈ Reine ✓';
+                document.getElementById('operationDisplay').textContent = 'V⃗(Roi) - V⃗(Homme) + V⃗(Femme) ≈ V⃗(Reine) ✓';
                 document.getElementById('operationDisplay').style.background = 'rgba(46, 204, 113, 0.95)';
                 document.getElementById('similarityBox').classList.add('show');
-            }, 13500);
+            }, 15000);
 
             setTimeout(() => {
                 document.getElementById('operationDisplay').style.background = 'rgba(102, 126, 234, 0.95)';
-            }, 17000);
+            }, 19000);
 
             // Restart cycle
             setTimeout(() => {
@@ -790,10 +999,36 @@
             }, totalDuration);
         }
 
+        // Handle responsive canvas
+        function resizeCanvas() {
+            const wrapper = document.getElementById('canvasWrapper');
+            const rect = wrapper.getBoundingClientRect();
+
+            // Only resize if wrapper size changed significantly
+            if (Math.abs(canvas.width - rect.width) > 10) {
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+
+                // Adjust origin and scale based on new size
+                const minDim = Math.min(canvas.width, canvas.height);
+                origin.x = canvas.width * 0.15;
+                origin.y = canvas.height * 0.85;
+                scale = minDim * 0.65;
+            }
+        }
+
+        // Initial setup
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            drawScene(0);
+            updateLabels();
+        });
+
         // Start animation
+        resizeCanvas();
         drawScene(0);
         updateLabels();
-        runAnimation();
+        setTimeout(() => runAnimation(), 500);
     </script>
 </body>
 </html>
