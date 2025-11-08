@@ -260,6 +260,8 @@
 </head>
 <body>
     <div class="container">
+        <a href="../index.html" style="display: inline-block; margin-bottom: 15px; padding: 12px 25px; background: #667eea; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 1.1em;">← Retour à l'accueil</a>
+
         <h1>🧠 Réseau de Neurones - Entraînement Animé</h1>
         <p class="subtitle">Observez l'apprentissage en direct, epoch par epoch</p>
 
@@ -363,6 +365,96 @@
                     <h3>🔬 Réseau de Neurones</h3>
                     <canvas id="networkCanvas" width="100%" height="300"></canvas>
                 </div>
+            </div>
+        </div>
+
+        <div class="section" style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border: 3px solid #667eea;">
+            <h2>🧠 Le Principe du Neurone Artificiel</h2>
+            <p>
+                Un <strong>neurone artificiel</strong> est une unité de calcul simple inspirée du cerveau humain.
+                Voici comment il fonctionne, étape par étape :
+            </p>
+
+            <div style="background: white; padding: 25px; border-radius: 15px; margin: 20px 0; border-left: 5px solid #667eea;">
+                <h3 style="color: #667eea; margin-bottom: 15px;">📥 Étape 1 : Réception des Entrées</h3>
+                <p>
+                    Le neurone reçoit plusieurs <strong>entrées</strong> (inputs). Par exemple : x₁ = 0.5, x₂ = 0.8
+                </p>
+                <p style="font-family: monospace; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                    Entrées : [x₁, x₂] = [0.5, 0.8]
+                </p>
+            </div>
+
+            <div style="background: white; padding: 25px; border-radius: 15px; margin: 20px 0; border-left: 5px solid #f39c12;">
+                <h3 style="color: #f39c12; margin-bottom: 15px;">⚖️ Étape 2 : Multiplication par les Poids</h3>
+                <p>
+                    Chaque entrée est <strong>multipliée par un poids</strong> (weight). Les poids déterminent l'importance de chaque entrée.
+                </p>
+                <p style="font-family: monospace; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                    Poids : [w₁, w₂] = [0.3, -0.7]<br>
+                    Multiplications : x₁×w₁ = 0.5×0.3 = 0.15<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x₂×w₂ = 0.8×(-0.7) = -0.56
+                </p>
+            </div>
+
+            <div style="background: white; padding: 25px; border-radius: 15px; margin: 20px 0; border-left: 5px solid #2ecc71;">
+                <h3 style="color: #2ecc71; margin-bottom: 15px;">➕ Étape 3 : Somme Pondérée + Biais</h3>
+                <p>
+                    On <strong>additionne</strong> toutes les multiplications et on ajoute un <strong>biais</strong> (bias).
+                </p>
+                <p style="font-family: monospace; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                    Biais : b = 0.1<br>
+                    Somme : z = (x₁×w₁) + (x₂×w₂) + b<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z = 0.15 + (-0.56) + 0.1<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z = -0.31
+                </p>
+            </div>
+
+            <div style="background: white; padding: 25px; border-radius: 15px; margin: 20px 0; border-left: 5px solid #9b59b6;">
+                <h3 style="color: #9b59b6; margin-bottom: 15px;">⚡ Étape 4 : Fonction d'Activation</h3>
+                <p>
+                    La somme passe dans une <strong>fonction d'activation</strong> qui transforme la valeur.
+                </p>
+                <p style="font-family: monospace; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                    <strong>ReLU (Rectified Linear Unit) :</strong><br>
+                    → Si z > 0 : sortie = z<br>
+                    → Si z ≤ 0 : sortie = 0<br>
+                    <br>
+                    Pour notre exemple : z = -0.31<br>
+                    <strong>Sortie ReLU = 0</strong> (car -0.31 ≤ 0)<br>
+                    <br>
+                    <strong>Sigmoid :</strong> sortie = 1 / (1 + e^(-z))<br>
+                    → Transforme n'importe quelle valeur entre 0 et 1<br>
+                    <br>
+                    <strong>Tanh :</strong> sortie = tanh(z)<br>
+                    → Transforme n'importe quelle valeur entre -1 et 1
+                </p>
+            </div>
+
+            <div style="background: white; padding: 25px; border-radius: 15px; margin: 20px 0; border-left: 5px solid #e74c3c;">
+                <h3 style="color: #e74c3c; margin-bottom: 15px;">📤 Étape 5 : Sortie du Neurone</h3>
+                <p>
+                    La valeur après activation devient la <strong>sortie</strong> du neurone, qui peut être :
+                </p>
+                <ul style="margin-left: 25px; line-height: 2;">
+                    <li>Envoyée à d'autres neurones dans la couche suivante</li>
+                    <li>Utilisée comme prédiction finale si c'est la couche de sortie</li>
+                </ul>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); padding: 25px; border-radius: 15px; margin: 25px 0; color: white;">
+                <h3 style="color: white; margin-bottom: 15px; font-size: 1.4em;">💡 Résumé du Neurone</h3>
+                <p style="font-size: 1.1em; line-height: 2; color: white;">
+                    <strong>1.</strong> Reçoit des entrées (x₁, x₂, ...)<br>
+                    <strong>2.</strong> Multiplie chaque entrée par son poids (w₁, w₂, ...)<br>
+                    <strong>3.</strong> Additionne tout + ajoute le biais (b)<br>
+                    <strong>4.</strong> Applique une fonction d'activation (ReLU, Sigmoid, Tanh)<br>
+                    <strong>5.</strong> Produit une sortie
+                </p>
+                <p style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 10px; font-size: 1.1em;">
+                    ⚡ <strong>L'apprentissage</strong> consiste à ajuster les <strong>poids</strong> et <strong>biais</strong>
+                    pour que le neurone produise la bonne sortie !
+                </p>
             </div>
         </div>
 
