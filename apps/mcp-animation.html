@@ -463,6 +463,86 @@
                     <li><strong>Knowledge Bases:</strong> Accès à des documentations, wikis internes</li>
                 </ul>
             </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 15px;">✅ Avantages</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Standard ouvert Anthropic:</strong> Interopérabilité entre différents LLMs et outils</li>
+                    <li><strong>Intégration facile outils/données:</strong> Plugin system simple pour exposer APIs</li>
+                    <li><strong>Sécurité contrôlée:</strong> Permissions granulaires, sandbox par ressource</li>
+                    <li><strong>Extensible:</strong> Créer vos propres servers MCP en quelques lignes</li>
+                    <li><strong>Découplage:</strong> LLM indépendant des sources de données (swap provider facilement)</li>
+                </ul>
+            </div>
+
+            <div style="background: #ffebee; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e53935;">
+                <h3 style="color: #c62828; margin-bottom: 15px;">⚠️ Limites</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Standard récent (adoption):</strong> Lancé fin 2023, écosystème encore jeune</li>
+                    <li><strong>Latence réseau:</strong> Chaque tool call = aller-retour serveur MCP</li>
+                    <li><strong>Complexité setup serveur:</strong> Déployer/maintenir plusieurs MCP servers</li>
+                    <li><strong>Debugging difficile:</strong> Erreurs distribuées entre client, serveur, LLM</li>
+                    <li><strong>Pas de caching natif:</strong> Requêtes répétées peuvent être coûteuses</li>
+                </ul>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #ff9800;">
+                <h3 style="color: #e65100; margin-bottom: 15px;">💼 Cas d'Usage Production</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>LLM + bases de données:</strong> Claude/GPT peut requêter Postgres, MongoDB sans code custom</li>
+                    <li><strong>LLM + APIs internes:</strong> CRM, ERP, ticketing (Salesforce, Jira, ServiceNow)</li>
+                    <li><strong>Workflows multi-outils:</strong> "Analyse les tickets Jira, résume dans Slack, update Confluence"</li>
+                    <li><strong>Agents autonomes:</strong> Agent qui peut lire emails, créer tasks, scheduler meetings</li>
+                    <li><strong>Code assistants:</strong> Accès git, CI/CD, logs, metrics pour debugging contextuel</li>
+                </ul>
+            </div>
+
+            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e91e63;">
+                <h3 style="color: #c2185b; margin-bottom: 15px;">🚨 Pièges à Éviter</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Pas de fallback si serveur down:</strong> Implémenter retry logic + circuit breakers</li>
+                    <li><strong>Sécurité mal configurée:</strong> MCP server avec accès DB sans auth = faille critique</li>
+                    <li><strong>Tools mal documentés:</strong> LLM ne sait pas quand/comment utiliser si description vague</li>
+                    <li><strong>Trop de tools exposés:</strong> LLM confus avec 50+ tools. Limiter à 10-15 pertinents</li>
+                    <li><strong>Pas de rate limiting:</strong> LLM peut spammer API si mal prompté</li>
+                    <li><strong>Ignorer les coûts:</strong> Chaque tool call = tokens input/output facturés</li>
+                </ul>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 12px; margin-top: 25px; color: white; box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);">
+                <h3 style="margin-bottom: 15px; font-size: 1.3em;">🎯 Production 2025</h3>
+
+                <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="margin-bottom: 10px; color: #fff;">📚 Stack Recommandé</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8; font-size: 0.95em;">
+                        <li><strong>MCP SDK (TypeScript):</strong> Official Anthropic SDK pour créer servers</li>
+                        <li><strong>FastMCP (Python):</strong> Wrapper simplifié pour créer MCP servers rapidement</li>
+                        <li><strong>LangChain Tools:</strong> Convertir tools LangChain en MCP servers</li>
+                        <li><strong>Claude Desktop:</strong> Client officiel avec support MCP intégré</li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="margin-bottom: 10px; color: #fff;">🏢 Providers & Clients</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8; font-size: 0.95em;">
+                        <li><strong>Claude (Anthropic):</strong> Support natif MCP via API & Desktop app</li>
+                        <li><strong>OpenAI GPT-4:</strong> Via function calling (adaptateur MCP → OpenAI tools)</li>
+                        <li><strong>VS Code / Cursor:</strong> Extensions MCP pour code assistants</li>
+                        <li><strong>Zed Editor:</strong> Integration MCP native pour AI collaboration</li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="margin-bottom: 10px; color: #fff;">🔓 MCP Servers Open-Source</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8; font-size: 0.95em;">
+                        <li><strong>Filesystem MCP:</strong> Accès fichiers locaux avec permissions</li>
+                        <li><strong>PostgreSQL MCP:</strong> Requêtes SQL read-only sécurisées</li>
+                        <li><strong>GitHub MCP:</strong> Issues, PRs, commits, code search</li>
+                        <li><strong>Google Drive MCP:</strong> Search & read documents cloud</li>
+                        <li><strong>Community:</strong> 100+ servers sur modelcontextprotocol.io/servers</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 

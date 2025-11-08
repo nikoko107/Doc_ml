@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide de Formation - Machine Learning en 1 Journée</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: clamp(2em, 5vw, 3em);
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header .subtitle {
+            font-size: clamp(1em, 2.5vw, 1.3em);
+            opacity: 0.95;
+            line-height: 1.6;
+        }
+
+        .info-banner {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .info-banner h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .info-banner p {
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .info-banner ul {
+            margin: 15px 0 0 25px;
+            line-height: 1.9;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 40px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+        }
+
+        .session {
+            position: relative;
+            margin-bottom: 60px;
+        }
+
+        .session:nth-child(odd) .session-content {
+            margin-left: 0;
+            margin-right: 52%;
+            text-align: right;
+        }
+
+        .session:nth-child(even) .session-content {
+            margin-left: 52%;
+            margin-right: 0;
+            text-align: left;
+        }
+
+        .session-marker {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 2;
+        }
+
+        .session-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+
+        .session-content:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .session-time {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+        }
+
+        .session-content h3 {
+            color: #667eea;
+            font-size: 1.6em;
+            margin-bottom: 15px;
+        }
+
+        .session-content p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            font-size: 1.05em;
+        }
+
+        .apps-list {
+            list-style: none;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .apps-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .apps-list li:last-child {
+            border-bottom: none;
+        }
+
+        .apps-list li::before {
+            content: '🔹';
+            font-size: 1.2em;
+        }
+
+        .apps-list a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .apps-list a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .duration {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .tips-box {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 40px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .tips-box h3 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tips-box ul {
+            margin: 15px 0 0 25px;
+            line-height: 2;
+        }
+
+        .break-session {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            color: white;
+            margin: 30px auto;
+            max-width: 500px;
+        }
+
+        .break-session h3 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 30px;
+            }
+
+            .session-marker {
+                left: 30px;
+                width: 50px;
+                height: 50px;
+                font-size: 1.5em;
+            }
+
+            .session:nth-child(odd) .session-content,
+            .session:nth-child(even) .session-content {
+                margin-left: 80px;
+                margin-right: 0;
+                text-align: left;
+            }
+
+            .session-content {
+                padding: 20px;
+            }
+
+            .session-content h3 {
+                font-size: 1.3em;
+            }
+
+            .apps-list li {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .duration {
+                margin-left: 0;
+                margin-top: 5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .timeline::before {
+                left: 20px;
+            }
+
+            .session-marker {
+                left: 20px;
+                width: 40px;
+                height: 40px;
+                font-size: 1.2em;
+            }
+
+            .session:nth-child(odd) .session-content,
+            .session:nth-child(even) .session-content {
+                margin-left: 70px;
+            }
+
+            .session-content {
+                padding: 15px;
+            }
+
+            .apps-list {
+                padding: 10px;
+            }
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+            margin-top: 60px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 15px;
+        }
+
+        footer p {
+            line-height: 1.8;
+            opacity: 0.9;
+        }
+
+        .download-box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .download-box h3 {
+            color: #667eea;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+        }
+
+        .download-box p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .download-box code {
+            background: #f5f5f5;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Retour au catalogue</a>
+
+        <header>
+            <h1>📚 Guide de Formation Machine Learning</h1>
+            <p class="subtitle">
+                Programme structuré pour une journée complète de formation<br>
+                Des fondamentaux historiques aux architectures modernes d'IA
+            </p>
+        </header>
+
+        <div class="info-banner">
+            <h2>🎯 Objectifs pédagogiques</h2>
+            <p>
+                À la fin de cette journée de formation, les participants seront capables de :
+            </p>
+            <ul>
+                <li><strong>Comprendre l'évolution</strong> du Machine Learning depuis les années 1800 jusqu'aux LLMs modernes</li>
+                <li><strong>Maîtriser les concepts fondamentaux</strong> : régression, classification, clustering, réseaux de neurones</li>
+                <li><strong>Visualiser concrètement</strong> comment fonctionnent les algorithmes grâce aux applications interactives</li>
+                <li><strong>Évaluer</strong> correctement les performances d'un modèle en production</li>
+                <li><strong>Comprendre les architectures modernes</strong> : Transformers, RAG, LoRA, Diffusion Models</li>
+            </ul>
+        </div>
+
+        <div class="download-box">
+            <h3>💾 Préparation de la formation</h3>
+            <p>
+                <strong>Aucune installation requise !</strong> Toutes les applications fonctionnent directement dans le navigateur.
+            </p>
+            <p>
+                <strong>Prérequis :</strong>
+            </p>
+            <ul style="margin: 10px 0 10px 25px; line-height: 1.8; color: #666;">
+                <li>Navigateur web moderne (Chrome, Firefox, Edge, Safari)</li>
+                <li>Connaissances de base en mathématiques (algèbre, fonctions)</li>
+                <li>Curiosité et envie d'apprendre ! 🚀</li>
+            </ul>
+            <p style="margin-top: 15px;">
+                <strong>Conseil :</strong> Ouvrez chaque application dans un nouvel onglet pour pouvoir revenir facilement au guide.
+                Utilisez <code>Ctrl+Clic</code> (ou <code>Cmd+Clic</code> sur Mac) sur les liens.
+            </p>
+        </div>
+
+        <div class="timeline">
+            <!-- SESSION 1: Matinée - Fondamentaux -->
+            <div class="session">
+                <div class="session-marker">🌅</div>
+                <div class="session-content">
+                    <span class="session-time">09:00 - 10:30 (1h30)</span>
+                    <h3>Session 1 : Les Fondations du Machine Learning</h3>
+                    <p>
+                        Commencez par les bases historiques. Comprenez comment tout a débuté avec la régression linéaire
+                        et évoluez vers les premiers réseaux de neurones.
+                    </p>
+                    <p><strong>Concepts clés :</strong> Prédiction, classification, descente de gradient, fonction de coût</p>
+                    <ul class="apps-list">
+                        <li>
+                            <a href="apps/linear-regression.html">Régression Linéaire</a>
+                            <span class="duration">25 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/gradient-descent.html">Descente de Gradient</a>
+                            <span class="duration">20 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/perceptron.html">Perceptron (1958)</a>
+                            <span class="duration">20 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/kmeans.html">K-Means Clustering</a>
+                            <span class="duration">15 min</span>
+                        </li>
+                    </ul>
+                    <p style="margin-top: 15px; padding: 12px; background: #e8f5e9; border-radius: 8px; color: #2e7d32;">
+                        <strong>💡 Point pédagogique :</strong> Insistez sur le fait que la descente de gradient est
+                        au cœur de TOUT l'apprentissage moderne. Tous les algorithmes suivants l'utilisent.
+                    </p>
+                </div>
+            </div>
+
+            <div class="break-session">
+                <h3>☕ Pause café</h3>
+                <p>10:30 - 10:45 (15 min)</p>
+            </div>
+
+            <div class="session">
+                <div class="session-marker">🧠</div>
+                <div class="session-content">
+                    <span class="session-time">10:45 - 12:30 (1h45)</span>
+                    <h3>Session 2 : Réseaux de Neurones & Deep Learning</h3>
+                    <p>
+                        Passez aux réseaux de neurones multicouches et au Deep Learning. Visualisez comment
+                        la backpropagation permet d'entraîner des réseaux profonds, et découvrez les CNNs.
+                    </p>
+                    <p><strong>Concepts clés :</strong> Couches cachées, activations, backpropagation, convolution, pooling</p>
+                    <ul class="apps-list">
+                        <li>
+                            <a href="apps/neural-network.html">Réseau de Neurones Multicouche</a>
+                            <span class="duration">25 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/backpropagation.html">Backpropagation</a>
+                            <span class="duration">20 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/deep-learning-training.html">Cycle d'Entraînement Complet</a>
+                            <span class="duration">20 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/cnn.html">CNN - Réseaux Convolutifs</a>
+                            <span class="duration">25 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/svm.html">Bonus : SVM (si temps)</a>
+                            <span class="duration">15 min</span>
+                        </li>
+                    </ul>
+                    <p style="margin-top: 15px; padding: 12px; background: #e8f5e9; border-radius: 8px; color: #2e7d32;">
+                        <strong>💡 Point pédagogique :</strong> Les CNNs ont révolutionné la vision par ordinateur en 2012 (AlexNet).
+                        Montrez comment les filtres de convolution extraient automatiquement les caractéristiques.
+                    </p>
+                </div>
+            </div>
+
+            <div class="break-session">
+                <h3>🍽️ Pause déjeuner</h3>
+                <p>12:30 - 13:30 (1h)</p>
+            </div>
+
+            <!-- SESSION 3: Après-midi - NLP & Évaluation -->
+            <div class="session">
+                <div class="session-marker">📝</div>
+                <div class="session-content">
+                    <span class="session-time">13:30 - 14:45 (1h15)</span>
+                    <h3>Session 3 : NLP & Traitement du Langage</h3>
+                    <p>
+                        Découvrez comment les ordinateurs comprennent le langage humain. De l'encodage simple
+                        aux embeddings vectoriels qui capturent le sens des mots.
+                    </p>
+                    <p><strong>Concepts clés :</strong> Encodage, fréquences, TF-IDF, embeddings, espace sémantique</p>
+                    <ul class="apps-list">
+                        <li>
+                            <a href="apps/one-hot-encoding.html">One-Hot Encoding</a>
+                            <span class="duration">12 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/bag-of-words.html">Bag of Words</a>
+                            <span class="duration">12 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/tfidf.html">TF-IDF</a>
+                            <span class="duration">15 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/embeddings-animation.html">Word Embeddings</a>
+                            <span class="duration">20 min</span>
+                        </li>
+                    </ul>
+                    <p style="margin-top: 15px; padding: 12px; background: #fff3e0; border-radius: 8px; color: #e65100;">
+                        <strong>⚡ Moment "Wow" :</strong> L'animation Roi - Homme + Femme = Reine est toujours impressionnante !
+                        C'est le pont vers les Transformers de la session suivante.
+                    </p>
+                </div>
+            </div>
+
+            <div class="session">
+                <div class="session-marker">🎯</div>
+                <div class="session-content">
+                    <span class="session-time">14:45 - 15:30 (45 min)</span>
+                    <h3>Session 4 : Évaluation & Algorithmes Avancés</h3>
+                    <p>
+                        Apprenez à évaluer correctement vos modèles ! Découvrez aussi des algorithmes plus avancés :
+                        ensemble learning, algorithmes génétiques, reinforcement learning.
+                    </p>
+                    <p><strong>Concepts clés :</strong> Métriques, ROC/AUC, ensemble learning, évolution, Q-learning</p>
+                    <ul class="apps-list">
+                        <li>
+                            <a href="apps/metrics-evaluation.html">Métriques & Évaluation</a>
+                            <span class="duration">15 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/data-preprocessing.html">Prétraitement de Données</a>
+                            <span class="duration">12 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/random-forest.html">Random Forest</a>
+                            <span class="duration">10 min</span>
+                        </li>
+                        <li>
+                            Choisir : <a href="apps/genetic-algorithm.html">Algo Génétique</a> OU
+                            <a href="apps/q-learning.html">Q-Learning</a>
+                            <span class="duration">8 min</span>
+                        </li>
+                    </ul>
+                    <p style="margin-top: 15px; padding: 12px; background: #e8f5e9; border-radius: 8px; color: #2e7d32;">
+                        <strong>💡 Point important :</strong> L'évaluation est CRITIQUE en production. Un modèle avec 95% d'accuracy
+                        peut être inutile si vous avez des classes déséquilibrées !
+                    </p>
+                </div>
+            </div>
+
+            <div class="break-session">
+                <h3>☕ Pause</h3>
+                <p>15:30 - 15:45 (15 min)</p>
+            </div>
+
+            <!-- SESSION 5: Fin d'après-midi - IA Moderne -->
+            <div class="session">
+                <div class="session-marker">🤖</div>
+                <div class="session-content">
+                    <span class="session-time">15:45 - 17:15 (1h30)</span>
+                    <h3>Session 5 : IA Moderne - Transformers & LLMs</h3>
+                    <p>
+                        Le grand final ! Explorez les architectures qui ont révolutionné l'IA depuis 2017 :
+                        Transformers, GPT, RAG, LoRA, et les modèles de diffusion.
+                    </p>
+                    <p><strong>Concepts clés :</strong> Attention, Q·K·V, génération de texte, RAG, fine-tuning, diffusion</p>
+                    <ul class="apps-list">
+                        <li>
+                            <a href="apps/transformers-attention.html">Transformers & Attention</a>
+                            <span class="duration">25 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/beam-search-temperature.html">Beam Search & Température</a>
+                            <span class="duration">15 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/rag-animation.html">RAG - Retrieval Augmented Generation</a>
+                            <span class="duration">12 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/prompts-memory-animation.html">Prompts & Mémoire</a>
+                            <span class="duration">10 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/lora-animation.html">LoRA - Fine-tuning Efficace</a>
+                            <span class="duration">12 min</span>
+                        </li>
+                        <li>
+                            <a href="apps/diffusion-models.html">Modèles de Diffusion</a>
+                            <span class="duration">10 min</span>
+                        </li>
+                        <li>
+                            Bonus : <a href="apps/mcp-animation.html">MCP</a> et
+                            <a href="apps/graph-neural-networks.html">GNN</a>
+                            <span class="duration">6 min</span>
+                        </li>
+                    </ul>
+                    <p style="margin-top: 15px; padding: 12px; background: #fff3e0; border-radius: 8px; color: #e65100;">
+                        <strong>🎆 Grand finale :</strong> Cette session montre l'état de l'art actuel. Les Transformers (2017)
+                        ont permis GPT, BERT, Claude, ChatGPT. Les modèles de diffusion ont créé Stable Diffusion et DALL-E !
+                    </p>
+                </div>
+            </div>
+
+            <div class="session">
+                <div class="session-marker">💬</div>
+                <div class="session-content">
+                    <span class="session-time">17:15 - 17:30 (15 min)</span>
+                    <h3>Clôture & Questions</h3>
+                    <p>
+                        Récapitulatif de la journée, questions ouvertes, et ressources pour aller plus loin.
+                    </p>
+                    <ul style="margin: 15px 0 0 25px; line-height: 1.8; color: #666;">
+                        <li>Qu'avez-vous appris aujourd'hui ?</li>
+                        <li>Quelles applications allez-vous réutiliser ?</li>
+                        <li>Quels sujets approfondir ?</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="tips-box">
+            <h3>💡 Conseils pour animer la formation</h3>
+            <ul>
+                <li><strong>Soyez interactif :</strong> Laissez les participants manipuler les applications eux-mêmes</li>
+                <li><strong>Posez des questions :</strong> "Que se passe-t-il si on augmente le learning rate ?" "Pourquoi MSE est sensible aux outliers ?"</li>
+                <li><strong>Faites des analogies :</strong> La descente de gradient = descendre une montagne dans le brouillard</li>
+                <li><strong>Montrez les maths ET l'intuition :</strong> Les formules sont importantes, mais l'intuition l'est encore plus</li>
+                <li><strong>Adaptez le rythme :</strong> Certains concepts peuvent nécessiter plus de temps selon le public</li>
+                <li><strong>Utilisez les exemples concrets :</strong> "Netflix utilise ça pour...", "Spotify fait comme ça..."</li>
+                <li><strong>Prenez des pauses :</strong> Le Machine Learning est dense, les cerveaux ont besoin de repos !</li>
+            </ul>
+        </div>
+
+        <div class="tips-box" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);">
+            <h3>🎓 Variantes selon le niveau</h3>
+            <p><strong>Public débutant :</strong></p>
+            <ul style="margin: 10px 0 0 25px; line-height: 1.8;">
+                <li>Insistez sur Sessions 1, 2 et 3 (fondamentaux + deep learning + NLP)</li>
+                <li>Allez moins vite sur la descente de gradient et backpropagation</li>
+                <li>Simplifiez la Session 5, montrez surtout l'attention des Transformers</li>
+            </ul>
+            <p style="margin-top: 15px;"><strong>Public avancé :</strong></p>
+            <ul style="margin: 10px 0 0 25px; line-height: 1.8;">
+                <li>Accélérez les Sessions 1-2 (fondamentaux connus)</li>
+                <li>Approfondissez Session 5 (RAG, LoRA, MCP, GNN)</li>
+                <li>Ajoutez des discussions sur l'implémentation pratique en production</li>
+                <li>Explorez tous les bonus (SVM, Algo Génétique, Q-Learning, GNN)</li>
+            </ul>
+        </div>
+
+        <div class="download-box">
+            <h3>📦 Ressources complémentaires</h3>
+            <p><strong>Après la formation, les participants peuvent :</strong></p>
+            <ul style="margin: 10px 0 0 25px; line-height: 1.8; color: #666;">
+                <li>Télécharger tout le projet et l'utiliser offline</li>
+                <li>Partager les liens des applications individuelles</li>
+                <li>Modifier le code pour créer leurs propres variantes</li>
+                <li>Utiliser les applications comme support de révision</li>
+            </ul>
+            <p style="margin-top: 15px;">
+                <strong>Pour aller plus loin :</strong>
+            </p>
+            <ul style="margin: 10px 0 0 25px; line-height: 1.8; color: #666;">
+                <li>Cours : fast.ai, Stanford CS229, DeepLearning.AI</li>
+                <li>Livres : "Hands-On Machine Learning" (Géron), "Deep Learning" (Goodfellow)</li>
+                <li>Pratique : Kaggle competitions, projets personnels</li>
+            </ul>
+        </div>
+
+        <footer>
+            <h3 style="font-size: 1.3em; margin-bottom: 15px;">🎓 Bonne formation !</h3>
+            <p>
+                Ce guide est flexible - adaptez-le selon votre public et vos contraintes de temps.
+            </p>
+            <p>
+                L'essentiel est de rendre le Machine Learning <strong>concret</strong>, <strong>visuel</strong> et <strong>compréhensible</strong>.
+            </p>
+            <p style="margin-top: 20px; font-size: 1.1em;">
+                <strong>26 applications | 1 journée | Des milliers de possibilités d'apprentissage 🚀</strong>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

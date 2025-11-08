@@ -52,6 +52,130 @@
         .explanation h3 { color: #667eea; margin: 20px 0 15px 0; }
         .explanation p { line-height: 1.6; color: #666; margin-bottom: 10px; }
         .formula { background: #f0f0f0; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; margin: 15px 0; }
+
+        .swot-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .swot-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid;
+        }
+
+        .swot-box h4 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .swot-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .swot-box li {
+            padding: 8px 0;
+            line-height: 1.6;
+            color: #555;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .swot-box li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .swot-avantages {
+            border-left-color: #2ecc71;
+        }
+
+        .swot-avantages h4 {
+            color: #2ecc71;
+        }
+
+        .swot-limites {
+            border-left-color: #e74c3c;
+        }
+
+        .swot-limites h4 {
+            color: #e74c3c;
+        }
+
+        .swot-usages {
+            border-left-color: #3498db;
+        }
+
+        .swot-usages h4 {
+            color: #3498db;
+        }
+
+        .swot-pieges {
+            border-left-color: #f39c12;
+        }
+
+        .swot-pieges h4 {
+            color: #f39c12;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                max-width: 600px;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            canvas {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .swot-container {
+                grid-template-columns: 1fr;
+            }
+
+            .population-grid {
+                grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .work-area, .controls, .explanation {
+                padding: 15px;
+            }
+
+            .generation-info .value {
+                font-size: 1.5em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -181,6 +305,65 @@
                 • <strong>Feature selection</strong><br>
                 • <strong>Neural Architecture Search</strong> (NAS)
             </p>
+
+            <h3 style="margin-top: 30px;">📊 Analyse SWOT - Algorithme Génétique</h3>
+            <div class="swot-container">
+                <div class="swot-box swot-avantages">
+                    <h4>✅ Avantages</h4>
+                    <ul>
+                        <li><strong>Pas de gradient nécessaire:</strong> Fonctionne en boîte noire</li>
+                        <li><strong>Parallélisable:</strong> Évaluation fitness indépendante</li>
+                        <li><strong>Explore large:</strong> Évite minima locaux (exploration globale)</li>
+                        <li><strong>Multimodal:</strong> Trouve plusieurs optima en parallèle</li>
+                        <li>Pas besoin de dérivée ou fonction convexe</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box swot-limites">
+                    <h4>⚠️ Limites</h4>
+                    <ul>
+                        <li><strong>Lent:</strong> Beaucoup d'évaluations de fitness nécessaires</li>
+                        <li><strong>Pas de garantie optimum:</strong> Heuristique stochastique</li>
+                        <li><strong>Hyperparamètres nombreux:</strong> Mutation rate, crossover rate, population size</li>
+                        <li>Stochastique: résultats varient entre exécutions</li>
+                        <li>Réglage délicat des paramètres évolutifs</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box swot-usages">
+                    <h4>🎯 Cas d'Usage</h4>
+                    <ul>
+                        <li><strong>Optimisation combinatoire:</strong> TSP, scheduling, bin packing</li>
+                        <li><strong>NAS (Neural Architecture Search):</strong> Recherche d'architectures NN</li>
+                        <li><strong>Feature selection:</strong> Sélection sous-ensemble features optimal</li>
+                        <li><strong>Hyperparameter tuning:</strong> Calibration modèles ML</li>
+                        <li><strong>Design génératif:</strong> Circuits, formes, structures</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box swot-pieges">
+                    <h4>🚨 Pièges à Éviter</h4>
+                    <ul>
+                        <li><strong>Convergence prématurée:</strong> Population trop homogène trop tôt</li>
+                        <li><strong>Fitness mal définie:</strong> Ne reflète pas vraiment l'objectif</li>
+                        <li><strong>Population trop petite:</strong> Manque de diversité génétique</li>
+                        <li><strong>Mutation rate statique:</strong> Devrait souvent décroître</li>
+                        <li><strong>Pas d'élitisme:</strong> Peut perdre meilleures solutions</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 15px;">🎯 Stratégies d'Optimisation</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Élitisme adaptatif:</strong> Garder top 10-20% entre générations</li>
+                    <li><strong>Mutation adaptative:</strong> Décroissance du taux au fil des générations</li>
+                    <li><strong>Sélection diversifiée:</strong> Tournament + Roulette pour équilibrer</li>
+                    <li><strong>Hybridation:</strong> Combiner avec local search (memetic algorithms)</li>
+                    <li><strong>Multi-objectif:</strong> NSGA-II pour optimisation Pareto</li>
+                    <li><strong>Island model:</strong> Sous-populations isolées avec migration</li>
+                </ul>
+            </div>
         </div>
     </div>
     <script>

@@ -369,7 +369,45 @@ Résultat : Prédiction de la classe pour le nouveau point
                 • <strong>Santé:</strong> Diagnostic médical assisté<br>
                 • <strong>Industrie:</strong> Maintenance prédictive
             </p>
+        
+        <div class="swot-analysis">
+            <h3>📊 Analyse : Quand utiliser Random Forest ?</h3>
+
+            <div class="swot-grid">
+                <div class="swot-box advantages">
+                    <h4>✅ Avantages</h4>
+                    <ul>
+                        <li><strong>Robuste à l'overfitting</strong> : Moyenne de nombreux arbres réduit variance</li><li><strong>Pas de scaling requis</strong> : Fonctionne directement sur features brutes</li><li><strong>Feature importance gratuite</strong> : Explique quelles variables sont importantes</li><li><strong>Gère données mixtes</strong> : Numériques + catégorielles ensemble</li><li><strong>Parallélisable</strong> : Arbres indépendants entraînables en parallèle</li><li><strong>Peu d'hyperparamètres</strong> : n_estimators, max_depth suffisent souvent</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box disadvantages">
+                    <h4>❌ Inconvénients & Limites</h4>
+                    <ul>
+                        <li><strong>Moins interprétable</strong> : Contrairement à un arbre seul (boîte noire légère)</li><li><strong>Plus lent en prédiction</strong> : Doit interroger tous les arbres</li><li><strong>Taille mémoire</strong> : Stockage de centaines d'arbres</li><li><strong>Biais vers classes majoritaires</strong> : Déséquilibre de classes = problème</li><li><strong>Extrapolation impossible</strong> : Ne peut prédire hors plage d'entraînement</li><li><strong>Pas SOTA</strong> : Battu par Gradient Boosting (XGBoost, LightGBM) en compétitions</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box use-cases">
+                    <h4>💡 Cas d'usage recommandés</h4>
+                    <ul>
+                        <li><strong>Kaggle competitions</strong> : Baseline solide, souvent top 10%</li><li><strong>Production robuste</strong> : Moins de tuning que boosting, plus stable</li><li><strong>Features mixtes</strong> : Mélange numérique + catégoriel sans preprocessing</li><li><strong>Feature selection</strong> : Identifier variables importantes</li><li><strong>Détection d'anomalies</strong> : Isolation Forest (variante)</li><li><strong>Médical, finance</strong> : Balance performance/interprétabilité</li>
+                    </ul>
+                </div>
+
+                <div class="swot-box pitfalls">
+                    <h4>⚠️ Pièges à éviter</h4>
+                    <ul>
+                        <li><strong>Trop d'arbres</strong> : 100-500 souvent suffisant, 1000+ = temps perdu</li><li><strong>Arbres trop profonds</strong> : Overfitting malgré ensemble (limiter max_depth)</li><li><strong>Déséquilibre classes</strong> : Utiliser class_weight="balanced" ou SMOTE</li><li><strong>Pas de tuning</strong> : Au moins tester n_estimators et max_depth</li><li><strong>Comparer sans boosting</strong> : Toujours tester XGBoost/LightGBM aussi</li><li><strong>Ignorer OOB score</strong> : Out-Of-Bag = validation gratuite</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 25px; border-left: 5px solid #2ecc71;">
+                <p style="color: #1565c0; line-height: 1.8;"><strong>🎯 Production : Random Forest = excellent compromis performance/simplicité. Pour squeeze les derniers % de performance, passer à LightGBM ou CatBoost. Feature importance très utile pour expliquer décisions.</strong></p>
+            </div>
         </div>
+    </div>
     </div>
 
     <script>

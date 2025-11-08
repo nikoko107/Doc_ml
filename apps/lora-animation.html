@@ -589,6 +589,85 @@
                     <li><strong>DoRA:</strong> Décomposition en magnitude et direction pour meilleure convergence</li>
                 </ul>
             </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 15px;">✅ Avantages</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Fine-tuning 100× plus rapide:</strong> Quelques heures vs plusieurs jours pour full fine-tuning</li>
+                    <li><strong>Mémoire réduite 90%:</strong> GPU consumer (RTX 4090) suffit pour Llama 70B avec QLoRA</li>
+                    <li><strong>Modèles modulaires (swap LoRA):</strong> 1 base model + 10 LoRA = 10 modèles spécialisés</li>
+                    <li><strong>QLoRA 4-bit:</strong> Fine-tuning 65B sur 24GB VRAM (impossible avec full FT)</li>
+                    <li><strong>Pas de catastrophic forgetting:</strong> Le modèle de base reste intact</li>
+                </ul>
+            </div>
+
+            <div style="background: #ffebee; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e53935;">
+                <h3 style="color: #c62828; margin-bottom: 15px;">⚠️ Limites</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Petits changements uniquement:</strong> LoRA ne peut pas apprendre de nouvelles capacités radicales</li>
+                    <li><strong>Tâches spécifiques seulement:</strong> Bon pour adapter style/domaine, mauvais pour enseigner nouveau langage</li>
+                    <li><strong>Combinaison LoRA complexe:</strong> Merger plusieurs LoRA peut causer des conflits</li>
+                    <li><strong>Choix du rang r difficile:</strong> Trop bas = underfitting, trop haut = perd les avantages</li>
+                    <li><strong>Pas toujours meilleur que full FT:</strong> Pour changements majeurs, full FT reste optimal</li>
+                </ul>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #ff9800;">
+                <h3 style="color: #e65100; margin-bottom: 15px;">💼 Cas d'Usage Production</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Adapter LLM à domaine:</strong> Médical (PubMed), juridique (contrats), code (repo privé)</li>
+                    <li><strong>Style d'écriture personnalisé:</strong> Imiter le ton d'une marque, rédaction technique vs marketing</li>
+                    <li><strong>Langues rares:</strong> Adapter GPT-4 au breton, créole, langues régionales</li>
+                    <li><strong>Fine-tuning GPU consumer:</strong> Startups sans budget cloud massif</li>
+                    <li><strong>Multi-tenant SaaS:</strong> 1 modèle base + 1 LoRA par client = isolation + coûts optimisés</li>
+                </ul>
+            </div>
+
+            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e91e63;">
+                <h3 style="color: #c2185b; margin-bottom: 15px;">🚨 Pièges à Éviter</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Rank trop bas (r=4):</strong> Underfitting, le modèle n'apprend pas. Start avec r=8-16</li>
+                    <li><strong>Rank trop haut (r=128):</strong> Perd les avantages mémoire/vitesse, risque overfitting</li>
+                    <li><strong>Learning rate par défaut:</strong> LoRA nécessite LR plus élevé que full FT (1e-4 vs 1e-5)</li>
+                    <li><strong>Dataset trop petit (&lt;1k exemples):</strong> LoRA overfit facilement. Min 5k-10k samples</li>
+                    <li><strong>Oublier target_modules:</strong> Appliquer LoRA seulement sur Q,V (attention) vs toutes les couches</li>
+                    <li><strong>Pas de validation:</strong> Monitor loss sur validation set pour éviter overfitting</li>
+                </ul>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 12px; margin-top: 25px; color: white; box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);">
+                <h3 style="margin-bottom: 15px; font-size: 1.3em;">🎯 Production 2025</h3>
+
+                <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="margin-bottom: 10px; color: #fff;">📚 Stack Recommandé</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8; font-size: 0.95em;">
+                        <li><strong>Hugging Face PEFT:</strong> Library officielle LoRA/QLoRA (intégration Transformers)</li>
+                        <li><strong>Axolotl:</strong> Fine-tuning simplifié, configs YAML, support QLoRA/FSDP</li>
+                        <li><strong>Unsloth:</strong> LoRA 2× plus rapide, consommation mémoire optimisée</li>
+                        <li><strong>LitGPT:</strong> Lightning AI, production-ready, multi-GPU</li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="margin-bottom: 10px; color: #fff;">🏢 Providers (Modèles Base)</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8; font-size: 0.95em;">
+                        <li><strong>OpenAI:</strong> Pas de LoRA public, mais fine-tuning API (GPT-4 Turbo)</li>
+                        <li><strong>Anthropic:</strong> Pas de fine-tuning client-side actuellement</li>
+                        <li><strong>Google Vertex AI:</strong> Fine-tuning Gemini 1.5 Flash (adapters similaires LoRA)</li>
+                        <li><strong>Together AI:</strong> Fine-tuning Llama, Mixtral avec LoRA managed</li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="margin-bottom: 10px; color: #fff;">🔓 Open-Source Alternatives</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8; font-size: 0.95em;">
+                        <li><strong>Modèles:</strong> Llama 3 (8B/70B), Mistral 7B, Mixtral 8x7B, Qwen 72B, Phi-3</li>
+                        <li><strong>QLoRA stack:</strong> bitsandbytes + PEFT + Transformers + Accelerate</li>
+                        <li><strong>Datasets:</strong> Alpaca, Dolly, OpenOrca, SlimOrca (instruction tuning)</li>
+                        <li><strong>UI:</strong> Axolotl OneTrainer, LM Studio (fine-tuning local GUI)</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -30,8 +30,12 @@
         }
 
         h1 {
-            font-size: 2.5em;
+            font-size: clamp(1.8em, 5vw, 2.5em);
             margin-bottom: 10px;
+        }
+
+        p {
+            font-size: clamp(0.9em, 2vw, 1em);
         }
 
         .back-btn {
@@ -194,13 +198,149 @@
         .info-box strong {
             color: #667eea;
         }
+
+        .help-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: help;
+            margin-left: 5px;
+            position: relative;
+        }
+
+        .help-icon:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            white-space: nowrap;
+            font-size: 12px;
+            font-weight: normal;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .definitions {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .definitions h4 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+            font-size: clamp(1em, 3vw, 1.2em);
+        }
+
+        .definition-item {
+            margin-bottom: 12px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .definition-term {
+            font-weight: bold;
+            color: #667eea;
+            font-size: clamp(0.95em, 2.5vw, 1.05em);
+        }
+
+        .definition-desc {
+            color: #666;
+            margin-top: 5px;
+            line-height: 1.6;
+            font-size: clamp(0.85em, 2vw, 0.95em);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .controls {
+                order: -1;
+            }
+
+            button {
+                font-size: 0.95em;
+                padding: 14px;
+            }
+
+            .example-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .result-table {
+                font-size: 0.75em;
+                overflow-x: auto;
+                display: block;
+            }
+
+            .result-table th, .result-table td {
+                padding: 6px;
+            }
+
+            .vocab-item {
+                font-size: 0.8em;
+                padding: 4px 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .back-btn {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+
+            .work-area, .controls, .explanation {
+                padding: 15px;
+            }
+
+            .result-table {
+                font-size: 0.7em;
+            }
+
+            .vocab-item {
+                font-size: 0.75em;
+                padding: 3px 8px;
+                margin: 3px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <a href="../index.html" class="back-btn">← Retour</a>
-            <h1>🔤 One-Hot Encoding</h1>
+            <h1>🔤 One-Hot Encoding <span class="help-icon" data-tooltip="Représentation binaire des mots">?</span></h1>
             <p>Transformez des mots en vecteurs binaires</p>
         </header>
 
@@ -292,6 +432,26 @@ Exemple avec vocabulaire = ["chat", "chien", "oiseau"]<br>
                 <strong>Évolution :</strong> Pour pallier ces limitations, des techniques plus avancées ont été développées
                 comme Word2Vec, GloVe, FastText, et aujourd'hui les embeddings de transformers (BERT, GPT).
             </p>
+
+            <div class="definitions">
+                <h4>📚 Définitions Clés</h4>
+                <div class="definition-item">
+                    <div class="definition-term">Vocabulaire</div>
+                    <div class="definition-desc">Ensemble de tous les mots uniques présents dans le corpus de texte</div>
+                </div>
+                <div class="definition-item">
+                    <div class="definition-term">Vecteur binaire</div>
+                    <div class="definition-desc">Représentation d'un mot par un vecteur ne contenant que des 0 et un seul 1</div>
+                </div>
+                <div class="definition-item">
+                    <div class="definition-term">Sparse (creux)</div>
+                    <div class="definition-desc">Vecteur contenant majoritairement des zéros, inefficace en mémoire pour de grands vocabulaires</div>
+                </div>
+                <div class="definition-item">
+                    <div class="definition-term">Token / Tokenisation</div>
+                    <div class="definition-desc">Découpage du texte en unités élémentaires (mots, sous-mots, caractères)</div>
+                </div>
+            </div>
         </div>
     </div>
 

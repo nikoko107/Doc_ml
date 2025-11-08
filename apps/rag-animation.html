@@ -408,6 +408,84 @@
                     <li><strong>Génération:</strong> Le LLM génère une réponse basée sur le contexte fourni</li>
                 </ol>
             </div>
+
+            <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-bottom: 15px;">✅ Avantages</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Connaissances à jour sans ré-entraînement:</strong> Ajoutez des documents sans modifier le modèle</li>
+                    <li><strong>Réponses factuelles avec sources:</strong> Citations traçables, réduction des hallucinations</li>
+                    <li><strong>Coût faible vs fine-tuning:</strong> Pas besoin de GPUs pour entraîner, juste indexation</li>
+                    <li><strong>Domaine privé:</strong> Intégrer des connaissances propriétaires sans les exposer</li>
+                    <li><strong>Explicabilité:</strong> On sait exactement d'où viennent les informations</li>
+                </ul>
+            </div>
+
+            <div style="background: #ffebee; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e53935;">
+                <h3 style="color: #c62828; margin-bottom: 15px;">⚠️ Limites</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Qualité dépend du retrieval:</strong> Si la recherche rate les bons docs, la réponse sera mauvaise</li>
+                    <li><strong>Latence ajoutée:</strong> Embedding + recherche vectorielle + génération = plus lent</li>
+                    <li><strong>Chunking difficile:</strong> Découper des docs longs sans perdre le contexte est un art</li>
+                    <li><strong>Hallucinations possibles:</strong> Si retrieval échoue, le LLM peut inventer</li>
+                    <li><strong>Limite de contexte:</strong> Top-k docs doivent tenir dans la fenêtre du LLM</li>
+                </ul>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #ff9800;">
+                <h3 style="color: #e65100; margin-bottom: 15px;">💼 Cas d'Usage Production</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Chatbots documentation:</strong> Support technique avec docs produit à jour</li>
+                    <li><strong>Q&A entreprise:</strong> Recherche dans bases de connaissances internes (Confluence, SharePoint)</li>
+                    <li><strong>Assistants avec connaissances privées:</strong> Legal, médical, finance</li>
+                    <li><strong>Fact-checking:</strong> Vérification d'informations avec sources vérifiées</li>
+                    <li><strong>Recherche sémantique:</strong> "Trouve-moi tout sur les contrats 2024" sans mots-clés exacts</li>
+                </ul>
+            </div>
+
+            <div style="background: #fce4ec; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #e91e63;">
+                <h3 style="color: #c2185b; margin-bottom: 15px;">🚨 Pièges à Éviter</h3>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Embedding model inadapté:</strong> Utiliser text-embedding-ada-002 pour du code = mauvais. Préférer models spécialisés (code-search-ada)</li>
+                    <li><strong>Chunk size mal choisi:</strong> Trop petit = contexte perdu. Trop grand = bruit. Sweet spot: 512-1024 tokens avec overlap 128</li>
+                    <li><strong>Pas de reranking:</strong> Top-k cosinus ≠ top-k pertinents. Ajouter un reranker (Cohere, cross-encoder)</li>
+                    <li><strong>Qualité base vectorielle ignorée:</strong> Garbage in = garbage out. Nettoyer vos docs avant indexation</li>
+                    <li><strong>Pas de fallback:</strong> Si retrieval rate, avoir un plan B (question générique au LLM + disclaimer)</li>
+                </ul>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 12px; margin-top: 25px; color: white; box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);">
+                <h3 style="margin-bottom: 15px; font-size: 1.3em;">🎯 Production 2025</h3>
+
+                <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="margin-bottom: 10px; color: #fff;">📚 Stack Recommandé</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8; font-size: 0.95em;">
+                        <li><strong>LangChain:</strong> Orchestration RAG, chaînes complexes, agents</li>
+                        <li><strong>LlamaIndex:</strong> Spécialisé RAG, meilleur pour indexation avancée</li>
+                        <li><strong>Haystack:</strong> Production-ready, pipeline modulaire, monitoring</li>
+                        <li><strong>Vector DBs:</strong> Pinecone (managed), Qdrant (open-source), Weaviate, Milvus</li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="margin-bottom: 10px; color: #fff;">🏢 Providers (Embeddings + LLM)</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8; font-size: 0.95em;">
+                        <li><strong>OpenAI:</strong> text-embedding-3-large (3072 dim) + GPT-4 Turbo</li>
+                        <li><strong>Anthropic:</strong> Voyage embeddings + Claude 3.5 Sonnet</li>
+                        <li><strong>Cohere:</strong> embed-v3 multilingue + Command-R+ (128k context)</li>
+                        <li><strong>Google:</strong> Vertex AI embeddings + Gemini 1.5 Pro (1M context!)</li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="margin-bottom: 10px; color: #fff;">🔓 Open-Source Alternatives</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8; font-size: 0.95em;">
+                        <li><strong>Embeddings:</strong> sentence-transformers (all-MiniLM-L6-v2, mpnet), instructor-xl, e5-large-v2</li>
+                        <li><strong>LLM:</strong> Llama 3 70B, Mixtral 8x7B, Qwen 72B (via Ollama, vLLM)</li>
+                        <li><strong>Stack complet:</strong> Qdrant + sentence-transformers + LlamaIndex + Llama.cpp</li>
+                        <li><strong>Reranker:</strong> cross-encoder/ms-marco-MiniLM-L6-v2</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 
